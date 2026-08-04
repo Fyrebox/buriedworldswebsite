@@ -6,10 +6,7 @@ export const links = {
   redditGame: 'https://www.reddit.com/r/buriedworlds/comments/1ux2j2s/buried_worlds_daily_prospect/',
   metaQuestStore: '#',
   subreddit: 'https://www.reddit.com/r/buriedworlds/',
-  discord: 'https://discord.gg/2d6XkPrSNU',
-  // Shown on /privacy as the contact for data requests. Must be a mailbox
-  // someone actually reads — privacy requests have to reach a human.
-  contactEmail: 'privacy@buriedworlds.com'
+  discord: 'https://discord.gg/2d6XkPrSNU'
 };
 
 // Hero variant: "poster" | "split" | "banner". Poster is the shipped default;

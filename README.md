@@ -11,7 +11,10 @@ Vintage-expedition-brochure aesthetic: parchment, near-black ink, antique bronze
 - **Node.js** (ES modules, `"type": "module"`)
 - **Express 5** — server + routing
 - **Pug** — server-rendered views (mixins per section)
-- **htmx** — progressive enhancement for the newsletter form (button swaps to "Noted ✓" without a full page reload; still works without JS via a normal POST + redirect)
+
+No client-side JavaScript, no forms, no cookies, no analytics. The site collects
+nothing: community and launch news run through Discord, and every call to action
+is a link out to Discord or Reddit.
 
 ## Run
 
@@ -29,18 +32,25 @@ Set `PORT` to override the default (`PORT=4000 npm start`).
 server.mjs              Express 5 app: routes + view config
 data/content.mjs        All page copy + per-world gradients (single source of truth)
 views/
-  layout.pug            HTML shell, Google Fonts, htmx
+  layout.pug            HTML shell, Google Fonts (optional pageTitle/pageDescription)
   index.pug             Composes the five sections
+  privacy.pug           /privacy — long-form policy on parchment
   partials/
     hero.pug            Hero (poster default; split + banner reference variants)
     reddit.pug          "Play now on Reddit" dark olive band + detector card
     vr.pug              "The Prospector's Day" 5-step core loop
-    destinations.pug    Six world cards + locked "more worlds coming" card
-    footer.pug          Wordmark, newsletter form, link columns
-    notifyButton.pug    Newsletter button mixin (initial / done / error states)
-    notifyResponse.pug  Standalone htmx response wrapper
+    destinations.pug    World cards (+ optional locked "more worlds coming" card)
+    footer.pug          Wordmark, Discord CTA, link columns
 public/css/styles.css   Token-based stylesheet (values transcribed from the handoff)
 ```
+
+## Routes
+
+| Path | What it does |
+|---|---|
+| `/` | The landing page |
+| `/privacy` | Privacy policy, linked from the footer |
+| `/discord` | 302 vanity redirect to the Discord invite |
 
 ## Design fidelity
 
@@ -53,12 +63,15 @@ screenshots — aspect ratios and radii are kept so real assets drop straight in
 
 Edit `data/content.mjs` → `links`:
 
-- `redditGame` — the Reddit daily-dig URL (hero + Reddit-section CTA)
-- `metaQuestStore` — Meta Quest store listing
+- `redditGame` — the Reddit daily-dig post (Reddit-section CTA)
+- `metaQuestStore` — Meta Quest store listing (**still a placeholder `#`**)
 - `subreddit` — r/BuriedWorlds
+- `discord` — the invite the footer, community section and `/discord` all use
 
 `heroVariant` (`'poster' | 'split' | 'banner'`) and `showLockedCard` are also set there.
 
-The `POST /notify` handler validates the email and returns the confirmation button, but does
-**not** yet persist it — wire it to the mailing-list backend where the `// TODO` marks in
-`server.mjs`.
+Destinations live in the `worlds` array. Kimberley is withheld from the current
+release — it is left out of that array rather than deleted, and its images and
+gradient are kept, so restoring it is a matter of putting the entry back and
+updating the "five real places" copy in `destinations.pug` and the `loopSteps`
+travel line.
