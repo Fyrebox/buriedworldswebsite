@@ -11,18 +11,18 @@ mixin hero(variant, links)
 mixin heroPoster(links)
   header.hero(data-screen-label="Hero — poster")
     .hero__inner
-      .ornament.ornament--hero
-        span.rule
-        span.diamond
-        span.rule
       h1.h1 Buried Worlds
       p.hero__tagline Sweep, dig, pan, and travel the world's great gold rushes. A gold-prospecting adventure in virtual reality.
       span.badge.badge--coming Coming soon to Meta Quest
-      .keyart
-        span.img-note VR key art — hero shot
+      //- CTAs sit above the key art so they stay above the fold on short screens.
       .hero__cta
         a.btn.btn--primary(href="#reddit") Play today's dig on Reddit
         a.btn.btn--secondary(href="#vr") About the VR game
+        a.btn.btn--secondary(href=links.discord target="_blank" rel="noopener noreferrer") Join the Discord
+      .keyart
+        picture
+          source(srcset="/images/hero.webp" type="image/webp")
+          img.keyart__img(src="/images/hero.png" alt="A metal detector coil resting on red stony ground, a gold coin glowing beneath it. Behind, a gold-rush mine headframe among gum trees, a creek winding away toward a walled hilltop town." width="2560" height="1440" fetchpriority="high")
 
 //- Split variant (reference)
 mixin heroSplit(links)
