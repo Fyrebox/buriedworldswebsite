@@ -163,6 +163,11 @@ html { scroll-behavior: smooth; }
 }
 .btn--gold:hover { background: var(--bw-gold-bright); }
 
+/* Buttons carrying an inline icon beside their label. The icon inherits the
+   button's text colour via fill="currentColor", so it recolours on hover too. */
+.btn--icon { display: inline-flex; align-items: center; gap: 9px; }
+.icon { flex: none; display: block; }
+
 /* ============================================================
    HERO — poster (default)
    ============================================================ */
@@ -436,6 +441,9 @@ html { scroll-behavior: smooth; }
 
 .footer__cta {
   align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   background: var(--bronze);
   color: var(--parchment);
   border-radius: 10px;

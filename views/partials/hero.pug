@@ -1,4 +1,6 @@
 //- Hero — three variants. "poster" is the shipped default (README §1).
+include icons
+
 mixin hero(variant, links)
   if variant === 'split'
     +heroSplit(links)
@@ -18,7 +20,9 @@ mixin heroPoster(links)
       .hero__cta
         a.btn.btn--primary(href="#reddit") Play today's dig on Reddit
         a.btn.btn--secondary(href="#vr") About the VR game
-        a.btn.btn--secondary(href=links.discord target="_blank" rel="noopener noreferrer") Join the Discord
+        a.btn.btn--secondary.btn--icon(href=links.discord target="_blank" rel="noopener noreferrer")
+          +discordIcon()
+          span Join the Discord
       .keyart
         img.keyart__img(src="/images/hero.webp" alt="A metal detector coil resting on red stony ground, a gold coin glowing beneath it. Behind, a gold-rush mine headframe among gum trees, a creek winding away toward a walled hilltop town." width="2560" height="1440" fetchpriority="high")
 

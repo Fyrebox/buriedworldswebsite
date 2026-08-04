@@ -1,4 +1,6 @@
 //- Community — join the Discord server
+include icons
+
 mixin discord(links)
   section#community.community(data-screen-label="Join the Discord")
     .community__inner
@@ -9,4 +11,6 @@ mixin discord(links)
           span.rule
         h2.h2 Join the expedition
         p.serif-italic Trade routes, compare digs, and be first to hear when a new world opens. The camp gathers on Discord.
-      a.btn.btn--primary.community__cta(href=links.discord target="_blank" rel="noopener noreferrer") Join the Discord
+      a.btn.btn--primary.btn--icon.community__cta(href=links.discord target="_blank" rel="noopener noreferrer")
+        +discordIcon(20)
+        span Join the Discord
