@@ -1,0 +1,100 @@
+extends layout
+
+include partials/footer
+
+block content
+  main.legal(data-screen-label="Privacy")
+    .wrap.legal__inner
+      a.legal__home(href="/") ← Buried Worlds
+
+      .section-head
+        .ornament
+          span.rule
+          span.diamond
+          span.rule
+        h1.h2 Privacy
+        p.serif-italic What we collect, which is very little, and what we do with it.
+
+      .legal__body
+        p.legal__meta Last updated 4 August 2026
+
+        h2.legal__h The short version
+        p.
+          Buried Worlds does not have accounts, does not show ads, and does not
+          contain any analytics or tracking software. Your progress is a file on
+          your own headset and never leaves it. This website asks you for
+          nothing at all — there is no sign-up form and no mailing list. We hold
+          no personal information about you.
+
+        h2.legal__h The VR game
+        p.
+          Everything the game remembers about you is stored on your headset:
+          your three save slots, the money and tools they hold, which finds you
+          have recovered, quest progress, and your comfort and audio settings.
+          None of it is transmitted anywhere. We cannot see it, and we have no
+          server that could receive it. Uninstalling the game removes it.
+        p.
+          The game contains no advertising, no analytics, no crash-reporting
+          service and no social features. It makes no network requests of its
+          own.
+
+        h2.legal__h The licence check
+        p.
+          When the game starts, it asks the Meta platform software on your
+          headset a single question: whether the Meta account signed in there is
+          entitled to run Buried Worlds — that is, whether it was bought or
+          invited to a test release. Meta requires this check of apps on its
+          store. It is answered on the device by Meta's own software, tells us
+          nothing about who you are, and produces no record that we receive or
+          keep.
+
+        h2.legal__h Meta and the store
+        p
+          | Buying, downloading and running an app from the Meta Horizon Store
+          | is handled by Meta, not by us. Anything Meta collects in the
+          | process — your purchase, your account, playtime, crash information —
+          | is governed by #[a(href="https://www.meta.com/legal/privacy-policy/" target="_blank" rel="noopener noreferrer") Meta's privacy policy] and their settings, not ours.
+          | Meta may give us aggregate figures such as install counts or
+          | anonymous crash reports. Where it does, we use them only to
+          | understand how the game is performing and to fix faults, and they do
+          | not identify individual players to us.
+
+        h2.legal__h This website
+        p.
+          This site collects nothing from you. There is no form, no sign-up and
+          no account. We set no cookies and run no analytics. Our web host may
+          keep ordinary server logs, which can include IP addresses, for
+          security and reliability.
+        p.
+          Our typefaces are loaded from Google Fonts, which means Google
+          necessarily receives your IP address and basic browser information in
+          order to serve them. Links to Discord and Reddit take you to those
+          services, where their own privacy policies apply — including anything
+          you post or share there. Our community is run on Discord, so if you
+          join it, Discord holds your account and messages under its terms, not
+          ours.
+
+        h2.legal__h Children
+        p.
+          Buried Worlds is intended for teens and adults, in line with the age
+          group declared on the Meta Horizon Store, and is not directed at
+          children. Neither the game nor this site collects anything from
+          anyone, whatever their age.
+
+        h2.legal__h Your rights and how to reach us
+        p.
+          We hold no personal information about you, so there is nothing for us
+          to show you, correct or erase — your saves are yours, on your own
+          device. You are welcome to ask us to confirm that, and we will.
+        p
+          | Write to #[a(href=`mailto:${links.contactEmail}`)= links.contactEmail].
+          | Depending on where you live you may also have the right to complain
+          | to your local data protection authority.
+
+        h2.legal__h Changes
+        p.
+          If we add something that changes any of this — an online feature, a
+          leaderboard, analytics of our own — we will update this page and the
+          date at the top before it ships, not after.
+
+  +footer(links)

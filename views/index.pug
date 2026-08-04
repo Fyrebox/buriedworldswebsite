@@ -1,0 +1,16 @@
+extends layout
+
+include partials/hero
+include partials/reddit
+include partials/vr
+include partials/destinations
+include partials/discord
+include partials/footer
+
+block content
+  +hero(heroVariant, links)
+  +reddit(links, signalRows)
+  +vr(loopSteps)
+  +destinations(worlds, showLockedCard)
+  +discord(links)
+  +footer(links)

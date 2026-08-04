@@ -1,0 +1,28 @@
+//- Section 5 — Footer
+mixin footer(links)
+  footer.footer(data-screen-label="Footer")
+    .footer__inner
+      .footer__top
+        .footer__brand
+          span.footer__wordmark Buried Worlds
+          p.footer__line News, new worlds and test invites go out on Discord first.
+          a.footer__cta(href=links.discord target="_blank" rel="noopener noreferrer") Join the Discord
+        .footer__links
+          .footer__col
+            span.footer__col-label Play
+            a.footer__link(href="#reddit") Today's dig on Reddit
+            a.footer__link(href="#vr") The VR game
+          .footer__col
+            span.footer__col-label Elsewhere
+            a.footer__link(href=links.metaQuestStore) Meta Quest store
+            a.footer__link(href=links.subreddit) r/BuriedWorlds
+            a.footer__link(href=links.discord target="_blank" rel="noopener noreferrer") Discord
+      .footer__bottom
+        span.footer__copy
+          | © 2026 Buried Worlds. Real places, real hoards.
+          |  ·
+          a.footer__legal(href="/privacy") Privacy
+        .ornament.ornament--footer
+          span.rule
+          span.diamond
+          span.rule

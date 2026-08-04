@@ -1,0 +1,26 @@
+//- Section 2 — Play now on Reddit (dark olive band)
+mixin reddit(links, signalRows)
+  section#reddit.reddit(data-screen-label="Play now on Reddit")
+    .reddit__grid
+      .reddit__copy
+        span.badge.badge--available Available now
+        h2.h2 Buried Worlds
+          br
+          | on Reddit
+        p.reddit__lede A daily deduction dig. Six digs, one buried relic, same field for everyone.
+        p.reddit__body Every day, one relic is buried somewhere in a shared field. Sweep your detector, read the signal, and triangulate the spot in six digs or fewer. Then share your grid and compare routes with everyone else who dug the same field.
+        a.btn.btn--gold.reddit__cta(href=links.redditGame) Play today's dig
+      .detector
+        .detector__head
+          span.detector__title Detector reading
+          span.detector__dig dig 4 / 6
+        .signals
+          each row in signalRows
+            .signal
+              span.signal__label(style=`color:${row.color}`)= row.label
+              .signal__track
+                .signal__fill(style=`width:${row.pct}%;background:${row.color}`)
+        .share
+          span.share__title Share your route
+          span.share__grid ⬛🟫🟫💎
+          span.share__caption Found it in 4 — same field, different route than yours.

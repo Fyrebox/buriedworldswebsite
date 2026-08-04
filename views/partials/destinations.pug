@@ -1,0 +1,36 @@
+//- Section 4 — Destinations gallery
+mixin destinations(worlds, showLockedCard)
+  section.destinations(data-screen-label="Destinations")
+    .destinations__inner
+      .section-head
+        .ornament
+          span.rule
+          span.diamond
+          span.rule
+        h2.h2 Destinations
+        p.serif-italic Five real places, five real rushes. Every field seeded by history.
+      .dest-grid
+        each w in worlds
+          .dest-card
+            .dest-card__img(style=`background:${w.gradient}`)
+              picture
+                source(srcset=w.image type="image/webp")
+                img.dest-card__photo(src=w.imageFallback alt=`${w.name} — terrain screenshot` loading="lazy" width="384" height="256")
+            .dest-card__meta
+              .dest-card__row
+                span.dest-card__name= w.name
+                span.dest-card__diamond
+              span.dest-card__dash
+              span.dest-card__sub= w.subtitle
+        if showLockedCard
+          //- 7th card — locked "more worlds coming" variant
+          .dest-card.dest-card--locked
+            .locked__img
+              span.padlock
+                span.padlock__shackle
+                span.padlock__body
+            .locked__meta
+              span.locked__title More worlds coming
+              span.locked__sub New dig sites unlock as the expedition continues.
+              .locked__track
+                .locked__fill

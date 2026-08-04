@@ -1,0 +1,530 @@
+/* ============================================================
+   Buried Worlds — landing page styles
+   Tokens and values transcribed from the design handoff
+   (DESIGN_SYSTEM.md §3–§5, README §1–§5). Aesthetic is flat:
+   no shadow heavier than rgba(0,0,0,.15).
+   ============================================================ */
+
+:root {
+  /* Parchment brand palette */
+  --paper: #F6F2E6;        /* page base */
+  --parchment: #EDE6D1;    /* cards + alternating section */
+  --ink: #1F211F;
+  --ink-soft: #4C574F;
+  --bronze: #8C6133;       /* THE accent */
+  --bronze-link: #7A5227;  /* darkened link/hover bronze */
+  --bronze-hover: #A0713C; /* button hover on ink footer */
+  --sage: #788C7A;
+  --track: rgba(31, 33, 31, .18);
+  --outline-rest: rgba(255, 255, 255, .28);
+  --locked-bg: #D9D3C4;
+
+  /* Reddit dark band only */
+  --bw-bg: #11140D;
+  --bw-panel: #192014;
+  --bw-panel-2: #202919;
+  --bw-line: #35412B;
+  --bw-muted: #92998A;
+  --bw-gold: #E3A52B;
+  --bw-gold-bright: #FFC940;
+  --bw-green: #7EB64A;
+  --bw-text: #F1F0E9;
+
+  /* Type */
+  --font-display: 'Oswald', sans-serif;
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+
+a { color: var(--bronze-link); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--bronze); }
+
+html { scroll-behavior: smooth; }
+
+/* ---------- Layout helpers ---------- */
+.section { padding: 88px 24px; }
+.wrap { max-width: 1120px; margin: 0 auto; }
+.stack { display: flex; flex-direction: column; }
+
+/* Centered section header (ornament + H2 + serif sub) */
+.section-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+/* ---------- Ornaments (pure CSS) ---------- */
+.ornament { display: flex; align-items: center; gap: 12px; color: var(--bronze); }
+.ornament .rule { display: block; width: 48px; height: 1px; background: var(--bronze); }
+.ornament .diamond { display: block; width: 6px; height: 6px; background: var(--bronze); transform: rotate(45deg); }
+.ornament--hero .rule { width: 64px; }
+.ornament--hero .diamond { width: 7px; height: 7px; }
+.ornament--footer .rule { width: 32px; }
+.ornament--footer .diamond { width: 5px; height: 5px; }
+
+/* ---------- Type ---------- */
+.h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(3rem, 7vw, 5.2rem);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  line-height: 1.02;
+  color: var(--ink);
+}
+.h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 3.6vw, 2.8rem);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+.serif { font-family: var(--font-serif); }
+.serif-italic { font-family: var(--font-serif); font-style: italic; }
+
+/* ---------- Badges ---------- */
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.badge--coming {
+  border: 1px solid var(--ink-soft);
+  color: var(--ink-soft);
+  padding: 7px 18px;
+  font-size: 13px;
+}
+.badge--available {
+  background: var(--bw-green);
+  color: var(--bw-bg);
+  padding: 6px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-block;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color .15s ease, color .15s ease;
+}
+.btn--primary {
+  background: var(--bronze);
+  color: var(--parchment);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 26px;
+  font-size: 15px;
+}
+.btn--primary:hover { background: var(--bronze-link); color: var(--paper); }
+
+.btn--secondary {
+  border: 1px solid var(--bronze);
+  color: var(--bronze-link);
+  background: transparent;
+  border-radius: 12px;
+  padding: 13px 26px;
+  font-size: 15px;
+}
+.btn--secondary:hover { background: rgba(140, 97, 51, .08); }
+
+.btn--gold {
+  background: var(--bw-gold);
+  color: var(--bw-bg);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 26px;
+  font-size: 15px;
+}
+.btn--gold:hover { background: var(--bw-gold-bright); }
+
+/* ============================================================
+   HERO — poster (default)
+   ============================================================ */
+.hero { background: var(--paper); padding: 88px 24px 72px; text-align: center; }
+.hero__inner {
+  max-width: 880px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+.hero__tagline {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+  color: var(--ink-soft);
+  max-width: 34em;
+  line-height: 1.4;
+}
+.keyart {
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 16 / 8;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  background: repeating-linear-gradient(-45deg, #788C7A 0, #788C7A 14px, #81957F 14px, #81957F 28px);
+  outline: 1px solid var(--outline-rest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.img-note {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--paper);
+  background: rgba(31, 33, 31, .55);
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+.hero__cta { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+
+/* ============================================================
+   HERO — split (reference variant)
+   ============================================================ */
+.hero-split { background: var(--paper); padding: 72px 24px; }
+.hero-split__grid {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.hero-split__copy { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
+.hero-split .h1 { font-size: clamp(2.6rem, 5vw, 4.2rem); line-height: 1.04; }
+.hero-split__kicker { font-family: var(--font-serif); font-style: italic; font-size: 17px; color: var(--ink-soft); }
+.hero-split__art {
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  background: repeating-linear-gradient(-45deg, #788C7A 0, #788C7A 14px, #81957F 14px, #81957F 28px);
+  outline: 1px solid var(--outline-rest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   HERO — banner (reference variant)
+   ============================================================ */
+.hero-banner {
+  position: relative;
+  min-height: 78vh;
+  display: flex;
+  align-items: flex-end;
+  background: repeating-linear-gradient(-45deg, #788C7A 0, #788C7A 16px, #81957F 16px, #81957F 32px);
+}
+.hero-banner__scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(31, 33, 31, 0) 30%, rgba(31, 33, 31, .72) 100%); }
+.hero-banner__inner {
+  position: relative;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+.hero-banner .h1 { color: var(--paper); font-size: clamp(3rem, 7vw, 5.4rem); line-height: 1; }
+.hero-banner__tagline { margin: 0; font-family: var(--font-serif); font-style: italic; font-size: 1.45rem; color: var(--parchment); max-width: 30em; line-height: 1.4; }
+.hero-banner__note { position: absolute; top: 24px; right: 24px; }
+.btn--gold-banner { padding: 13px 24px; font-size: 14.5px; }
+.badge--coming-light { border-color: var(--parchment); color: var(--parchment); }
+
+/* ============================================================
+   PLAY NOW — Reddit dark band
+   ============================================================ */
+.reddit { background: var(--bw-bg); color: var(--bw-text); padding: 88px 24px; }
+.reddit__grid {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 56px;
+  align-items: center;
+}
+.reddit__copy { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+.reddit .h2 { line-height: 1.1; font-size: clamp(2rem, 4vw, 3rem); }
+.reddit__lede { margin: 0; font-family: var(--font-serif); font-size: 1.3rem; color: var(--bw-text); line-height: 1.45; }
+.reddit__body { margin: 0; font-size: 16px; color: var(--bw-muted); line-height: 1.6; max-width: 36em; }
+.reddit__cta { margin-top: 4px; }
+
+.detector {
+  background: var(--bw-panel);
+  border: 1px solid var(--bw-line);
+  border-radius: 20px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.detector__head { display: flex; align-items: baseline; justify-content: space-between; }
+.detector__title, .share__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--bw-muted);
+}
+.detector__dig { font-family: var(--font-mono); font-size: 12px; color: var(--bw-muted); }
+.signals { display: flex; flex-direction: column; gap: 10px; }
+.signal { display: grid; grid-template-columns: 76px 1fr; gap: 12px; align-items: center; }
+.signal__label { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; }
+.signal__track { height: 10px; border-radius: 5px; background: var(--bw-panel-2); overflow: hidden; }
+.signal__fill { height: 100%; border-radius: 5px; }
+
+.share { border-top: 1px solid var(--bw-line); padding-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.share__grid { font-size: 22px; letter-spacing: 3px; }
+.share__caption { font-size: 13px; color: var(--bw-muted); }
+
+/* ============================================================
+   THE VR GAME — core loop
+   ============================================================ */
+.vr { background: var(--parchment); padding: 88px 24px; }
+.vr__inner { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
+.vr .serif-italic, .destinations .serif-italic { font-size: 1.3rem; color: var(--ink-soft); max-width: 34em; line-height: 1.4; margin: 0; }
+.loop-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
+.loop-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--paper);
+  border-radius: 20px;
+  padding: 24px 20px;
+  outline: 1px solid var(--outline-rest);
+}
+.loop-card__num { font-family: var(--font-serif); font-weight: 600; font-size: 2rem; color: var(--bronze); line-height: 1; }
+.loop-card__name { font-family: var(--font-display); font-weight: 600; font-size: 17px; letter-spacing: .04em; text-transform: uppercase; }
+.loop-card__desc { font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+
+/* ============================================================
+   DESTINATIONS GALLERY
+   ============================================================ */
+.destinations { background: var(--paper); padding: 88px 24px; }
+.destinations__inner { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
+.dest-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+
+.dest-card {
+  background: var(--parchment);
+  border-radius: 20px;
+  padding: 16px 16px 20px;
+  outline: 1px solid var(--outline-rest);
+  transition: outline-color .18s ease, transform .18s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.dest-card:hover { outline: 1px solid var(--bronze); transform: scale(1.015); }
+.dest-card__img {
+  height: 150px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dest-card__img picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.dest-card__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.dest-card__meta { display: flex; flex-direction: column; gap: 6px; padding: 0 6px; }
+.dest-card__row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.dest-card__name { font-family: var(--font-serif); font-weight: 600; font-size: 1.5rem; color: var(--ink); }
+.dest-card__diamond { display: block; width: 6px; height: 6px; background: var(--bronze); transform: rotate(45deg); flex: none; }
+.dest-card__dash { display: block; width: 44px; height: 2px; background: var(--bronze); }
+.dest-card__sub { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
+
+/* Locked "more worlds coming" variant */
+.dest-card--locked { background: var(--locked-bg); }
+.locked__img {
+  height: 150px;
+  border-radius: 12px;
+  background: repeating-linear-gradient(-45deg, #B7B1A0 0, #B7B1A0 14px, #BFB9A8 14px, #BFB9A8 28px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.padlock { width: 34px; height: 40px; position: relative; display: block; }
+.padlock__shackle {
+  position: absolute; top: 0; left: 5px;
+  width: 24px; height: 22px;
+  border: 4px solid var(--ink);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  display: block;
+}
+.padlock__body {
+  position: absolute; bottom: 0; left: 0;
+  width: 34px; height: 24px;
+  background: var(--ink);
+  border-radius: 5px;
+  display: block;
+}
+.locked__meta { display: flex; flex-direction: column; gap: 8px; padding: 0 6px; }
+.locked__title { font-family: var(--font-serif); font-weight: 600; font-size: 1.5rem; color: var(--ink-soft); }
+.locked__sub { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
+.locked__track { height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; margin-top: 4px; }
+.locked__fill { width: 62%; height: 100%; border-radius: 4px; background: var(--bronze); }
+
+/* ============================================================
+   COMMUNITY — join the Discord
+   ============================================================ */
+.community { background: var(--parchment); padding: 88px 24px; }
+.community__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+.community .serif-italic { font-size: 1.3rem; color: var(--ink-soft); max-width: 34em; line-height: 1.4; margin: 0; }
+.community__cta { margin-top: 2px; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer { background: var(--ink); color: var(--parchment); padding: 72px 24px 40px; }
+.footer__inner { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+.footer__top { display: grid; grid-template-columns: 1.2fr .8fr; gap: 56px; align-items: start; }
+.footer__brand { display: flex; flex-direction: column; gap: 14px; }
+.footer__wordmark { font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; letter-spacing: .03em; text-transform: uppercase; }
+.footer__line { margin: 0; font-family: var(--font-serif); font-style: italic; font-size: 1.15rem; color: var(--parchment); opacity: .85; max-width: 30em; line-height: 1.5; }
+
+.footer__cta {
+  align-self: flex-start;
+  background: var(--bronze);
+  color: var(--parchment);
+  border-radius: 10px;
+  padding: 13px 22px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color .15s ease;
+}
+.footer__cta:hover { background: var(--bronze-hover); color: var(--parchment); }
+
+.footer__links { display: flex; gap: 56px; justify-content: flex-end; }
+.footer__col { display: flex; flex-direction: column; gap: 10px; }
+.footer__col-label { font-family: var(--font-display); font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--bw-muted); }
+.footer__link { color: #C89A62; text-decoration: none; font-size: 14.5px; }
+.footer__link:hover { color: var(--bw-gold); text-decoration: underline; }
+
+.footer__bottom {
+  border-top: 1px solid rgba(237, 230, 209, .16);
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.footer__copy { font-size: 12.5px; color: var(--bw-muted); }
+
+/* ============================================================
+   RESPONSIVE — collapse to single column below ~900px
+   ============================================================ */
+@media (max-width: 900px) {
+  .hero-split__grid { grid-template-columns: 1fr; gap: 40px; }
+  .reddit__grid { grid-template-columns: 1fr; gap: 40px; }
+  .loop-grid { grid-template-columns: repeat(2, 1fr); }
+  .dest-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer__top { grid-template-columns: 1fr; gap: 40px; }
+  .footer__links { justify-content: flex-start; }
+}
+
+@media (max-width: 560px) {
+  .loop-grid { grid-template-columns: 1fr; }
+  .dest-grid { grid-template-columns: 1fr; }
+  .footer__links { gap: 40px; }
+}
+
+/* ============================================================
+   LEGAL PAGES (/privacy) — long-form prose on parchment
+   ============================================================ */
+.legal { padding: 56px 24px 88px; background: var(--paper); }
+.legal__inner { max-width: 760px; }
+.legal__home {
+  display: inline-block;
+  margin-bottom: 40px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--bronze-link);
+  text-decoration: none;
+}
+.legal__home:hover { color: var(--bronze); text-decoration: underline; }
+.legal__body { margin-top: 48px; }
+.legal__meta {
+  margin: 0 0 32px;
+  font-size: 13px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.legal__h {
+  margin: 40px 0 12px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.legal__body p {
+  margin: 0 0 16px;
+  font-size: 16.5px;
+  line-height: 1.72;
+  color: var(--ink-soft);
+}
+
+/* Footer privacy link sits inline with the copyright line. */
+.footer__legal { color: #C89A62; text-decoration: none; font-size: 12.5px; }
+.footer__legal:hover { color: var(--bw-gold); text-decoration: underline; }

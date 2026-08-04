@@ -1,0 +1,17 @@
+//- Section 3 — The VR game core loop, "The Prospector's Day"
+mixin vr(loopSteps)
+  section#vr.vr(data-screen-label="The VR game")
+    .vr__inner
+      .section-head
+        .ornament
+          span.rule
+          span.diamond
+          span.rule
+        h2.h2 The prospector's day
+        p.serif-italic The whole loop, from first signal to the next departure.
+      .loop-grid
+        each step in loopSteps
+          .loop-card
+            span.loop-card__num= step.num
+            span.loop-card__name= step.name
+            span.loop-card__desc= step.desc
