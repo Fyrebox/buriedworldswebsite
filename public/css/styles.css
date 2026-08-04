@@ -166,7 +166,7 @@ html { scroll-behavior: smooth; }
 /* ============================================================
    HERO — poster (default)
    ============================================================ */
-.hero { background: var(--paper); padding: 88px 24px 72px; text-align: center; }
+.hero { background: var(--paper); padding: 48px 24px 72px; text-align: center; }
 .hero__inner {
   max-width: 880px;
   margin: 0 auto;
@@ -198,7 +198,6 @@ html { scroll-behavior: smooth; }
   align-items: center;
   justify-content: center;
 }
-.keyart picture { display: block; width: 100%; height: 100%; }
 .keyart__img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .img-note {
   font-family: var(--font-mono);

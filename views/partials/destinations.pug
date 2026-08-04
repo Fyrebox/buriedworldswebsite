@@ -13,9 +13,7 @@ mixin destinations(worlds, showLockedCard)
         each w in worlds
           .dest-card
             .dest-card__img(style=`background:${w.gradient}`)
-              picture
-                source(srcset=w.image type="image/webp")
-                img.dest-card__photo(src=w.imageFallback alt=`${w.name} — terrain screenshot` loading="lazy" width="384" height="256")
+              img.dest-card__photo(src=w.image alt=`${w.name} — terrain screenshot` loading="lazy" width="384" height="256")
             .dest-card__meta
               .dest-card__row
                 span.dest-card__name= w.name

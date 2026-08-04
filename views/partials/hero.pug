@@ -20,9 +20,7 @@ mixin heroPoster(links)
         a.btn.btn--secondary(href="#vr") About the VR game
         a.btn.btn--secondary(href=links.discord target="_blank" rel="noopener noreferrer") Join the Discord
       .keyart
-        picture
-          source(srcset="/images/hero.webp" type="image/webp")
-          img.keyart__img(src="/images/hero.png" alt="A metal detector coil resting on red stony ground, a gold coin glowing beneath it. Behind, a gold-rush mine headframe among gum trees, a creek winding away toward a walled hilltop town." width="2560" height="1440" fetchpriority="high")
+        img.keyart__img(src="/images/hero.webp" alt="A metal detector coil resting on red stony ground, a gold coin glowing beneath it. Behind, a gold-rush mine headframe among gum trees, a creek winding away toward a walled hilltop town." width="2560" height="1440" fetchpriority="high")
 
 //- Split variant (reference)
 mixin heroSplit(links)
