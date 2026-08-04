@@ -35,6 +35,7 @@ views/
   layout.pug            HTML shell, Google Fonts (optional pageTitle/pageDescription)
   index.pug             Composes the five sections
   privacy.pug           /privacy — long-form policy on parchment
+  terms.pug             /terms — same treatment
   partials/
     hero.pug            Hero (poster default; split + banner reference variants)
     reddit.pug          "Play now on Reddit" dark olive band + detector card
@@ -50,6 +51,7 @@ public/css/styles.css   Token-based stylesheet (values transcribed from the hand
 |---|---|
 | `/` | The landing page |
 | `/privacy` | Privacy policy, linked from the footer |
+| `/terms` | Terms of service, linked from the footer |
 | `/discord` | 302 vanity redirect to the Discord invite |
 
 ## Design fidelity

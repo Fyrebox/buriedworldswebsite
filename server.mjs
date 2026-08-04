@@ -46,6 +46,16 @@ app.get('/privacy', (req, res) => {
   });
 });
 
+app.get('/terms', (req, res) => {
+  res.render('terms', {
+    links,
+    pageTitle: 'Terms of Service — Buried Worlds',
+    pageDescription:
+      'The terms covering the Buried Worlds game and website: licensing, ' +
+      'a game still in development, your saves, and fair use.'
+  });
+});
+
 // Vanity redirect — /discord is the short link to hand out anywhere. Kept as a
 // 302 so the destination invite can be swapped without clients caching the old one.
 app.get('/discord', (req, res) => {

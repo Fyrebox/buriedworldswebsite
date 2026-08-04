@@ -1,0 +1,120 @@
+extends layout
+
+include partials/footer
+
+block content
+  main.legal(data-screen-label="Terms")
+    .wrap.legal__inner
+      a.legal__home(href="/") ← Buried Worlds
+
+      .section-head
+        .ornament
+          span.rule
+          span.diamond
+          span.rule
+        h1.h2 Terms of Service
+        p.serif-italic The agreement between you and us, in plain English.
+
+      .legal__body
+        p.legal__meta Last updated 4 August 2026
+
+        h2.legal__h The short version
+        p.
+          Buy the game, play it, enjoy it. Don't copy it, sell it or pull it
+          apart. It is still being made, so it will change. Your saves live on
+          your headset and we cannot recover them. And if something goes wrong,
+          you keep every right the law gives you — nothing here takes those
+          away.
+
+        h2.legal__h Who we are
+        p.
+          Buried Worlds is made by Bellare Studios, in Melbourne, Australia.
+          These terms cover this website and the Buried Worlds game. By using
+          either, you are agreeing to them.
+
+        h2.legal__h Buying and playing the game
+        p.
+          Buried Worlds is distributed through the Meta Horizon Store. Buying it
+          is a transaction between you and Meta, under Meta's terms — payment,
+          your account, and refunds are all handled by Meta rather than by us.
+          If you want a refund, Meta is who to ask.
+        p.
+          What you get is a personal licence to play the game on your own
+          headset for as long as that store licence lasts. You are not buying
+          the game itself, and the licence cannot be passed to someone else.
+
+        h2.legal__h A game still being dug out
+        p.
+          Buried Worlds is in active development, and some builds are released
+          for testing. Expect it to change. Destinations may be added, reworked,
+          or held back while they are finished; rewards and prices will be
+          rebalanced; test builds may contain faults. We do not promise that any
+          particular feature will exist, keep behaving the same way, or arrive
+          on a particular date.
+        p.
+          If you are playing from a test channel, please treat what you find
+          there as unfinished work.
+
+        h2.legal__h Your saves
+        p.
+          Your progress is stored on your headset and nowhere else. We hold no
+          copy of it and have no way to restore it. Uninstalling the game,
+          resetting the headset or a failed device will lose it. If a change to
+          the game ever means older saves cannot be read, we will say so before
+          it ships.
+
+        h2.legal__h Fair use
+        p Please do not:
+        ul.legal__list
+          li copy, share, sell or redistribute the game or its files
+          li reverse engineer it, or work around the store's licence check
+          li modify it to cheat, or pass off a modified build as ours
+          li use our name, artwork or logo to imply we endorse something we do not
+
+        p.
+          Recording, streaming and making videos of your own play is welcome,
+          including monetised ones. You do not need to ask us.
+
+        h2.legal__h What belongs to whom
+        p.
+          The game — its code, artwork, music, name and logo — belongs to us.
+          The real places and histories it draws on, from gold rushes to Roman
+          hoards, are facts of the world and belong to nobody.
+        p.
+          Anything you post in our Discord or on Reddit lives under those
+          platforms' terms. What you make stays yours; just do not post things
+          you have no right to share.
+
+        h2.legal__h Guarantees, and their limits
+        p.
+          We build the game as carefully as we can, but we cannot promise it
+          will be free of faults or run perfectly on every device. Except where
+          the law says otherwise, we are not liable for indirect losses such as
+          lost time, lost data, or losses that could not reasonably have been
+          foreseen.
+        p.
+          Nothing in these terms excludes, restricts or modifies any right or
+          guarantee you have under the Australian Consumer Law, or under any
+          other law that cannot be excluded. Where such a guarantee applies and
+          we fail to meet it, you have the remedies that law provides, whatever
+          else this page says.
+
+        h2.legal__h This website
+        p
+          | The site exists to tell you about the game and point you to our
+          | community. It asks nothing of you and stores nothing about you —
+          | see the #[a(href="/privacy") privacy policy]. It links out to other
+          | services, and what happens on those is between you and them.
+
+        h2.legal__h Changes
+        p.
+          We will update these terms as the game grows, and change the date at
+          the top when we do. If something significant changes, we will say so
+          in the community rather than hoping you notice.
+
+        h2.legal__h Getting in touch
+        p
+          | Questions about any of this are best asked on #[a(href=links.discord target="_blank" rel="noopener noreferrer") our Discord].
+          | These terms are governed by the laws of Victoria, Australia.
+
+  +footer(links)
