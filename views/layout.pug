@@ -3,6 +3,13 @@ html(lang="en")
   head
     meta(charset="utf-8")
     meta(name="viewport" content="width=device-width, initial-scale=1")
+    //- Google tag (gtag.js) — GA4 property "Buried Worlds"
+    script(async src="https://www.googletagmanager.com/gtag/js?id=G-YFMCSBH80C")
+    script.
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-YFMCSBH80C');
     //- Pages may override these; the landing page uses the defaults.
     title= pageTitle || 'Buried Worlds — A VR gold-prospecting adventure'
     meta(name="description" content=pageDescription || "Sweep, dig, pan, and travel the world's great gold rushes. Buried Worlds VR is coming soon to Meta Quest — and the daily deduction dig is playable now on Reddit.")
