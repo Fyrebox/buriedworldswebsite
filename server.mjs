@@ -10,11 +10,19 @@ import {
   worlds,
   signalRows
 } from './data/content.mjs';
+import { createFeedbackRouter } from './feedback.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
+
+// Behind a reverse proxy (most hosts), req.ip is the proxy unless this is set — and
+// the feedback rate limiter keys on it. Left off by default so a direct-to-node
+// deployment cannot be fooled by a spoofed X-Forwarded-For.
+if (process.env.TRUST_PROXY) {
+  app.set('trust proxy', Number(process.env.TRUST_PROXY) || 1);
+}
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -55,6 +63,18 @@ app.get('/terms', (req, res) => {
       'a game still in development, your saves, and fair use.'
   });
 });
+
+// In-game feedback from the VR build. POST is open to the headset (optionally gated
+// by FEEDBACK_APP_KEY); GET reads the log back and needs FEEDBACK_ADMIN_TOKEN.
+app.use(
+  '/api/feedback',
+  createFeedbackRouter({
+    dataDir: process.env.FEEDBACK_DIR ?? path.join(__dirname, 'data', 'feedback'),
+    appKey: process.env.FEEDBACK_APP_KEY ?? '',
+    adminToken: process.env.FEEDBACK_ADMIN_TOKEN ?? '',
+    discordWebhook: process.env.FEEDBACK_DISCORD_WEBHOOK ?? ''
+  })
+);
 
 // Vanity redirect — /discord is the short link to hand out anywhere. Kept as a
 // 302 so the destination invite can be swapped without clients caching the old one.

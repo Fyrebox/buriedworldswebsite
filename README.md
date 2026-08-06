@@ -13,8 +13,9 @@ Vintage-expedition-brochure aesthetic: parchment, near-black ink, antique bronze
 - **Pug** — server-rendered views (mixins per section)
 
 No client-side JavaScript, no forms, no cookies, no analytics. The site collects
-nothing: community and launch news run through Discord, and every call to action
-is a link out to Discord or Reddit.
+nothing from web visitors: community and launch news run through Discord, and every
+call to action is a link out to Discord or Reddit. It does host one API route —
+`/api/feedback`, which the VR build posts player feedback to (see below).
 
 ## Run
 
@@ -53,6 +54,48 @@ public/css/styles.css   Token-based stylesheet (values transcribed from the hand
 | `/privacy` | Privacy policy, linked from the footer |
 | `/terms` | Terms of service, linked from the footer |
 | `/discord` | 302 vanity redirect to the Discord invite |
+| `POST /api/feedback` | In-game feedback intake from the VR build |
+| `GET /api/feedback` | Read the feedback log back (token-gated) |
+
+## Feedback intake
+
+The VR build's settings menu has a **Send Feedback** panel: a 1–5 rating plus tapped
+multiple-choice answers, with a build/device context block attached automatically. It
+posts JSON to `POST /api/feedback` (`feedback.mjs`).
+
+Submissions append to `data/feedback/YYYY-MM.jsonl` (gitignored). The client's IP is
+used for rate limiting **in memory only** and is never written to disk or forwarded —
+the only identifier stored is the game's own random install id, which maps to no
+account, person or device serial. See `/privacy` § *Feedback you send us*.
+
+Configure with environment variables — all optional, all off by default:
+
+| Variable | Effect |
+|---|---|
+| `FEEDBACK_DIR` | Where the JSONL logs go (default `./data/feedback`) |
+| `FEEDBACK_APP_KEY` | If set, submissions must carry a matching `X-App-Key` header |
+| `FEEDBACK_ADMIN_TOKEN` | If set, enables `GET /api/feedback`; unset ⇒ that route 404s |
+| `FEEDBACK_DISCORD_WEBHOOK` | If set, each submission is echoed to that Discord webhook |
+| `TRUST_PROXY` | Set when running behind a reverse proxy, so rate limiting sees the real IP |
+
+Read the last 50 submissions:
+
+```bash
+curl -H "Authorization: Bearer $FEEDBACK_ADMIN_TOKEN" https://<host>/api/feedback
+```
+
+Limits: 32 KB bodies, 5 submissions per install id per hour, 60 per IP per hour, notes
+capped at 2000 characters. Rejected submissions stay queued on the headset and retry
+later, so a deploy or an outage loses nothing.
+
+**Deployment note:** the JSONL log lives on the filesystem, so on a host with an
+ephemeral disk (Render, Heroku, Fly without a volume) it is wiped on redeploy. Either
+attach a persistent volume and point `FEEDBACK_DIR` at it, or rely on
+`FEEDBACK_DISCORD_WEBHOOK` as the durable copy.
+
+```bash
+npm test        # node's built-in runner — validation, rate limiting, storage, auth
+```
 
 ## Design fidelity
 
