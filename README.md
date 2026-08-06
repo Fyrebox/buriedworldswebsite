@@ -12,10 +12,14 @@ Vintage-expedition-brochure aesthetic: parchment, near-black ink, antique bronze
 - **Express 5** — server + routing
 - **Pug** — server-rendered views (mixins per section)
 
-No client-side JavaScript, no forms, no cookies, no analytics. The site collects
-nothing from web visitors: community and launch news run through Discord, and every
-call to action is a link out to Discord or Reddit. It does host one API route —
-`/api/feedback`, which the VR build posts player feedback to (see below).
+No forms, no sign-up, no mailing list — community and launch news run through
+Discord, and every call to action is a link out to Discord or Reddit. Two things
+qualify that: Google Analytics (GA4, property `G-YFMCSBH80C`, loaded in
+`views/layout.pug`) counts visits and sets cookies, and `/api/feedback` receives
+player feedback from the VR build (see below).
+
+Both are covered by `/privacy` — **keep that page in step with anything you add
+here**, since the policy commits to being updated before a change ships, not after.
 
 ## Run
 
