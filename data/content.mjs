@@ -26,12 +26,12 @@ export const loopSteps = [
 ];
 
 // Section 4 — the five destinations. Gradients are terrain height gradients
-// (DESIGN_SYSTEM.md §5); Hoxne intentionally reuses the Castlemaine green.
+// (DESIGN_SYSTEM.md §5); Hoxne intentionally reuses the Ballarat green.
 // Kimberley is withheld from the current release — its card, images and
 // gradient are kept out of this list rather than deleted, ready to return.
 export const worlds = [
   {
-    name: 'Castlemaine',
+    name: 'Ballarat',
     subtitle: 'The Victorian gold rush, Australia. Where the expedition begins.',
     gradient: 'linear-gradient(160deg,#85A857,#668C45 45%,#8C734C 78%,#C2B280)',
     image: '/images/CastlemaineShot.webp'
