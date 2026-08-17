@@ -49,8 +49,8 @@ app.get('/privacy', (req, res) => {
     links,
     pageTitle: 'Privacy — Buried Worlds',
     pageDescription:
-      'How Buried Worlds handles your data: no accounts, no analytics, no tracking. ' +
-      'Your progress stays on your headset.'
+      'How Buried Worlds handles your data: no accounts, no ads, and no analytics ' +
+      'in the game. Your progress stays on your headset.'
   });
 });
 

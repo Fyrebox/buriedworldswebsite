@@ -16,15 +16,24 @@ block content
         p.serif-italic What we collect, which is very little, and what we do with it.
 
       .legal__body
-        p.legal__meta Last updated 6 August 2026
+        p.legal__meta Last updated 25 August 2026
+
+        p
+          | Buried Worlds is published by MELVIA PTY. LTD. (ACN 159 295 824,
+          | ABN 41 159 295 824), trading as Bellare Studios, of 372/585 Little
+          | Collins Street, Melbourne, Victoria 3000, Australia. This policy
+          | covers the game on Meta Quest and, from its release, on Steam for
+          | PC VR, and it covers this website. Privacy questions and requests
+          | go to #[a(href="mailto:cyril@fyrebox.com") cyril@fyrebox.com].
 
         h2.legal__h The short version
         p.
           The game does not have accounts, does not show ads, and contains no
-          analytics or tracking software. Your progress is a file on your own
-          headset and never leaves it. The one thing the game ever sends us is
-          feedback you choose to send, from a form you have to go and open
-          yourself.
+          analytics or tracking software. It runs fully offline once installed,
+          it does not know who you are, and it never asks for your name, email
+          address or location. Your progress is a file on your own headset and
+          never leaves it. The one thing the game ever sends us is feedback you
+          choose to send, from a form you have to go and open yourself.
         p.
           This website is separate: it asks you for nothing — there is no
           sign-up form and no mailing list — but it does use Google Analytics
@@ -46,31 +55,61 @@ block content
 
         h2.legal__h Feedback you send us
         p.
-          The settings menu has a "Send Feedback" panel. It is never sent for
+          The settings menu has a "Send Feedback" panel: a short questionnaire
+          about your experience, including whether you felt any motion sickness
+          and whether you had difficulty with the controls. It is never sent for
           you: you open it, you answer, and nothing leaves the headset until you
           press Send. If you never open it, the game never contacts us at all.
         p.
-          When you do send it, we receive your rating and the answers you
-          tapped, and — so that a report about a problem is actually
-          actionable — a short technical note about the build: the game version,
-          your Quest model, which world you were in, how long the session had
-          been running, your in-game money and lifetime finds, and how smoothly
-          the game was running. That is the whole list.
+          When you do send it, this is everything that goes with your answers,
+          which reach us as option identifiers — the choices you tapped, not
+          words:
+        ul.legal__list
+          li a random install identifier, created on your headset
+          li the build version of the game
+          li your device model and operating system version
+          li the interface language you have selected
+          li how long the session had been running
+          li.
+            a small set of progress and frame-rate figures: which world you
+            were in, your in-game money and lifetime finds, and how smoothly
+            the game was running
         p.
-          It carries a random identifier created on your headset the first time
-          you send something. It is a random number and nothing else: it is not
-          your Meta account, your name, your email, or your headset's serial
-          number, and it lets us do one thing only — tell two reports from the
-          same player apart, so a follow-up makes sense. Your IP address reaches
-          our server, as it must for any connection, and we use it to stop
-          flooding, but we do not store it with your feedback or write it to the
-          feedback log.
+          That last group exists so that a report about a problem is actionable
+          without you having to describe your setup.
         p.
-          We keep feedback for as long as it is useful for improving the game
-          and no longer than two years, and we use it for nothing else: we do
-          not advertise to you, sell it, or share it with anyone outside the
-          small team working on the game. If you would rather we deleted
-          something you sent, ask on Discord — see below — and we will.
+          The install identifier is a random number and nothing else: it is not
+          your Meta account, your Steam ID, your name, your email, or your
+          headset's serial number, and it lets us do one thing only — tell two
+          reports from the same player apart, so a follow-up makes sense. Your
+          IP address reaches our server, as it must for any connection, and we
+          use it to stop flooding, but we do not store it with your feedback or
+          write it to the feedback log.
+
+        h2.legal__h What we deliberately do not collect
+        ul.legal__list
+          li your name, email address or any other contact detail
+          li your Meta account identifier, Meta username or Steam ID
+          li your headset's serial number or device unique identifier
+          li.
+            your location, IP-derived or otherwise, beyond what is inherent in
+            making any internet request at all
+          li any advertising or cross-app tracking identifier
+        p.
+          None of these would tell us anything the random install identifier
+          does not, and every one of them would be identity we would then have
+          to justify holding.
+
+        h2.legal__h Where feedback is kept, and for how long
+        p.
+          Feedback is sent to an endpoint we operate and stored on a private
+          volume hosted in Australia, with access restricted to the developer.
+          We use it solely to improve the game: we do not advertise to you,
+          sell it, or share it with anyone outside the small team working on
+          the game.
+        p.
+          Submissions are kept for 24 months from the date you send them and
+          then deleted. You can ask us to delete yours sooner — see below.
 
         h2.legal__h The licence check
         p.
@@ -82,7 +121,7 @@ block content
           nothing about who you are, and produces no record that we receive or
           keep.
 
-        h2.legal__h Meta and the store
+        h2.legal__h The stores
         p
           | Buying, downloading and running an app from the Meta Horizon Store
           | is handled by Meta, not by us. Anything Meta collects in the
@@ -92,6 +131,18 @@ block content
           | anonymous crash reports. Where it does, we use them only to
           | understand how the game is performing and to fix faults, and they do
           | not identify individual players to us.
+        p
+          | The same will be true of Steam when the PC VR version is released:
+          | Valve is the data controller for anything collected in buying,
+          | installing or running the game there, under
+          | #[a(href="https://store.steampowered.com/privacy_agreement/" target="_blank" rel="noopener noreferrer") Valve's privacy policy],
+          | and we receive only aggregate sales and store reporting that does
+          | not identify individual players.
+        p.
+          No third-party analytics service and no third-party crash-reporting
+          service receives anything from the game itself. If one is ever added,
+          it will be named here, and the change published, before the build
+          that uses it ships.
 
         h2.legal__h This website
         p.
@@ -129,29 +180,40 @@ block content
         p.
           Buried Worlds is intended for teens and adults, in line with the age
           group declared on the Meta Horizon Store, and is not directed at
-          children. The game collects nothing from anyone, whatever their age.
-          This website counts visits through Google Analytics as described
-          above, which it does without knowing anything about who is visiting
-          or how old they are.
+          children under 13; we do not knowingly collect anything from them,
+          and Meta requires account holders to meet its own minimum age. The
+          game collects nothing from anyone, whatever their age. This website
+          counts visits through Google Analytics as described above, which it
+          does without knowing anything about who is visiting or how old they
+          are.
 
         h2.legal__h Your rights and how to reach us
         p.
-          Unless you have sent us feedback, we hold nothing that identifies
-          you — your saves are yours, on your own device, and the website
-          analytics reach us only as aggregate counts. There is nothing for us
-          to show you, correct or erase. You are welcome to ask us to confirm
-          that, and we will.
+          Australian privacy law gives you rights to access and correct
+          personal information held about you. Unless you have sent us
+          feedback, we hold nothing that identifies you — your saves are yours,
+          on your own device, and the website analytics reach us only as
+          aggregate counts. There is nothing for us to show you, correct or
+          erase. You are welcome to ask us to confirm that, and we will.
         p.
           If you have sent feedback, you can ask us for a copy of it, ask us to
-          correct it, or ask us to delete it. The random identifier attached to
-          it is the only way to find it again, so tell us roughly when you sent
-          it and what it said and we will look. We may also delete it on our own
-          initiative at any time.
+          correct it, or ask us to delete it. Because we hold no identity, we
+          cannot look you up by name: the install identifier is the only way to
+          find your submissions again, and it is shown on the feedback screen
+          inside the game. Send it to us and the submissions attached to it
+          will be deleted within 30 days, and we will confirm when it is done.
+          You can also stop any further collection at any time simply by not
+          sending feedback.
         p
-          | Everything we do runs through our community server, so the way to
+          | Send any privacy question, request or complaint to
+          | #[a(href="mailto:cyril@fyrebox.com") cyril@fyrebox.com] and we will
+          | respond within 30 days; for anything else, the quickest way to
           | reach us is to #[a(href=links.discord target="_blank" rel="noopener noreferrer") ask on Discord].
-          | Depending on where you live you may also have the right to complain
-          | to your local data protection authority.
+          | If our response does not satisfy you, you can contact the Office of
+          | the Australian Information Commissioner at
+          | #[a(href="https://www.oaic.gov.au/" target="_blank" rel="noopener noreferrer") oaic.gov.au],
+          | and depending on where you live you may also have the right to
+          | complain to your local data protection authority.
 
         h2.legal__h Changes
         p.
