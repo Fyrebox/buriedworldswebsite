@@ -20,7 +20,7 @@ export const descriptions = {
 
   // For a news item or a preview paragraph.
   short:
-    'Buried Worlds is a VR treasure-hunting game for Meta Quest. No combat and '
+    'Buried Worlds VR is a VR treasure-hunting game for Meta Quest. No combat and '
     + 'no timers — just a metal detector, a signal climbing, and a patch of dirt '
     + 'that might be hiding a coin, a nugget, or nothing at all. Every tool is '
     + 'worked by hand: sweep the coil, drive the pickaxe, swirl a pan of river '
@@ -32,7 +32,7 @@ export const descriptions = {
   // The store listing's own text.
   full: [
     'Somewhere under your feet, something has been waiting a long time.',
-    'Buried Worlds is a VR treasure-hunting game built around the oldest thrill '
+    'Buried Worlds VR is a VR treasure-hunting game built around the oldest thrill '
       + 'there is: the moment the ground gives something up. No combat, no timers. '
       + 'Just a detector in your hand, a signal climbing, and a patch of dirt that '
       + 'might be hiding a coin, a nugget, or nothing at all.',

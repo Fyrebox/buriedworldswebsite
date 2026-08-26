@@ -54,6 +54,7 @@ const gameJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'VideoGame',
   name: product.name,
+  alternateName: product.storeListingName,
   url: siteUrl,
   image: `${siteUrl}/images/og-cover.jpg`,
   description:
@@ -79,7 +80,7 @@ const gameJsonLd = {
   },
   trailer: {
     '@type': 'VideoObject',
-    name: 'Buried Worlds — launch trailer',
+    name: 'Buried Worlds VR — launch trailer',
     description:
       'Two minutes of the loop: sweeping the detector, digging, panning the ' +
       'river, and the five destinations the expedition travels between.',
@@ -115,9 +116,9 @@ app.get('/', (req, res) => {
 app.get('/privacy', (req, res) => {
   res.render('privacy', {
     pagePath: '/privacy',
-    pageTitle: 'Privacy — Buried Worlds',
+    pageTitle: 'Privacy — Buried Worlds VR',
     pageDescription:
-      'How Buried Worlds handles your data: no accounts, no ads, and no analytics ' +
+      'How Buried Worlds VR handles your data: no accounts, no ads, and no analytics ' +
       'in the game. Your progress stays on your headset.'
   });
 });
@@ -142,7 +143,7 @@ app.get('/press', (req, res) => {
     pageTitle: 'Press kit — Buried Worlds VR',
     pageDescription:
       'Screenshots, key art, the trailer, fact sheet and descriptions for '
-      + 'Buried Worlds, a VR treasure-hunting game on Meta Quest. Free to use '
+      + 'Buried Worlds VR, a VR treasure-hunting game on Meta Quest. Free to use '
       + 'in coverage.',
     kitFile,
     kitSize: kitSize(),
@@ -158,9 +159,9 @@ app.get('/press', (req, res) => {
 app.get('/terms', (req, res) => {
   res.render('terms', {
     pagePath: '/terms',
-    pageTitle: 'Terms of Service — Buried Worlds',
+    pageTitle: 'Terms of Service — Buried Worlds VR',
     pageDescription:
-      'The terms covering the Buried Worlds game and website: licensing, ' +
+      'The terms covering the Buried Worlds VR game and website: licensing, ' +
       'a game still in development, your saves, and fair use.'
   });
 });

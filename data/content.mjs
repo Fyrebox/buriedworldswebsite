@@ -1,4 +1,4 @@
-// Central content model for the Buried Worlds landing page.
+// Central content model for the Buried Worlds VR landing page.
 // Copy and per-world theming live here so templates stay presentational.
 
 export const links = {
@@ -22,7 +22,12 @@ export const siteUrl = 'https://www.buriedworlds.com';
 // `price` is deliberately labelled with its currency. Meta localises the real
 // figure per region, so an unlabelled number would be wrong for most visitors.
 export const product = {
-  name: 'Buried Worlds',
+  // The site leads with "Buried Worlds VR" everywhere because the bare name
+  // collides with an existing television series in search results. The store
+  // listing itself is titled "Buried Worlds", which is carried in the
+  // structured data as alternateName so the two stay linked.
+  name: 'Buried Worlds VR',
+  storeListingName: 'Buried Worlds',
   status: 'Early Access',
   price: 'US$14.99',
   priceAmount: '14.99',

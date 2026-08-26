@@ -1,5 +1,5 @@
-BURIED WORLDS — PRESS KIT
-=========================
+BURIED WORLDS VR — PRESS KIT
+============================
 
 A VR treasure-hunting game for Meta Quest.
 Out now in Early Access on the Meta Horizon Store.
@@ -10,6 +10,7 @@ Out now in Early Access on the Meta Horizon Store.
   Contact  press@buriedworlds.com
 
 FACTS
+  Store title    Buried Worlds (the store lists it without "VR")
   Price          US$14.99 (Meta shows local currency by region)
   Released       26 August 2026, in Early Access
   Devices        Meta Quest 2, Quest 3, Quest 3S, Quest Pro
@@ -42,7 +43,7 @@ GETTING THE HISTORY RIGHT
 
 USE
   These assets may be used freely in reviews, previews, news coverage,
-  videos and streams of Buried Worlds, including monetised ones. No
+  videos and streams of Buried Worlds VR, including monetised ones. No
   permission needed. Please do not alter the logo or present the artwork
   as your own work.
 

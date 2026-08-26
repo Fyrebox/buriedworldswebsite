@@ -10,6 +10,27 @@ soon" — the right shape for a page with nothing to sell, and the wrong one now
 
 Vintage-expedition-brochure aesthetic: parchment, near-black ink, antique bronze, muted sage.
 
+## Naming
+
+The site says **Buried Worlds VR** everywhere — page titles, the `h1`, the footer
+wordmark, the buy bar, the legal pages and the press kit. The bare name collides with
+an existing television series in search results, so the longer string is the one being
+built up.
+
+Two places deliberately keep the short name, and a find-and-replace will break both:
+
+- **`views/partials/reddit.pug`** — "Buried Worlds on Reddit" is the free browser
+  deduction game. It is not VR, and calling it that misleads anyone who clicks.
+- **The store title.** Meta lists the game as *Buried Worlds*. `data/content.mjs`
+  keeps it as `product.storeListingName`, the press kit fact sheet shows it in its own
+  row, and the landing page's structured data carries it as `alternateName` — which is
+  the schema.org field for exactly this, so search engines treat the two as one entity
+  rather than two different games.
+
+The wordmark artwork in `public/press/art/` and on the share card reads "BURIED
+WORLDS" with no "VR", which is why the `og:image:alt` describes it as "the game's
+logo" rather than naming it.
+
 ## Stack
 
 - **Node.js** (ES modules, `"type": "module"`)

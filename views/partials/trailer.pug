@@ -8,7 +8,7 @@
 //- <dialog> rather than a hand-rolled overlay: it traps focus, closes on Escape
 //- and renders its own backdrop, none of which is worth reimplementing badly.
 mixin trailerModal(trailer)
-  dialog#trailer-modal.trailer-modal(aria-label="Buried Worlds trailer")
+  dialog#trailer-modal.trailer-modal(aria-label="Buried Worlds VR trailer")
     button.trailer-modal__close(type="button" data-trailer-close aria-label="Close the trailer") ✕
     video#trailer-video.trailer-modal__video(
       controls
