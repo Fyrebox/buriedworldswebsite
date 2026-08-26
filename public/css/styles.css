@@ -742,3 +742,129 @@ html { scroll-behavior: smooth; }
   .trailer-modal { width: 96vw; }
   .trailer-modal__close { top: -12px; right: -6px; }
 }
+
+/* ============================================================
+   PRESS KIT (/press)
+   ============================================================ */
+.press { padding: 56px 24px 88px; background: var(--paper); }
+.press__inner { max-width: 860px; margin: 0 auto; }
+.press__head { margin-top: 48px; }
+.press__lede {
+  margin: 18px 0 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.3rem;
+  color: var(--ink-soft);
+  line-height: 1.45;
+  max-width: 34em;
+}
+.press__actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 8px; }
+.press__note { margin: -8px 0 20px; font-size: 14px; color: var(--ink-soft); }
+
+/* Fact sheet — a definition list rather than a table, so it reflows to one
+   column on a phone instead of scrolling sideways. */
+.press-facts { margin-bottom: 8px; }
+.press-facts__list { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+.press-facts__list > div {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(31, 33, 31, .10);
+}
+.press-facts__list dt {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--bronze);
+}
+.press-facts__list dd { margin: 0; font-size: 14.5px; color: var(--ink); line-height: 1.5; }
+
+/* Copy blocks are meant to be selected and pasted, so they read as quotable
+   material rather than as page prose. */
+.press-copy {
+  background: var(--parchment);
+  border-left: 3px solid var(--bronze);
+  border-radius: 0 12px 12px 0;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+.press-copy__label {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 10px;
+}
+.press-copy__text { margin: 0 0 12px; font-size: 15px; line-height: 1.62; color: var(--ink); }
+.press-copy__text:last-child { margin-bottom: 0; }
+
+.press-worlds { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 8px; }
+.press-world {
+  background: var(--parchment);
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.press-world__head { display: flex; flex-direction: column; gap: 2px; }
+.press-world__place { font-family: var(--font-serif); font-weight: 600; font-size: 1.4rem; color: var(--ink); }
+.press-world__region { font-size: 12.5px; color: var(--ink-soft); }
+.press-world__quest {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--bronze);
+}
+.press-world__blurb { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink); }
+.press-world__history { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); }
+
+.press-loop { margin: 0 0 8px; padding-left: 20px; }
+.press-loop li { margin-bottom: 10px; font-size: 15px; line-height: 1.6; color: var(--ink-soft); }
+.press-loop li strong { color: var(--ink); }
+.press-loop li::marker { color: var(--bronze); font-weight: 600; }
+
+.press-shots { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.press-shot { margin: 0; display: flex; flex-direction: column; gap: 9px; }
+.press-shot__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 12px;
+  outline: 1px solid var(--outline-rest);
+}
+.press-shot a:focus-visible .press-shot__img { outline: 2px solid var(--bronze); outline-offset: 2px; }
+.press-shot__cap { font-size: 13px; line-height: 1.5; color: var(--ink-soft); }
+
+.press-files { margin: 0 0 8px; padding: 0; list-style: none; }
+.press-files li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(31, 33, 31, .10);
+  font-size: 15px;
+}
+.press-files__meta { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-soft); flex: none; }
+
+.press h2.legal__h { margin-top: 48px; }
+.press p { font-size: 15px; line-height: 1.68; color: var(--ink-soft); }
+.press p strong, .press li strong { color: var(--ink); }
+
+@media (max-width: 760px) {
+  .press-facts__list { grid-template-columns: 1fr; }
+  .press-worlds { grid-template-columns: 1fr; }
+  .press-shots { grid-template-columns: 1fr; }
+  .press-facts__list > div { grid-template-columns: 120px 1fr; }
+}

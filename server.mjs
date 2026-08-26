@@ -1,4 +1,5 @@
 import express from 'express';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -13,6 +14,14 @@ import {
   worlds,
   signalRows
 } from './data/content.mjs';
+import {
+  pressContact,
+  descriptions,
+  expeditions,
+  loop,
+  screenshots,
+  art
+} from './data/press.mjs';
 import { createFeedbackRouter } from './feedback.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -82,7 +91,11 @@ const gameJsonLd = {
 };
 
 // Static assets (CSS, client JS, future key art).
-app.use(express.static(path.join(__dirname, 'public')));
+// redirect:false because public/press/ is a directory AND /press is a route.
+// Left on, static answers /press with a 301 to /press/ before the route is ever
+// reached, and the press kit page becomes unreachable. Files beneath it still
+// serve normally; only the directory redirect is given up, which nothing wants.
+app.use(express.static(path.join(__dirname, 'public'), { redirect: false }));
 
 // Home — the landing page.
 app.get('/', (req, res) => {
@@ -106,6 +119,39 @@ app.get('/privacy', (req, res) => {
     pageDescription:
       'How Buried Worlds handles your data: no accounts, no ads, and no analytics ' +
       'in the game. Your progress stays on your headset.'
+  });
+});
+
+// Press kit. The download's size is read off disk rather than written into the
+// copy, so re-zipping a new set of screenshots cannot leave the page quoting a
+// figure that stopped being true.
+const kitFile = 'buried-worlds-press-kit.zip';
+
+function kitSize() {
+  try {
+    const bytes = fs.statSync(path.join(__dirname, 'public', 'press', kitFile)).size;
+    return `${Math.round(bytes / 1024 / 1024)} MB`;
+  } catch {
+    return 'zip';
+  }
+}
+
+app.get('/press', (req, res) => {
+  res.render('press', {
+    pagePath: '/press',
+    pageTitle: 'Press kit — Buried Worlds VR',
+    pageDescription:
+      'Screenshots, key art, the trailer, fact sheet and descriptions for '
+      + 'Buried Worlds, a VR treasure-hunting game on Meta Quest. Free to use '
+      + 'in coverage.',
+    kitFile,
+    kitSize: kitSize(),
+    pressContact,
+    descriptions,
+    expeditions,
+    loop,
+    screenshots,
+    art
   });
 });
 

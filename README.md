@@ -18,8 +18,8 @@ Vintage-expedition-brochure aesthetic: parchment, near-black ink, antique bronze
 
 No forms, no sign-up, no mailing list — community and launch news run through
 Discord, and every call to action is a link out to Discord or Reddit. Two things
-qualify that: Google Analytics (GA4, property `G-YFMCSBH80C`, loaded in
-`views/layout.pug`) counts visits and sets cookies, and `/api/feedback` receives
+qualify that: Google Analytics (GA4, properties `G-PVF7WKPPFD` and `G-YFMCSBH80C`,
+both loaded in `views/layout.pug`) counts visits and sets cookies, and `/api/feedback` receives
 player feedback from the VR build (see below).
 
 Both are covered by `/privacy` — **keep that page in step with anything you add
@@ -59,6 +59,7 @@ public/css/styles.css   Token-based stylesheet (values transcribed from the hand
 | Path | What it does |
 |---|---|
 | `/` | The landing page |
+| `/press` | Press kit — fact sheet, descriptions, screenshots, art, trailer |
 | `/privacy` | Privacy policy, linked from the footer |
 | `/terms` | Terms of service, linked from the footer |
 | `/discord` | 302 vanity redirect to the Discord invite |
@@ -168,6 +169,39 @@ load is ~1 MB, and the 14 MB file is not among it.
 
 **Note:** `public/video/` puts 16 MB of binaries in git. Fine at this size; if more
 trailers arrive, move them to object storage rather than growing the repo.
+
+## Press kit
+
+Copy lives in `data/press.mjs`, assets in `public/press/`. The page is `/press`.
+
+The historical detail in `data/press.mjs` is checked against the game's design docs
+and the store listing rather than recalled — a press kit is the document an outlet
+quotes without re-checking, and getting Hoxne wrong in front of the British Museum
+ends that conversation on contact. The long description is the store listing's text
+word for word, so every outlet quotes the same paragraphs the store page does.
+
+Screenshots are extracted from the 33 Mbps trailer master, not the compressed web
+copy, at 1920×1080. **Check any new frame for burned-in trailer captions** — two of
+the first eight carried "STAKE A CLAIM. BLAST IT OPEN." and "THE WELLS KEPT
+EVERYTHING", which an outlet would have printed as supplied.
+
+Rebuild the download after changing anything under `public/press/`:
+
+```bash
+cd public/press && zip -q -r buried-worlds-press-kit.zip screenshots art KIT-README.txt -x ".*" -x "__MACOSX/*"
+```
+
+The page reads the zip's size off disk at request time, so it cannot end up quoting
+a stale figure.
+
+**`express.static` runs with `redirect: false`.** `public/press/` is a directory and
+`/press` is a route; with the default on, static answers `/press` with a 301 to
+`/press/` before the route is reached and the page is unreachable.
+
+**Gap:** there is no Hoxne screenshot, because the final trailer cut contains no
+Hoxne footage — the shot list planned it and it did not survive. Hoxne is the
+strongest press hook there is (the lost hammer, the British Museum, the archaeology
+angle), so it wants a fresh capture via MQDH.
 
 Destinations live in the `worlds` array. Kimberley is withheld from the current
 release — it is left out of that array rather than deleted, and its images and

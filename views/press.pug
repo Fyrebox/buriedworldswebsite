@@ -1,0 +1,201 @@
+extends layout
+
+include partials/footer
+
+block content
+  section.press
+    .press__inner
+      a.legal__home(href="/") ← Buried Worlds
+
+      .press__head
+        h1.h1 Press kit
+        p.press__lede
+          | Everything needed to write about Buried Worlds without emailing anyone
+          | first. Screenshots, art and the trailer are free to use in coverage.
+
+      .press__actions
+        a.btn.btn--primary(href=`/press/${kitFile}` download) Download the kit · #{kitSize}
+        a.btn.btn--secondary(href=links.metaQuestStore target="_blank" rel="noopener noreferrer" data-cta="press") Store page
+        a.btn.btn--secondary(href=`mailto:${pressContact}`) #{pressContact}
+
+      h2.legal__h Fact sheet
+      .press-facts
+        dl.press-facts__list
+          div
+            dt Title
+            dd Buried Worlds
+          div
+            dt Platform
+            dd #{product.store} — #{product.devices}
+          div
+            dt Price
+            dd #{product.price} (Meta shows local currency by region)
+          div
+            dt Released
+            dd #{product.releaseDateLabel}, in #{product.status}
+          div
+            dt Developer
+            dd Cyril Gaillard, working alone
+          div
+            dt Studio
+            dd #{product.publisher} (#{product.developer}), Victoria, Australia
+          div
+            dt Built with
+            dd Unity 6, URP, OpenXR and the Meta XR SDK
+          div
+            dt Genres
+            dd #{product.genres.join(', ')} · single player, no combat
+          div
+            dt Languages
+            dd #{product.languages.join(' and ')}
+          div
+            dt Comfort
+            dd #{product.comfort} · #{product.playModes} · teleport or free movement
+          div
+            dt Rating
+            dd IARC #{product.ageRating}
+          div
+            dt Download size
+            dd #{product.size}
+          div
+            dt Internet
+            dd Not required once installed
+          div
+            dt Website
+            dd
+              a(href=siteUrl) buriedworlds.com
+
+      h2.legal__h Descriptions
+      p.press__note Take these as they are — no attribution needed, no need to reword.
+
+      .press-copy
+        span.press-copy__label One line
+        p.press-copy__text= descriptions.oneLine
+
+      .press-copy
+        span.press-copy__label One paragraph
+        p.press-copy__text= descriptions.short
+
+      .press-copy
+        span.press-copy__label Full description
+        each para in descriptions.full
+          p.press-copy__text= para
+
+      h2.legal__h The five expeditions
+      p.press__note
+        | Every destination is a real place where treasure was actually found.
+        | Each carries its in-game expedition name.
+      .press-worlds
+        each w in expeditions
+          .press-world
+            .press-world__head
+              span.press-world__place= w.place
+              span.press-world__region= w.region
+            span.press-world__quest= w.questName
+            p.press-world__blurb= w.blurb
+            p.press-world__history= w.history
+
+      h2.legal__h Getting the history right
+      p.
+        These are the details most worth checking before print, because they are
+        the ones the game is built on and the ones an archaeologist or a
+        detectorist will notice first.
+      ul.legal__list
+        li
+          strong Hoxne, 1992.
+          |  Eric Lawes was searching for a hammer lost by his tenant farmer,
+          | Peter Whatling, when he found the hoard. The hammer was recovered as
+          | well and is held with the hoard in the British Museum, Room 49. The
+          | game recreates the hammer, and finding it is part of the expedition.
+        li
+          strong Coloma, January 1848.
+          |  James Marshall's find at Sutter's Mill started the California Gold
+          | Rush.
+        li
+          strong Carcassonne.
+          |  The fortified city has been UNESCO-listed since 1997.
+        li
+          strong Bolonia.
+          |  The ruins are the Roman town of Baelo Claudia, on the Andalusian
+          | coast.
+        li
+          strong The detector's target ID scale.
+          |  Gold and lead deliberately overlap on it, because that is what the
+          | ground does to you in reality. Even the better detector cannot call
+          | that one — which is the point.
+
+      h2.legal__h The loop
+      ol.press-loop
+        each step in loop
+          li
+            strong= step[0]
+            |  — #{step[1]}
+
+      h2.legal__h What Early Access means here
+      p.
+        Five destinations are in the game today, along with the whole loop —
+        detector, pickaxe, pan, sieve, magnet and brush. Kimberley, the Western
+        Australian diamond country, is built and waiting as the first
+        destination to arrive after launch. The full version is working toward
+        twelve destinations and six languages, translated by people rather than
+        by machine. There is a feedback screen inside the game that reaches the
+        developer directly and does not ask who you are.
+
+      h2.legal__h The developer
+      p.
+        Buried Worlds was built by Cyril Gaillard, alone, over roughly two
+        years, trading as #{product.publisher} in Victoria, Australia. It started
+        with a gold prospecting course in Maryborough, in the Victorian
+        goldfields, which he never quite got over.
+      p.
+        The game is deliberately low-poly and flat-shaded so it holds frame rate
+        on standalone hardware, which is why it runs on Quest 2 as well as the
+        Quest 3 family rather than the newer headsets alone.
+
+      h2.legal__h Screenshots
+      p.press__note Click any image for the full 1920×1080 file.
+      .press-shots
+        each shot in screenshots
+          figure.press-shot
+            a(href=`/press/screenshots/${shot[0]}` target="_blank" rel="noopener noreferrer")
+              img.press-shot__img(src=`/press/screenshots/${shot[0]}` alt=shot[1] loading="lazy" width="1920" height="1080")
+            figcaption.press-shot__cap= shot[1]
+
+      h2.legal__h Logo and art
+      ul.press-files
+        each item in art
+          li
+            a(href=`/press/${item[0]}` download)= item[1]
+            span.press-files__meta= item[2]
+
+      h2.legal__h Trailer
+      p.
+        Two minutes, no narration. It covers the loop and four of the five
+        destinations.
+      ul.press-files
+        li
+          a(href=trailer.full download) Launch trailer — 720p MP4
+          span.press-files__meta 1280×720, 14 MB
+      p.press__note
+        | A 1080p master is available on request — ask at
+        | #[a(href=`mailto:${pressContact}`) #{pressContact}].
+
+      h2.legal__h Contact
+      p.
+        Press enquiries, review codes and interview requests go to
+        #[a(href=`mailto:${pressContact}`) #{pressContact}]. Review codes are
+        given with no conditions attached to what you say about the game.
+      p.
+        For anything less formal, the developer is on
+        #[a(href=links.discord target="_blank" rel="noopener noreferrer") Discord]
+        most days.
+
+      h2.legal__h Using these assets
+      p.
+        The screenshots, key art, logo and trailer on this page may be used
+        freely in reviews, previews, news coverage, videos and streams of
+        Buried Worlds, including monetised ones. No permission needed and no
+        need to ask first. Please do not alter the logo or present the artwork
+        as your own work.
+
+  +footer(links)
