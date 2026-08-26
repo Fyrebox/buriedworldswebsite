@@ -20,9 +20,6 @@ mixin heroPoster(links, product, trailer)
       .hero__cta
         a.btn.btn--primary(href=links.metaQuestStore target="_blank" rel="noopener noreferrer" data-cta="hero") Get it on Meta Quest
         a.btn.btn--secondary(href="#vr") See how it plays
-        a.btn.btn--secondary.btn--icon(href=links.discord target="_blank" rel="noopener noreferrer")
-          +discordIcon()
-          span Join the Discord
       //- The price carries its currency because Meta localises the real figure.
       p.hero__meta
         | #{product.price} on the #{product.store}
