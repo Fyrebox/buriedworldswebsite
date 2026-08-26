@@ -3,6 +3,15 @@ html(lang="en")
   head
     meta(charset="utf-8")
     meta(name="viewport" content="width=device-width, initial-scale=1")
+
+    //- Share cards and structured data both need ABSOLUTE urls — a relative
+    //- path yields no preview at all, silently, which is the sort of thing you
+    //- only discover after the link is already in somebody's inbox.
+    - var canonical = siteUrl + (pagePath || '/')
+    - var shareImage = siteUrl + (pageImage || '/images/og-cover.jpg')
+    - var title = pageTitle || 'Buried Worlds VR — Out now on Meta Quest'
+    - var description = pageDescription || "Sweep, dig, pan and travel five of the world's great treasure sites. Out now in Early Access on the Meta Horizon Store for Quest 2, 3, 3S and Pro."
+
     //- Google tag (gtag.js) — GA4 property "Buried Worlds"
     script(async src="https://www.googletagmanager.com/gtag/js?id=G-YFMCSBH80C")
     script.
@@ -10,12 +19,57 @@ html(lang="en")
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-YFMCSBH80C');
-    //- Pages may override these; the landing page uses the defaults.
-    title= pageTitle || 'Buried Worlds — A VR gold-prospecting adventure'
-    meta(name="description" content=pageDescription || "Sweep, dig, pan, and travel the world's great gold rushes. Buried Worlds VR is coming soon to Meta Quest — and the daily deduction dig is playable now on Reddit.")
+
+    title= title
+    meta(name="description" content=description)
+    link(rel="canonical" href=canonical)
+
+    //- Open Graph. Every launch link posted to Reddit, Discord, X or an email
+    //- renders from these; without them the site shares as a bare grey url.
+    meta(property="og:type" content="website")
+    meta(property="og:site_name" content="Buried Worlds")
+    meta(property="og:locale" content="en_AU")
+    meta(property="og:title" content=title)
+    meta(property="og:description" content=description)
+    meta(property="og:url" content=canonical)
+    meta(property="og:image" content=shareImage)
+    meta(property="og:image:width" content="1200")
+    meta(property="og:image:height" content="630")
+    meta(property="og:image:alt" content="The Buried Worlds logo above the Roman ruins at Bolonia, columns standing in pale sand.")
+
+    meta(name="twitter:card" content="summary_large_image")
+    meta(name="twitter:title" content=title)
+    meta(name="twitter:description" content=description)
+    meta(name="twitter:image" content=shareImage)
+
+    meta(name="theme-color" content="#F6F2E6")
+    link(rel="icon" href="/favicon.ico" sizes="any")
+    link(rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png")
+    link(rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16.png")
+    link(rel="apple-touch-icon" href="/apple-touch-icon.png")
+
     link(rel="preconnect" href="https://fonts.googleapis.com")
     link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous")
     link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@400;500;600&display=swap")
     link(rel="stylesheet" href="/css/styles.css")
+
+    //- Escaping "<" keeps a stray closing tag in any future copy from ending
+    //- the script element early. The payload is ours, but the cost is one call.
+    if jsonLd
+      script(type="application/ld+json")!= JSON.stringify(jsonLd).replace(/</g, '\\u003c')
   body
     block content
+
+    //- Outbound store clicks. The site cannot see installs, so views-into-store
+    //- -clicks is the only conversion number it can report, and it is the one
+    //- number the landing page can actually be changed to improve.
+    //- GA4 sends via sendBeacon, which survives the navigation away.
+    script.
+      document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[data-cta]');
+        if (!a || typeof gtag !== 'function') return;
+        gtag('event', 'store_click', {
+          cta_location: a.getAttribute('data-cta'),
+          link_url: a.href
+        });
+      });

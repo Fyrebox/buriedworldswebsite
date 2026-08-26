@@ -1,33 +1,38 @@
 //- Hero — three variants. "poster" is the shipped default (README §1).
 include icons
 
-mixin hero(variant, links)
+mixin hero(variant, links, product)
   if variant === 'split'
-    +heroSplit(links)
+    +heroSplit(links, product)
   else if variant === 'banner'
-    +heroBanner(links)
+    +heroBanner(links, product)
   else
-    +heroPoster(links)
+    +heroPoster(links, product)
 
 //- Poster variant (default)
-mixin heroPoster(links)
+mixin heroPoster(links, product)
   header.hero(data-screen-label="Hero — poster")
     .hero__inner
       h1.h1 Buried Worlds
       p.hero__tagline Sweep, dig, pan, and travel the world's great gold rushes. A gold-prospecting adventure in virtual reality.
-      span.badge.badge--coming Coming soon to Meta Quest
+      span.badge.badge--live Out now · Early Access
       //- CTAs sit above the key art so they stay above the fold on short screens.
       .hero__cta
-        a.btn.btn--primary(href="#reddit") Play today's dig on Reddit
-        a.btn.btn--secondary(href="#vr") About the VR game
+        a.btn.btn--primary(href=links.metaQuestStore target="_blank" rel="noopener noreferrer" data-cta="hero") Get it on Meta Quest
+        a.btn.btn--secondary(href="#vr") See how it plays
         a.btn.btn--secondary.btn--icon(href=links.discord target="_blank" rel="noopener noreferrer")
           +discordIcon()
           span Join the Discord
+      //- The price carries its currency because Meta localises the real figure.
+      p.hero__meta
+        | #{product.price} on the #{product.store}
+        span.hero__meta-dot ·
+        | #{product.devices}
       .keyart
         img.keyart__img(src="/images/hero.webp" alt="A metal detector coil resting on red stony ground, a gold coin glowing beneath it. Behind, a gold-rush mine headframe among gum trees, a creek winding away toward a walled hilltop town." width="2560" height="1440" fetchpriority="high")
 
 //- Split variant (reference)
-mixin heroSplit(links)
+mixin heroSplit(links, product)
   header.hero-split(data-screen-label="Hero — split")
     .hero-split__grid
       .hero-split__copy
@@ -39,15 +44,15 @@ mixin heroSplit(links)
           br
           | Worlds
         p.serif(style="margin:0;font-size:1.35rem;color:var(--ink-soft);line-height:1.45") Sweep, dig, pan, and travel the world's great gold rushes — from the creeks of Ballarat to a Suffolk field that hid a Roman hoard for sixteen centuries.
-        span.badge.badge--coming(style="padding:6px 16px;font-size:12.5px") Coming soon to Meta Quest
+        span.badge.badge--live(style="padding:6px 16px;font-size:12.5px") Out now · Early Access
         .hero__cta(style="justify-content:flex-start;margin-top:0")
-          a.btn.btn--primary(href="#reddit") Play today's dig on Reddit
-          a.btn.btn--secondary(href="#vr") About the VR game
+          a.btn.btn--primary(href=links.metaQuestStore target="_blank" rel="noopener noreferrer" data-cta="hero-split") Get it on Meta Quest
+          a.btn.btn--secondary(href="#vr") See how it plays
       .hero-split__art
         span.img-note VR key art — portrait
 
 //- Banner variant (reference)
-mixin heroBanner(links)
+mixin heroBanner(links, product)
   header.hero-banner(data-screen-label="Hero — banner")
     span.img-note.hero-banner__note VR key art — full-bleed
     .hero-banner__scrim
@@ -55,5 +60,5 @@ mixin heroBanner(links)
       h1.h1 Buried Worlds
       p.hero-banner__tagline Sweep, dig, pan, and travel the world's great gold rushes.
       .hero__cta(style="justify-content:flex-start;margin-top:0;align-items:center")
-        a.btn.btn--gold.btn--gold-banner(href="#reddit") Play today's dig on Reddit
-        span.badge.badge--coming.badge--coming-light Coming soon to Meta Quest
+        a.btn.btn--gold.btn--gold-banner(href=links.metaQuestStore target="_blank" rel="noopener noreferrer" data-cta="hero-banner") Get it on Meta Quest
+        span.badge.badge--live.badge--live-light Out now · Early Access

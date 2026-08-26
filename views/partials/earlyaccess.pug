@@ -1,0 +1,42 @@
+//- Early Access, stated plainly.
+//-
+//- Meta's own Early Access guidance asks for this on the listing, and the same
+//- reasoning applies to the page that sends people there: a buyer who knows
+//- what they are getting writes a two-star review about the thing that annoyed
+//- them, and a buyer who was surprised writes a one-star review about the
+//- label. Every claim here is a fact that is true on launch day — nothing
+//- about future pricing, and nothing promised on a date.
+mixin earlyaccess(links, product)
+  section#early-access.ea(data-screen-label="What Early Access means")
+    .ea__inner
+      .section-head
+        .ornament
+          span.rule
+          span.diamond
+          span.rule
+        h2.h2 What Early Access means here
+        p.serif-italic The expedition is real and playable. It is also still being extended.
+      .ea-grid
+        .ea-card
+          span.ea-card__label In the game today
+          ul.ea-card__list
+            li Five destinations, each drawn from a real place where real treasure was found.
+            li The whole loop — detector, pickaxe, pan, sieve, magnet and brush.
+            li English and French, seated or standing, teleport or free movement.
+            li No internet connection needed once it is installed.
+        .ea-card
+          span.ea-card__label What comes next
+          ul.ea-card__list
+            li Kimberley, the Western Australian diamond country, is built and waiting — it is the first destination to arrive after launch.
+            li More sites after it, working toward twelve in the full version.
+            li Six languages, translated by people rather than by machine.
+        .ea-card
+          span.ea-card__label How to push it along
+          ul.ea-card__list
+            li There is a feedback screen inside the game. It reaches the developer directly, and it does not ask who you are.
+            li The camp gathers on Discord — that is where new destinations get argued about first.
+          a.ea-card__link(href=links.discord target="_blank" rel="noopener noreferrer") Join the Discord
+      p.ea__note
+        | Built by one person in Victoria, Australia. If something is broken or
+        | wrong — particularly if you actually swing a coil — that is worth
+        | hearing about far more than a kind review.

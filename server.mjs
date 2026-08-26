@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 import {
   links,
+  siteUrl,
+  product,
   heroVariant,
   showLockedCard,
   loopSteps,
@@ -27,18 +29,58 @@ if (process.env.TRUST_PROXY) {
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
+// Shared by every view: the layout builds canonical urls and share cards from
+// these, and the legal pages are rendered through the same layout as the
+// landing page. Locals rather than per-route arguments so a new page cannot
+// ship with no share card by forgetting to pass them.
+app.locals.siteUrl = siteUrl;
+app.locals.product = product;
+app.locals.links = links;
+
+// Structured data for the landing page. Search and social crawlers read price,
+// platform and publisher from here rather than inferring them from the copy.
+const gameJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: product.name,
+  url: siteUrl,
+  image: `${siteUrl}/images/og-cover.jpg`,
+  description:
+    "A VR treasure-hunting game. Sweep a metal detector, dig, pan river gravel " +
+    "and travel five real sites where real treasure was found.",
+  applicationCategory: 'Game',
+  operatingSystem: 'Meta Horizon OS',
+  gamePlatform: product.devicesList,
+  genre: product.genres,
+  playMode: 'SinglePlayer',
+  inLanguage: ['en', 'fr'],
+  datePublished: product.releaseDate,
+  softwareVersion: product.version,
+  contentRating: `IARC ${product.ageRating}`,
+  author: { '@type': 'Organization', name: product.developer },
+  publisher: { '@type': 'Organization', name: product.publisher },
+  offers: {
+    '@type': 'Offer',
+    price: product.priceAmount,
+    priceCurrency: product.priceCurrency,
+    availability: 'https://schema.org/InStock',
+    url: links.metaQuestStore
+  }
+};
+
 // Static assets (CSS, client JS, future key art).
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Home — the landing page.
 app.get('/', (req, res) => {
   res.render('index', {
-    links,
     heroVariant,
     showLockedCard,
     loopSteps,
     worlds,
-    signalRows
+    signalRows,
+    pagePath: '/',
+    jsonLd: gameJsonLd
   });
 });
 
@@ -46,7 +88,7 @@ app.get('/', (req, res) => {
 // and Data Use Checkup point at.
 app.get('/privacy', (req, res) => {
   res.render('privacy', {
-    links,
+    pagePath: '/privacy',
     pageTitle: 'Privacy — Buried Worlds',
     pageDescription:
       'How Buried Worlds handles your data: no accounts, no ads, and no analytics ' +
@@ -56,7 +98,7 @@ app.get('/privacy', (req, res) => {
 
 app.get('/terms', (req, res) => {
   res.render('terms', {
-    links,
+    pagePath: '/terms',
     pageTitle: 'Terms of Service — Buried Worlds',
     pageDescription:
       'The terms covering the Buried Worlds game and website: licensing, ' +

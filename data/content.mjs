@@ -2,19 +2,56 @@
 // Copy and per-world theming live here so templates stay presentational.
 
 export const links = {
-  // TBD in the design handoff — wire these to real URLs when available.
   redditGame: 'https://www.reddit.com/r/buriedworlds/comments/1ux2j2s/buried_worlds_daily_prospect/',
-  metaQuestStore: '#',
+  // Locale-free on purpose: Meta redirects each visitor to their own region and
+  // currency. Pinning /en-gb/ or /en-us/ would show everyone else the wrong price.
+  metaQuestStore: 'https://www.meta.com/experiences/buried-worlds/1129006663640647/',
   subreddit: 'https://www.reddit.com/r/buriedworlds/',
   discord: 'https://discord.gg/2d6XkPrSNU'
+};
+
+// The canonical origin, used for absolute URLs in share cards and structured
+// data. Both require absolute URLs — a relative path silently yields no preview.
+export const siteUrl = 'https://www.buriedworlds.com';
+
+// Store facts, read off the live product detail page and the developer dashboard
+// on 27 August 2026. They live here rather than in the templates because the
+// same numbers appear in the hero, the buy bar, the structured data and the
+// share card, and a launch is exactly when they drift apart.
+//
+// `price` is deliberately labelled with its currency. Meta localises the real
+// figure per region, so an unlabelled number would be wrong for most visitors.
+export const product = {
+  name: 'Buried Worlds',
+  status: 'Early Access',
+  price: 'US$14.99',
+  priceAmount: '14.99',
+  priceCurrency: 'USD',
+  store: 'Meta Horizon Store',
+  devices: 'Quest 2, Quest 3, Quest 3S and Quest Pro',
+  devicesList: ['Meta Quest 2', 'Meta Quest 3', 'Meta Quest 3S', 'Meta Quest Pro'],
+  releaseDate: '2026-08-26',
+  releaseDateLabel: '26 August 2026',
+  version: '1.0',
+  size: '462 MB',
+  languages: ['English', 'French'],
+  comfort: 'Moderate',
+  playModes: 'Seated or standing',
+  developer: 'Melvia Pty Ltd',
+  publisher: 'Bellare Studios',
+  genres: ['Adventure', 'Simulation'],
+  ageRating: '13+',
+  offline: true
 };
 
 // Hero variant: "poster" | "split" | "banner". Poster is the shipped default;
 // the others are alternate layouts kept for reference (README §1).
 export const heroVariant = 'poster';
 
-// Toggle for the trailing "More worlds coming" destination card.
-export const showLockedCard = false;
+// Toggle for the trailing "More worlds coming" destination card. On since
+// launch: Kimberley is finished and held back as the first post-launch
+// destination, so the locked card now states a fact rather than a hope.
+export const showLockedCard = true;
 
 // Section 3 — the VR core loop, "The Prospector's Day".
 export const loopSteps = [

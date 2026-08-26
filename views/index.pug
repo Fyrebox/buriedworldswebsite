@@ -1,16 +1,25 @@
 extends layout
 
 include partials/hero
-include partials/reddit
+include partials/buybar
 include partials/vr
 include partials/destinations
+include partials/earlyaccess
+include partials/reddit
 include partials/discord
 include partials/footer
 
 block content
-  +hero(heroVariant, links)
-  +reddit(links, signalRows)
+  //- Order changed at launch. The VR game is the thing being sold, so it now
+  //- takes the whole run from the hero to the Early Access statement, and the
+  //- free Reddit game sits after it as a companion rather than as the first
+  //- ask. Before launch the Reddit band was the primary call to action, which
+  //- is the right shape for a page with nothing to sell and the wrong one now.
+  +hero(heroVariant, links, product)
   +vr(loopSteps)
   +destinations(worlds, showLockedCard)
+  +earlyaccess(links, product)
+  +reddit(links, signalRows)
   +discord(links)
   +footer(links)
+  +buybar(links, product)

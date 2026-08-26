@@ -1,0 +1,26 @@
+//- Sticky buy bar — appears once the hero CTA has scrolled out of view, so the
+//- store link is never more than one glance away no matter how far down the
+//- page a visitor has read. Hidden by default and revealed by script: with
+//- JavaScript off it simply never appears, rather than sitting there
+//- permanently covering the footer.
+mixin buybar(links, product)
+  .buybar#buybar(data-screen-label="Buy bar" hidden)
+    .buybar__inner
+      .buybar__id
+        span.buybar__name Buried Worlds
+        span.buybar__meta #{product.status} · #{product.price} · #{product.devices}
+      a.btn.btn--primary.buybar__cta(href=links.metaQuestStore target="_blank" rel="noopener noreferrer" data-cta="sticky") Get it on Meta Quest
+
+  script.
+    (function () {
+      var bar = document.getElementById('buybar');
+      var hero = document.querySelector('.hero__cta, .hero-split .hero__cta, .hero-banner .hero__cta');
+      if (!bar || !hero || !('IntersectionObserver' in window)) return;
+
+      new IntersectionObserver(function (entries) {
+        // Shown only while the hero's own buttons are off screen — two live
+        // copies of the same call to action competing on one screen reads as a
+        // mistake rather than as emphasis.
+        bar.toggleAttribute('hidden', entries[0].isIntersecting);
+      }, { rootMargin: '0px' }).observe(hero);
+    })();

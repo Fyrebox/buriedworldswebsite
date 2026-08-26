@@ -1,8 +1,12 @@
 # Buried Worlds — Marketing Landing Page
 
 A single-page marketing site for **Buried Worlds**, built from the design handoff in
-`design_handoff/`. Promotes the upcoming **Buried Worlds VR** (Meta Quest, "coming soon")
-and the live **Buried Worlds on Reddit** daily deduction game (primary CTA).
+`design_handoff/`. Sells **Buried Worlds VR**, live in Early Access on the Meta Horizon
+Store since 26 August 2026 (primary CTA), and carries the free **Buried Worlds on
+Reddit** daily deduction game below it as a companion.
+
+Before launch the Reddit band was the primary call to action and the hero said "coming
+soon" — the right shape for a page with nothing to sell, and the wrong one now.
 
 Vintage-expedition-brochure aesthetic: parchment, near-black ink, antique bronze, muted sage.
 
@@ -108,16 +112,37 @@ Colors, typography, spacing, radii, and hover states are transcribed from
 placeholder (striped sage blocks / terrain gradients) pending real key art and terrain
 screenshots — aspect ratios and radii are kept so real assets drop straight in.
 
-## Configuration notes (TBD in the handoff)
+## Configuration
 
 Edit `data/content.mjs` → `links`:
 
 - `redditGame` — the Reddit daily-dig post (Reddit-section CTA)
-- `metaQuestStore` — Meta Quest store listing (**still a placeholder `#`**)
+- `metaQuestStore` — the store listing. Kept **locale-free** on purpose: Meta redirects
+  each visitor to their own region and currency, so pinning `/en-gb/` or `/en-us/` would
+  show everyone else the wrong price
 - `subreddit` — r/BuriedWorlds
 - `discord` — the invite the footer, community section and `/discord` all use
 
+`data/content.mjs` → `product` holds the store facts — price, devices, release date,
+version, languages, rating. They are read off the live product detail page and the
+developer dashboard, and they feed the hero, the sticky buy bar, the share card and the
+`VideoGame` structured data at once. **Change them here, nowhere else.** `price` carries
+its currency because Meta localises the real figure per region.
+
 `heroVariant` (`'poster' | 'split' | 'banner'`) and `showLockedCard` are also set there.
+`showLockedCard` is on since launch: Kimberley is finished and held back as the first
+post-launch destination, so the locked card states a fact rather than a hope.
+
+## Launch surfaces
+
+| What | Where | Why it matters |
+|---|---|---|
+| Share card | `views/layout.pug` + `public/images/og-cover.jpg` (1200×630) | Every link posted to Reddit, Discord, X or an email renders from these. Without them the site shares as a bare grey url |
+| Structured data | `gameJsonLd` in `server.mjs` | Crawlers read price, platform and publisher from here rather than inferring them from the copy |
+| Sticky buy bar | `views/partials/buybar.pug` | Revealed once the hero CTA scrolls away, hidden again when it returns. Hidden by default and shown by script, so with JavaScript off it never appears rather than permanently covering the footer |
+| Store click tracking | `data-cta` attributes + the listener at the foot of `views/layout.pug` | The site cannot see installs, so views-into-store-clicks is the only conversion number it has. GA4 sends via `sendBeacon`, which survives the navigation away |
+| Early Access statement | `views/partials/earlyaccess.pug` | Meta's own guidance asks for this on the listing; the same reasoning applies to the page that sends people there. Every claim in it is true on launch day — nothing about future pricing, nothing promised on a date |
+| `robots.txt`, `sitemap.xml` | `public/` | Served straight off `express.static` |
 
 Destinations live in the `worlds` array. Kimberley is withheld from the current
 release — it is left out of that array rather than deleted, and its images and

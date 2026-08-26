@@ -546,3 +546,110 @@ html { scroll-behavior: smooth; }
 /* Footer privacy link sits inline with the copyright line. */
 .footer__legal { color: #C89A62; text-decoration: none; font-size: 12.5px; }
 .footer__legal:hover { color: var(--bw-gold); text-decoration: underline; }
+
+/* ============================================================
+   LAUNCH (27 August 2026) — live badge, hero meta line,
+   sticky buy bar, Early Access statement
+   ============================================================ */
+
+/* The pre-launch badge was an outline in --ink-soft, which is right for a
+   promise and wrong for a state. Filled bronze reads as live without becoming
+   a second button competing with the call to action beside it. */
+.badge--live {
+  background: var(--bronze);
+  color: var(--parchment);
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.badge--live-light { background: var(--bw-gold); color: var(--bw-bg); }
+
+.hero__meta {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.hero__meta-dot { margin: 0 9px; color: var(--bronze); }
+
+/* ---------- Sticky buy bar ---------- */
+.buybar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  background: var(--ink);
+  color: var(--parchment);
+  border-top: 1px solid rgba(246, 242, 230, .14);
+  padding: 12px 24px;
+}
+.buybar[hidden] { display: none; }
+.buybar__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.buybar__id { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.buybar__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.buybar__meta { font-size: 12.5px; color: var(--bw-muted); }
+.buybar__cta { flex: none; padding: 11px 22px; font-size: 14px; }
+
+/* The bar is fixed, so at the very bottom of the page it would otherwise sit
+   on top of the footer's last row. */
+.footer { padding-bottom: 96px; }
+
+/* ---------- Early Access statement ---------- */
+.ea { background: var(--parchment); padding: 88px 24px; }
+.ea__inner { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
+.ea .serif-italic { font-size: 1.3rem; color: var(--ink-soft); max-width: 34em; line-height: 1.4; margin: 0; }
+.ea-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; align-items: stretch; }
+.ea-card {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  outline: 1px solid rgba(31, 33, 31, .10);
+}
+.ea-card__label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--bronze);
+}
+.ea-card__list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 9px; }
+.ea-card__list li { font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+.ea-card__list li::marker { color: var(--bronze); }
+.ea-card__link { margin-top: auto; font-size: 14px; font-weight: 500; }
+.ea__note {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+  max-width: 46em;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .ea-grid { grid-template-columns: 1fr; }
+  .buybar__meta { display: none; }
+}
+
+@media (max-width: 560px) {
+  .buybar { padding: 10px 16px; }
+  .buybar__inner { gap: 12px; }
+  .buybar__cta { padding: 10px 16px; font-size: 13px; }
+}
