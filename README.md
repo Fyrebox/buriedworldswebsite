@@ -143,6 +143,31 @@ post-launch destination, so the locked card states a fact rather than a hope.
 | Store click tracking | `data-cta` attributes + the listener at the foot of `views/layout.pug` | The site cannot see installs, so views-into-store-clicks is the only conversion number it has. GA4 sends via `sendBeacon`, which survives the navigation away |
 | Early Access statement | `views/partials/earlyaccess.pug` | Meta's own guidance asks for this on the listing; the same reasoning applies to the page that sends people there. Every claim in it is true on launch day — nothing about future pricing, nothing promised on a date |
 | `robots.txt`, `sitemap.xml` | `public/` | Served straight off `express.static` |
+| Trailer | `views/partials/trailer.pug`, `public/video/` | Self-hosted, not YouTube — a normal YouTube embed sets cookies the policy would have to cover. The hero plays a muted 7s loop (~630 KB); the full 2:00 trailer is 14 MB and only downloads on click |
+
+### Video
+
+Encoded from `~/Documents/BuriedWorldsTrailer/Trailer_v2_30fps.mp4`, all 720p H.264
+with `+faststart`:
+
+| File | What | Size |
+|---|---|---|
+| `hero-loop-detector.mp4` | The detector sweep — the game's core verb. **Shipped** | 630 KB |
+| `hero-loop-well.mp4` | Magnet fishing a well under Carcassonne | 710 KB |
+| `hero-loop-ruins.mp4` | The camera crossing the ruins at Bolonia | 640 KB |
+| `buried-worlds-trailer-720p.mp4` | The full trailer, click-to-play | 14 MB |
+
+Swap the hero's mood by pointing `trailer.loop` in `data/content.mjs` at a different
+one. The 1080p master stays out of this repo — it is what press and YouTube should get.
+
+Two things keep the page light despite all that: the full trailer is `preload="none"`,
+and the modal's poster lives in `data-poster` and is promoted to `poster` on first open.
+A `poster` named in the markup is fetched **eagerly even under `preload="none"`**, which
+billed every visitor 166 KB for an image most never saw. Measured page weight on first
+load is ~1 MB, and the 14 MB file is not among it.
+
+**Note:** `public/video/` puts 16 MB of binaries in git. Fine at this size; if more
+trailers arrive, move them to object storage rather than growing the repo.
 
 Destinations live in the `worlds` array. Kimberley is withheld from the current
 release — it is left out of that array rather than deleted, and its images and

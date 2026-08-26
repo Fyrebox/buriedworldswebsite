@@ -1,16 +1,16 @@
 //- Hero — three variants. "poster" is the shipped default (README §1).
 include icons
 
-mixin hero(variant, links, product)
+mixin hero(variant, links, product, trailer)
   if variant === 'split'
     +heroSplit(links, product)
   else if variant === 'banner'
     +heroBanner(links, product)
   else
-    +heroPoster(links, product)
+    +heroPoster(links, product, trailer)
 
 //- Poster variant (default)
-mixin heroPoster(links, product)
+mixin heroPoster(links, product, trailer)
   header.hero(data-screen-label="Hero — poster")
     .hero__inner
       h1.h1 Buried Worlds
@@ -28,8 +28,22 @@ mixin heroPoster(links, product)
         | #{product.price} on the #{product.store}
         span.hero__meta-dot ·
         | #{product.devices}
+      //- The painted key art is the poster, so it is on screen instantly and
+      //- the video fades in over it rather than the slot sitting empty. The
+      //- clip is decorative — muted, looping, no controls — so it is hidden
+      //- from assistive technology and the play button carries the meaning.
       .keyart
-        img.keyart__img(src="/images/hero.webp" alt="A metal detector coil resting on red stony ground, a gold coin glowing beneath it. Behind, a gold-rush mine headframe among gum trees, a creek winding away toward a walled hilltop town." width="2560" height="1440" fetchpriority="high")
+        video.keyart__video(
+          poster=trailer.poster
+          autoplay muted loop playsinline disablepictureinpicture
+          preload="metadata"
+          aria-hidden="true"
+          tabindex="-1"
+        )
+          source(src=trailer.loop type="video/mp4")
+        button.keyart__play(type="button" data-trailer-open)
+          span.keyart__play-icon(aria-hidden="true")
+          span Watch the trailer · #{trailer.duration}
 
 //- Split variant (reference)
 mixin heroSplit(links, product)

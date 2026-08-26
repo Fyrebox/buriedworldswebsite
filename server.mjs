@@ -6,6 +6,7 @@ import {
   links,
   siteUrl,
   product,
+  trailer,
   heroVariant,
   showLockedCard,
   loopSteps,
@@ -36,6 +37,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.locals.siteUrl = siteUrl;
 app.locals.product = product;
 app.locals.links = links;
+app.locals.trailer = trailer;
 
 // Structured data for the landing page. Search and social crawlers read price,
 // platform and publisher from here rather than inferring them from the copy.
@@ -65,6 +67,17 @@ const gameJsonLd = {
     priceCurrency: product.priceCurrency,
     availability: 'https://schema.org/InStock',
     url: links.metaQuestStore
+  },
+  trailer: {
+    '@type': 'VideoObject',
+    name: 'Buried Worlds — launch trailer',
+    description:
+      'Two minutes of the loop: sweeping the detector, digging, panning the ' +
+      'river, and the five destinations the expedition travels between.',
+    thumbnailUrl: `${siteUrl}${trailer.fullPoster}`,
+    contentUrl: `${siteUrl}${trailer.full}`,
+    uploadDate: product.releaseDate,
+    duration: 'PT1M59S'
   }
 };
 

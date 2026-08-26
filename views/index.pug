@@ -1,6 +1,7 @@
 extends layout
 
 include partials/hero
+include partials/trailer
 include partials/buybar
 include partials/vr
 include partials/destinations
@@ -15,7 +16,7 @@ block content
   //- free Reddit game sits after it as a companion rather than as the first
   //- ask. Before launch the Reddit band was the primary call to action, which
   //- is the right shape for a page with nothing to sell and the wrong one now.
-  +hero(heroVariant, links, product)
+  +hero(heroVariant, links, product, trailer)
   +vr(loopSteps)
   +destinations(worlds, showLockedCard)
   +earlyaccess(links, product)
@@ -23,3 +24,4 @@ block content
   +discord(links)
   +footer(links)
   +buybar(links, product)
+  +trailerModal(trailer)

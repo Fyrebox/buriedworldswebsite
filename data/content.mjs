@@ -44,6 +44,27 @@ export const product = {
   offline: true
 };
 
+// The trailer, self-hosted. It is not on YouTube, and a normal YouTube embed
+// would set cookies the privacy policy would then have to cover — so the files
+// are served from here instead.
+//
+// `loop` is the muted clip that plays in the hero. Two alternates are encoded
+// and sitting beside it in public/video, so swapping the hero's mood is a
+// one-line change:
+//   /video/hero-loop-detector.mp4  the detector sweep, the game's core verb
+//   /video/hero-loop-well.mp4      magnet fishing a well under Carcassonne
+//   /video/hero-loop-ruins.mp4     the camera crossing the ruins at Bolonia
+//
+// The full trailer is 14 MB and only downloads when somebody asks for it
+// (preload="none"), so the page still costs well under a megabyte to open.
+export const trailer = {
+  loop: '/video/hero-loop-detector.mp4',
+  poster: '/images/hero-poster.jpg',
+  full: '/video/buried-worlds-trailer-720p.mp4',
+  fullPoster: '/images/og-cover.jpg',
+  duration: '2:00'
+};
+
 // Hero variant: "poster" | "split" | "banner". Poster is the shipped default;
 // the others are alternate layouts kept for reference (README §1).
 export const heroVariant = 'poster';

@@ -653,3 +653,92 @@ html { scroll-behavior: smooth; }
   .buybar__inner { gap: 12px; }
   .buybar__cta { padding: 10px 16px; font-size: 13px; }
 }
+
+/* ============================================================
+   TRAILER — hero loop and the full-trailer dialog
+   ============================================================ */
+
+/* Fills the same slot the key art image used to, so the hero's proportions
+   and the striped loading background behind it are unchanged. */
+.keyart__video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.keyart__play {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px 11px 14px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(31, 33, 31, .78);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color .15s ease;
+}
+.keyart__play:hover { background: var(--bronze); }
+.keyart__play:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+
+/* A CSS triangle rather than an icon file — one shape, no extra request. */
+.keyart__play-icon {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 7px 0 7px 12px;
+  border-color: transparent transparent transparent currentColor;
+}
+
+.trailer-modal {
+  width: min(1100px, 92vw);
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  background: var(--bw-bg);
+  overflow: visible;
+}
+.trailer-modal::backdrop { background: rgba(17, 20, 13, .82); }
+.trailer-modal__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  background: #000;
+}
+.trailer-modal__close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+.trailer-modal__close:hover { background: var(--bw-gold); }
+.trailer-modal__close:focus-visible { outline: 2px solid var(--bw-gold); outline-offset: 2px; }
+
+@media (max-width: 560px) {
+  .keyart__play {
+    right: 10px;
+    bottom: 10px;
+    padding: 9px 13px 9px 11px;
+    font-size: 12.5px;
+  }
+  .trailer-modal { width: 96vw; }
+  .trailer-modal__close { top: -12px; right: -6px; }
+}

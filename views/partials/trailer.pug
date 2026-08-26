@@ -1,0 +1,78 @@
+//- The full trailer, opened from the hero.
+//-
+//- Self-hosted rather than embedded from YouTube, which is not where it lives
+//- and whose normal embed sets cookies the privacy policy would then have to
+//- cover. preload="none" means the 14 MB file is fetched only when somebody
+//- actually asks for it, so it costs a visitor who never clicks nothing at all.
+//-
+//- <dialog> rather than a hand-rolled overlay: it traps focus, closes on Escape
+//- and renders its own backdrop, none of which is worth reimplementing badly.
+mixin trailerModal(trailer)
+  dialog#trailer-modal.trailer-modal(aria-label="Buried Worlds trailer")
+    button.trailer-modal__close(type="button" data-trailer-close aria-label="Close the trailer") ✕
+    video#trailer-video.trailer-modal__video(
+      controls
+      playsinline
+      preload="none"
+      data-poster=trailer.fullPoster
+    )
+      source(src=trailer.full type="video/mp4")
+      | Your browser cannot play this video.
+      a(href=trailer.full) Download the trailer instead.
+
+  script.
+    (function () {
+      var modal = document.getElementById('trailer-modal');
+      var video = document.getElementById('trailer-video');
+      var loop = document.querySelector('.keyart__video');
+      if (!modal || !video) return;
+
+      // Somebody who has asked their system to reduce motion did not ask for a
+      // clip looping under the headline. The poster still shows, so the hero
+      // loses nothing but the movement.
+      var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (loop && still && still.matches) {
+        loop.autoplay = false;
+        loop.pause();
+        loop.removeAttribute('loop');
+      }
+
+      document.addEventListener('click', function (e) {
+        var open = e.target.closest && e.target.closest('[data-trailer-open]');
+        if (open) {
+          if (typeof modal.showModal === 'function') {
+            modal.showModal();
+          } else {
+            // No <dialog> support: send them to the file rather than open
+            // nothing at all and leave the button looking broken.
+            window.open(video.querySelector('source').src, '_blank', 'noopener');
+            return;
+          }
+          // Promoted from data-poster on first open. A poster named in the
+          // markup is fetched eagerly even under preload="none", which would
+          // bill every visitor for an image most of them never see.
+          if (!video.hasAttribute('poster') && video.dataset.poster) {
+            video.setAttribute('poster', video.dataset.poster);
+          }
+
+          video.play();
+          if (loop) loop.pause();
+          if (typeof gtag === 'function') gtag('event', 'trailer_open');
+          return;
+        }
+
+        // The backdrop is part of the dialog element itself, so a click landing
+        // on the dialog but outside the video is a click on the backdrop.
+        if (e.target.closest && (e.target.closest('[data-trailer-close]') || e.target === modal)) {
+          modal.close();
+        }
+      });
+
+      // Fires for the close button, the backdrop and Escape alike, so the
+      // teardown lives here once rather than at each of the three call sites.
+      modal.addEventListener('close', function () {
+        video.pause();
+        video.currentTime = 0;
+        if (loop && !(still && still.matches)) loop.play();
+      });
+    })();
