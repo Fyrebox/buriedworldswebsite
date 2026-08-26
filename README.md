@@ -18,8 +18,8 @@ Vintage-expedition-brochure aesthetic: parchment, near-black ink, antique bronze
 
 No forms, no sign-up, no mailing list — community and launch news run through
 Discord, and every call to action is a link out to Discord or Reddit. Two things
-qualify that: Google Analytics (GA4, properties `G-PVF7WKPPFD` and `G-YFMCSBH80C`,
-both loaded in `views/layout.pug`) counts visits and sets cookies, and `/api/feedback` receives
+qualify that: Google Analytics (GA4, property `G-PVF7WKPPFD`, loaded in
+`views/layout.pug`) counts visits and sets cookies, and `/api/feedback` receives
 player feedback from the VR build (see below).
 
 Both are covered by `/privacy` — **keep that page in step with anything you add

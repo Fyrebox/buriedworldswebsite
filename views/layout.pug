@@ -12,17 +12,18 @@ html(lang="en")
     - var title = pageTitle || 'Buried Worlds VR — Out now on Meta Quest'
     - var description = pageDescription || "Sweep, dig, pan and travel five of the world's great treasure sites. Out now in Early Access on the Meta Horizon Store for Quest 2, 3, 3S and Pro."
 
-    //- Google tag (gtag.js). Two GA4 properties, each configured once, so each
-    //- receives a complete picture — separate properties do not double-count
-    //- one another. The original stays so the pre-launch history stays
-    //- continuous; drop its config line if it is meant to be retired.
+    //- Google tag (gtag.js) — GA4 property G-PVF7WKPPFD.
+    //- The pre-launch property G-YFMCSBH80C was retired on 27 August 2026. Its
+    //- data is not lost, only frozen: whatever it collected up to that date
+    //- still sits in that property, it simply stops receiving new hits. So
+    //- traffic from launch day onward lives here and nowhere else, and any
+    //- before-and-after comparison has to be made across the two.
     script(async src="https://www.googletagmanager.com/gtag/js?id=G-PVF7WKPPFD")
     script.
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-PVF7WKPPFD');
-      gtag('config', 'G-YFMCSBH80C');
 
     title= title
     meta(name="description" content=description)
