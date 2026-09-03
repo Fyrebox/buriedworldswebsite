@@ -91,6 +91,25 @@ const gameJsonLd = {
   }
 };
 
+// Canonical host. The apex answers every page with a 200 of its own rather than
+// pointing at www, so the two hostnames compete as separate sites in search.
+// One permanent redirect gives the site a single address.
+//
+// Matched against the exact apex and nothing else on purpose: Railway's
+// healthcheck, the *.railway.app domain and localhost all have to keep
+// answering normally, and a blanket "not www" test would redirect them and
+// break the deploy.
+//
+// /api is exempt because a headset already posting feedback to the apex would
+// be handed a redirect on a POST, and clients are not reliable about replaying
+// the body on a 301 — the request would be silently lost.
+app.use((req, res, next) => {
+  if (req.hostname === 'buriedworlds.com' && !req.path.startsWith('/api/')) {
+    return res.redirect(301, `https://www.buriedworlds.com${req.originalUrl}`);
+  }
+  next();
+});
+
 // Static assets (CSS, client JS, future key art).
 // redirect:false because public/press/ is a directory AND /press is a route.
 // Left on, static answers /press with a 301 to /press/ before the route is ever
