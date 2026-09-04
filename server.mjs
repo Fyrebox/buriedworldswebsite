@@ -112,7 +112,9 @@ const gameJsonLd = {
       'river, and the five destinations the expedition travels between.',
     thumbnailUrl: `${siteUrl}${trailer.fullPoster}`,
     contentUrl: `${siteUrl}${trailer.full}`,
-    uploadDate: product.releaseDate,
+    // Search Console flags a bare date here as "missing a timezone". The game
+    // shipped from Australia, so the trailer went up at midnight AEST.
+    uploadDate: `${product.releaseDate}T00:00:00+10:00`,
     duration: 'PT1M59S'
   }
 };
