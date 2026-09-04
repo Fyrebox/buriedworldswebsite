@@ -7,6 +7,7 @@
 import crypto from 'node:crypto';
 
 import express from 'express';
+import { buildQrUrl, createQrPng, createQrSvg } from './qr-code.mjs';
 import { LinkValidationError } from './tracking-store.mjs';
 
 export { createTrackingStore, LinkValidationError, normaliseLink } from './tracking-store.mjs';
@@ -285,6 +286,7 @@ export function createTrackingRouter({
     submitLabel: 'Create link',
     action: '/admin/links',
     link: formValues(),
+    isEdit: false,
     error: ''
   }));
 
@@ -303,6 +305,7 @@ export function createTrackingRouter({
         submitLabel: 'Create link',
         action: '/admin/links',
         link: formValues(req.body),
+        isEdit: false,
         error: error.message
       });
     }
@@ -320,14 +323,22 @@ export function createTrackingRouter({
       submitLabel: 'Save changes',
       action: `/admin/links/${link.id}`,
       link,
+      isEdit: true,
       error: ''
     });
   });
 
   router.post('/admin/links/:id', requireCsrf, async (req, res) => {
     const id = Number(req.params.id);
+    const existing = await store.getById(id);
+    if (!existing) return res.status(404).send('Not found');
     try {
-      const link = await store.updateLink(id, formValues(req.body));
+      const link = await store.updateLink(id, {
+        ...formValues(req.body),
+        // A printed QR code is a permanent physical reference. Never let a
+        // modified form value silently break every copy already in the wild.
+        slug: existing.slug
+      });
       return res.redirect(303, `/admin/links/${link.id}`);
     } catch (error) {
       if (!(error instanceof LinkValidationError)) throw error;
@@ -339,7 +350,8 @@ export function createTrackingRouter({
         heading: 'Edit campaign link',
         submitLabel: 'Save changes',
         action: `/admin/links/${id}`,
-        link: { id, ...formValues(req.body) },
+        link: { id, ...formValues(req.body), slug: existing.slug },
+        isEdit: true,
         error: error.message
       });
     }
@@ -350,6 +362,13 @@ export function createTrackingRouter({
     if (!link) return res.status(404).send('Not found');
     await store.setActive(link.id, !link.active);
     return res.redirect(303, `/admin/links/${link.id}`);
+  });
+
+  router.post('/admin/links/:id/reset-clicks', requireCsrf, async (req, res) => {
+    const link = await store.getById(Number(req.params.id));
+    if (!link) return res.status(404).send('Not found');
+    await store.resetClicks(link.id);
+    return res.redirect(303, `/admin/links/${link.id}?reset=1`);
   });
 
   router.get('/admin/links/:id/export.csv', async (req, res) => {
@@ -366,6 +385,28 @@ export function createTrackingRouter({
     return res.send(`${csv}\n`);
   });
 
+  async function sendQr(req, res, format) {
+    const link = await store.getById(Number(req.params.id));
+    if (!link) return res.status(404).send('Not found');
+
+    const qrUrl = buildQrUrl(siteUrl, link.slug);
+    const filename = `buried-worlds-${link.slug}-qr.${format}`;
+    if (req.query.download === '1') {
+      res.set('Content-Disposition', `attachment; filename="${filename}"`);
+    }
+
+    if (format === 'svg') {
+      res.type('image/svg+xml');
+      return res.send(await createQrSvg(qrUrl));
+    }
+
+    res.type('image/png');
+    return res.send(await createQrPng(qrUrl));
+  }
+
+  router.get('/admin/links/:id/qr.svg', (req, res) => sendQr(req, res, 'svg'));
+  router.get('/admin/links/:id/qr.png', (req, res) => sendQr(req, res, 'png'));
+
   router.get('/admin/links/:id', async (req, res) => {
     const requestedDays = Number.parseInt(req.query.days ?? '30', 10);
     const days = [7, 30, 90, 365].includes(requestedDays) ? requestedDays : 30;
@@ -378,6 +419,8 @@ export function createTrackingRouter({
       disableAnalytics: true,
       stats,
       siteUrl,
+      qrUrl: buildQrUrl(siteUrl, stats.link.slug),
+      resetNotice: req.query.reset === '1',
       maxDaily: Math.max(1, ...stats.daily.map((entry) => entry.clicks))
     });
   });
@@ -385,8 +428,7 @@ export function createTrackingRouter({
   router.use('/admin', (error, req, res, next) => {
     if (res.headersSent) return next(error);
     if (error?.type === 'entity.too.large') return res.status(413).send('Form is too large');
-    onError(error);
-    return res.status(500).send('Admin error');
+    return next(error);
   });
 
   return router;

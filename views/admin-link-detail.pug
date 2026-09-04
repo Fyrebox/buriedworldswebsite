@@ -29,18 +29,41 @@ block content
         p= stats.link.destinationUrl
       .admin-heading__actions
         a.btn.btn--secondary(href=`/admin/links/${stats.link.id}/edit`) Edit
-        form(action=`/admin/links/${stats.link.id}/toggle` method="post")
+        form(action=`/admin/links/${stats.link.id}/toggle` method="post" data-confirm-pause=stats.link.active ? 'This short link may already be printed. Pause it anyway?' : undefined)
           input(type="hidden" name="_csrf" value=csrf)
           button.btn.btn--secondary(type="submit")= stats.link.active ? 'Pause link' : 'Reactivate'
 
     .admin-copy-link
       code#public-link #{siteUrl}/go/#{stats.link.slug}
-      button.btn.btn--primary(type="button" data-copy-link) Copy link
+      button.btn.btn--primary(type="button" data-copy-target="public-link") Copy link
+
+    if resetNotice
+      p.admin-alert.admin-alert--success(role="status") Click history reset. The short link and QR code are still active.
+
+    section#qr-code.admin-qr(aria-labelledby="qr-heading")
+      .admin-qr__preview
+        img(src=`/admin/links/${stats.link.id}/qr.svg` alt=`QR code for ${stats.link.name}` width="260" height="260")
+      .admin-qr__content
+        span.admin-kicker Print tracking
+        h2#qr-heading Flyer QR code
+        p This code uses the permanent short link and records scans as the #[strong QR] placement. Editing the destination will not change the code.
+        if !stats.link.active
+          p.admin-alert This link is paused. The QR code will show an unavailable-link page until it is reactivated.
+        .admin-qr__link
+          code#qr-public-link= qrUrl
+          button(type="button" data-copy-target="qr-public-link") Copy QR link
+        .admin-qr__actions
+          a.btn.btn--primary(href=`/admin/links/${stats.link.id}/qr.svg?download=1` download) Download SVG
+          a.btn.btn--secondary(href=`/admin/links/${stats.link.id}/qr.png?download=1` download) Download PNG
+        small Use SVG for professional printing. Keep the white border intact and print at least 25 mm square.
 
     nav.admin-range(aria-label="Analytics period")
       each range in [7, 30, 90, 365]
         a(class=stats.days === range ? 'is-active' : '' href=`?days=${range}`) #{range} days
       a.admin-range__export(href=`/admin/links/${stats.link.id}/export.csv`) Export CSV
+      form(action=`/admin/links/${stats.link.id}/reset-clicks` method="post" data-confirm-reset="This permanently deletes every click record and lifetime total for this link. The link and QR code will keep working. Reset clicks?")
+        input(type="hidden" name="_csrf" value=csrf)
+        button.admin-range__reset(type="submit") Reset clicks
 
     .admin-metrics
       .admin-metric
@@ -76,13 +99,28 @@ block content
 
   script.
     (function () {
-      var button = document.querySelector('[data-copy-link]');
-      var value = document.getElementById('public-link');
-      if (!button || !value || !navigator.clipboard) return;
-      button.addEventListener('click', function () {
-        navigator.clipboard.writeText(value.textContent.trim()).then(function () {
-          button.textContent = 'Copied';
-          setTimeout(function () { button.textContent = 'Copy link'; }, 1500);
+      var pauseForm = document.querySelector('[data-confirm-pause]');
+      if (pauseForm) {
+        pauseForm.addEventListener('submit', function (event) {
+          if (!window.confirm(pauseForm.getAttribute('data-confirm-pause'))) event.preventDefault();
+        });
+      }
+      var resetForm = document.querySelector('[data-confirm-reset]');
+      if (resetForm) {
+        resetForm.addEventListener('submit', function (event) {
+          if (!window.confirm(resetForm.getAttribute('data-confirm-reset'))) event.preventDefault();
+        });
+      }
+      if (!navigator.clipboard) return;
+      document.querySelectorAll('[data-copy-target]').forEach(function (button) {
+        var originalLabel = button.textContent;
+        button.addEventListener('click', function () {
+          var value = document.getElementById(button.getAttribute('data-copy-target'));
+          if (!value) return;
+          navigator.clipboard.writeText(value.textContent.trim()).then(function () {
+            button.textContent = 'Copied';
+            setTimeout(function () { button.textContent = originalLabel; }, 1500);
+          });
         });
       });
     })();

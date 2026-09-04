@@ -138,6 +138,17 @@ coarse device category, placement and campaign fields. It deliberately contains 
 IP address, full user agent, cookie or fingerprint. Known bots and link previews are
 kept separate from the human total.
 
+Each link's analytics page also provides a print-ready QR code. The SVG download is
+preferred for flyers and professional printing; a 2048 px PNG is available for tools
+that do not accept SVG. QR codes encode `/go/:slug?placement=qr`, so scans appear in
+the placement breakdown without creating a separate campaign system. Short names are
+locked after creation because changing one would break every printed copy; destination
+URLs and campaign attribution can still be updated at any time.
+
+The analytics page can reset a link's click history. This permanently clears both
+recent click records and archived lifetime totals, but does not alter or pause the
+short link or its QR code.
+
 Copy `.env.example` to `.env` for local work. The repository already includes a
 gitignored `.env` shell with blank secrets. Configure:
 

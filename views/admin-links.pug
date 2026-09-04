@@ -54,7 +54,9 @@ block content
                 td.admin-table__number= link.humanClicks
                 td= link.lastClickedAt ? link.lastClickedAt.slice(0, 10) : '—'
                 td
-                  a.admin-table__action(href=`/admin/links/${link.id}`) View
+                  .admin-table__actions
+                    a.admin-table__action(href=`/admin/links/${link.id}`) View
+                    a.admin-table__action(href=`/admin/links/${link.id}#qr-code`) QR
     else
       .admin-empty
         h2 No links yet

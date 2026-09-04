@@ -116,13 +116,54 @@ test('campaign store creates, edits, pauses and keeps historic clicks', async ()
     });
     const updated = await store.updateLink(created.id, linkInput({
       name: 'Changed name',
+      slug: 'this-must-not-replace-the-printed-link',
       destinationUrl: 'https://example.com/new'
     }));
     assert.equal(updated.name, 'Changed name');
+    assert.equal(updated.slug, 'reddit-launch');
+    assert.equal(await store.getBySlug('this-must-not-replace-the-printed-link'), null);
     assert.equal((await store.listLinks())[0].humanClicks, 1);
     assert.equal((await store.getLinkStats(created.id, 30)).referrers[0].label, 'reddit.com');
     assert.equal(await store.setActive(created.id, false), true);
     assert.equal((await store.getBySlug(created.slug)).active, false);
+  } finally {
+    await store.close();
+  }
+});
+
+test('reset clicks clears recent records and archived totals without deleting the link', async () => {
+  const pool = createMemoryPool();
+  const store = await createTrackingStore({ pool });
+  try {
+    const created = await store.createLink(linkInput());
+    await store.recordClick(created, {
+      clickedAt: new Date().toISOString(),
+      destinationUrl: buildDestination(created),
+      referrerHost: '',
+      deviceCategory: 'mobile',
+      isBot: false,
+      placement: 'qr'
+    });
+    await pool.query(`
+      INSERT INTO campaign_click_totals
+        (link_id, human_clicks, bot_clicks, archived_through)
+      VALUES ($1, 5, 2, NOW())
+    `, [created.id]);
+
+    const before = (await store.listLinks())[0];
+    assert.equal(before.humanClicks, 6);
+    assert.equal(before.botClicks, 2);
+    assert.equal(await store.resetClicks(created.id), true);
+
+    const after = (await store.listLinks())[0];
+    assert.equal(after.humanClicks, 0);
+    assert.equal(after.botClicks, 0);
+    assert.deepEqual(await store.exportClicks(created.id), []);
+    assert.equal((await pool.query(
+      'SELECT COUNT(*) AS count FROM campaign_click_totals WHERE link_id = $1',
+      [created.id]
+    )).rows[0].count, 0);
+    assert.equal((await store.getById(created.id)).slug, 'reddit-launch');
   } finally {
     await store.close();
   }
@@ -208,7 +249,90 @@ test('admin is private, signs in and renders the dashboard without GA', async ()
     assert.match(html, /Campaign links/);
     assert.doesNotMatch(html, /googletagmanager/);
 
+    const seededLink = await app.store.getBySlug('reddit-launch');
+    const detail = await fetch(`${app.url}/admin/links/${seededLink.id}`, { headers: { cookie } });
+    const detailHtml = await detail.text();
+    assert.equal(detail.status, 200);
+    assert.match(detailHtml, /Flyer QR code/);
+    assert.match(detailHtml, /placement=qr/);
+
+    const editForm = await fetch(`${app.url}/admin/links/${seededLink.id}/edit`, {
+      headers: { cookie }
+    });
+    const editHtml = await editForm.text();
+    assert.equal(editForm.status, 200);
+    assert.match(editHtml, /Locked after creation so printed QR codes always keep working/);
+    assert.doesNotMatch(editHtml, /type="text" name="slug"/);
+
+    const guardedQr = await fetch(`${app.url}/admin/links/${seededLink.id}/qr.svg`, {
+      redirect: 'manual'
+    });
+    assert.equal(guardedQr.status, 303);
+
+    const svg = await fetch(`${app.url}/admin/links/${seededLink.id}/qr.svg?download=1`, {
+      headers: { cookie }
+    });
+    assert.equal(svg.status, 200);
+    assert.match(svg.headers.get('content-type'), /^image\/svg\+xml/);
+    assert.equal(
+      svg.headers.get('content-disposition'),
+      'attachment; filename="buried-worlds-reddit-launch-qr.svg"'
+    );
+    assert.match(await svg.text(), /^<svg/);
+
+    const png = await fetch(`${app.url}/admin/links/${seededLink.id}/qr.png?download=1`, {
+      headers: { cookie }
+    });
+    assert.equal(png.status, 200);
+    assert.match(png.headers.get('content-type'), /^image\/png/);
+    const pngBytes = new Uint8Array(await png.arrayBuffer());
+    assert.deepEqual([...pngBytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+
     const csrf = html.match(/name="_csrf" value="([^"]+)"/)[1];
+    await app.store.recordClick(seededLink, {
+      clickedAt: new Date().toISOString(),
+      destinationUrl: buildDestination(seededLink),
+      referrerHost: '',
+      deviceCategory: 'mobile',
+      isBot: false,
+      placement: 'qr'
+    });
+    const reset = await fetch(`${app.url}/admin/links/${seededLink.id}/reset-clicks`, {
+      method: 'POST',
+      redirect: 'manual',
+      headers: {
+        cookie,
+        'content-type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({ _csrf: csrf })
+    });
+    assert.equal(reset.status, 303);
+    assert.equal(reset.headers.get('location'), `/admin/links/${seededLink.id}?reset=1`);
+    assert.equal((await app.store.getLinkStats(seededLink.id, 30)).humanClicks, 0);
+    assert.ok(await app.store.getById(seededLink.id));
+    const resetPage = await fetch(`${app.url}${reset.headers.get('location')}`, {
+      headers: { cookie }
+    });
+    assert.match(await resetPage.text(), /Click history reset/);
+
+    const edited = await fetch(`${app.url}/admin/links/${seededLink.id}`, {
+      method: 'POST',
+      redirect: 'manual',
+      headers: {
+        cookie,
+        'content-type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        _csrf: csrf,
+        name: 'Printed flyer',
+        slug: 'tampered-short-name',
+        destinationUrl: 'https://example.com/updated'
+      })
+    });
+    assert.equal(edited.status, 303);
+    assert.equal((await app.store.getById(seededLink.id)).slug, 'reddit-launch');
+    assert.equal(await app.store.getBySlug('tampered-short-name'), null);
+
     const created = await fetch(`${app.url}/admin/links`, {
       method: 'POST',
       redirect: 'manual',

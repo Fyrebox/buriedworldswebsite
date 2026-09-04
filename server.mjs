@@ -25,6 +25,7 @@ import {
   art
 } from './data/press.mjs';
 import { createFeedbackRouter } from './feedback.mjs';
+import { createErrorHandler, notFoundHandler } from './errors.mjs';
 import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -237,6 +238,11 @@ app.use(createTrackingRouter({
 app.get('/discord', (req, res) => {
   res.redirect(302, links.discord);
 });
+
+// These must stay last: the first handles any path no feature claimed, and the
+// four-argument handler catches failures passed through by Express 5 async routes.
+app.use(notFoundHandler);
+app.use(createErrorHandler());
 
 app.listen(PORT, () => {
   console.log(`Buried Worlds site running at http://localhost:${PORT}`);

@@ -22,12 +22,21 @@ block content
           span Name
           input(type="text" name="name" value=link.name maxlength="80" required placeholder="Quest launch on Reddit")
           small A private label that makes the campaign easy to recognise.
-        label.admin-field
-          span Short name
-          .admin-slug
-            span /go/
-            input(type="text" name="slug" value=link.slug maxlength="48" minlength="3" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="reddit-launch")
-          small Lowercase letters, numbers and single dashes.
+        if isEdit
+          .admin-field
+            span Short name
+            input(type="hidden" name="slug" value=link.slug)
+            .admin-slug.admin-slug--locked
+              span /go/
+              code= link.slug
+            small Locked after creation so printed QR codes always keep working.
+        else
+          label.admin-field
+            span Short name
+            .admin-slug
+              span /go/
+              input(type="text" name="slug" value=link.slug maxlength="48" minlength="3" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="reddit-launch")
+            small Lowercase letters, numbers and single dashes. This cannot change after creation.
         label.admin-field.admin-field--wide
           span Destination URL
           input(type="url" name="destinationUrl" value=link.destinationUrl maxlength="2048" required placeholder="https://www.meta.com/experiences/…")

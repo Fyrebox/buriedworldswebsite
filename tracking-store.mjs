@@ -252,23 +252,20 @@ export async function createTrackingStore({
   }
 
   async function updateLink(id, input) {
-    const link = normaliseLink(input, allowedHostSet);
-    try {
-      const result = await pool.query(`
-        UPDATE campaign_links SET
-          name = $1, slug = $2, destination_url = $3,
-          utm_source = $4, utm_medium = $5, utm_campaign = $6, utm_content = $7,
-          updated_at = NOW()
-        WHERE id = $8
-        RETURNING *
-      `, [link.name, link.slug, link.destinationUrl, link.utmSource, link.utmMedium,
-        link.utmCampaign, link.utmContent, id]);
-      if (!result.rows[0]) throw new LinkValidationError('Campaign link was not found');
-      return rowToLink(result.rows[0]);
-    } catch (error) {
-      if (error.code === '23505') throw new LinkValidationError('That short name is already in use');
-      throw error;
-    }
+    const existing = await getById(id);
+    if (!existing) throw new LinkValidationError('Campaign link was not found');
+    const link = normaliseLink({ ...input, slug: existing.slug }, allowedHostSet);
+    const result = await pool.query(`
+      UPDATE campaign_links SET
+        name = $1, destination_url = $2,
+        utm_source = $3, utm_medium = $4, utm_campaign = $5, utm_content = $6,
+        updated_at = NOW()
+      WHERE id = $7
+      RETURNING *
+    `, [link.name, link.destinationUrl, link.utmSource, link.utmMedium,
+      link.utmCampaign, link.utmContent, id]);
+    if (!result.rows[0]) throw new LinkValidationError('Campaign link was not found');
+    return rowToLink(result.rows[0]);
   }
 
   async function setActive(id, active) {
@@ -291,6 +288,30 @@ export async function createTrackingStore({
     `, [link.id, click.clickedAt, click.destinationUrl, click.referrerHost,
       click.deviceCategory, Boolean(click.isBot), click.placement, link.utmSource,
       link.utmMedium, link.utmCampaign, link.utmContent]);
+  }
+
+  async function resetClicks(id) {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const existing = await client.query(
+        'SELECT id FROM campaign_links WHERE id = $1',
+        [id]
+      );
+      if (!existing.rows[0]) {
+        await client.query('ROLLBACK');
+        return false;
+      }
+      await client.query('DELETE FROM campaign_clicks WHERE link_id = $1', [id]);
+      await client.query('DELETE FROM campaign_click_totals WHERE link_id = $1', [id]);
+      await client.query('COMMIT');
+      return true;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async function listLinks() {
@@ -403,6 +424,7 @@ export async function createTrackingStore({
     updateLink,
     setActive,
     recordClick,
+    resetClicks,
     listLinks,
     getLinkStats,
     exportClicks,
