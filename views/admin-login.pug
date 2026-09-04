@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  main.admin-login
+    form.admin-login__card(action="/admin/login" method="post")
+      span.admin-kicker Private dashboard
+      h1 Campaign links
+      p Create short links, change their destinations and see which promotions send people to the game.
+      if error
+        p.admin-alert(role="alert")= error
+      label.admin-field
+        span Password
+        input(type="password" name="password" required autofocus autocomplete="current-password")
+      button.btn.btn--primary(type="submit") Sign in
+      a.admin-login__home(href="/") ← Return to the website

@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import express from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -23,11 +25,13 @@ import {
   art
 } from './data/press.mjs';
 import { createFeedbackRouter } from './feedback.mjs';
+import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
+app.disable('x-powered-by');
 
 // Behind a reverse proxy (most hosts), req.ip is the proxy unless this is set — and
 // the feedback rate limiter keys on it. Left off by default so a direct-to-node
@@ -47,6 +51,27 @@ app.locals.siteUrl = siteUrl;
 app.locals.product = product;
 app.locals.links = links;
 app.locals.trailer = trailer;
+
+// Campaign links are stored independently of the templates so their destination
+// can change without a deploy. PostgreSQL tables and indexes are created at
+// startup; Railway supplies DATABASE_URL from the attached Postgres service.
+const trackingAllowedHosts = (process.env.TRACKING_ALLOWED_HOSTS ?? '')
+  .split(',')
+  .map((host) => host.trim())
+  .filter(Boolean);
+const trackingStore = await createTrackingStore({
+  databaseUrl: process.env.DATABASE_URL ?? '',
+  allowedHosts: trackingAllowedHosts,
+  seedLinks: [{
+    name: 'Meta Quest store',
+    slug: 'meta-quest',
+    destinationUrl: links.metaQuestStore,
+    utmSource: '',
+    utmMedium: '',
+    utmCampaign: '',
+    utmContent: ''
+  }]
+});
 
 // Structured data for the landing page. Search and social crawlers read price,
 // platform and publisher from here rather than inferring them from the copy.
@@ -196,6 +221,16 @@ app.use(
     discordWebhook: process.env.FEEDBACK_DISCORD_WEBHOOK ?? ''
   })
 );
+
+// First-party campaign redirects and the private management dashboard. This is
+// mounted before the hand-written vanity redirects so /go/:slug always owns its
+// namespace and can safely grow without colliding with a marketing page.
+app.use(createTrackingRouter({
+  store: trackingStore,
+  siteUrl,
+  adminPassword: process.env.ADMIN_PASSWORD ?? '',
+  sessionSecret: process.env.ADMIN_SESSION_SECRET ?? ''
+}));
 
 // Vanity redirect — /discord is the short link to hand out anywhere. Kept as a
 // 302 so the destination invite can be swapped without clients caching the old one.

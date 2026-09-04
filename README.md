@@ -84,6 +84,8 @@ public/css/styles.css   Token-based stylesheet (values transcribed from the hand
 | `/privacy` | Privacy policy, linked from the footer |
 | `/terms` | Terms of service, linked from the footer |
 | `/discord` | 302 vanity redirect to the Discord invite |
+| `/go/:slug` | Track a campaign click and 302 to its current destination |
+| `/admin/links` | Private campaign-link dashboard |
 | `POST /api/feedback` | In-game feedback intake from the VR build |
 | `GET /api/feedback` | Read the feedback log back (token-gated) |
 
@@ -126,6 +128,36 @@ attach a persistent volume and point `FEEDBACK_DIR` at it, or rely on
 ```bash
 npm test        # node's built-in runner — validation, rate limiting, storage, auth
 ```
+
+## Campaign links
+
+The private dashboard at `/admin/links` creates first-party short links such as
+`/go/meta-quest`. A public visit is written to PostgreSQL and immediately sent to the
+current destination with a 302. The record contains the time, referring host, a
+coarse device category, placement and campaign fields. It deliberately contains no
+IP address, full user agent, cookie or fingerprint. Known bots and link previews are
+kept separate from the human total.
+
+Copy `.env.example` to `.env` for local work. The repository already includes a
+gitignored `.env` shell with blank secrets. Configure:
+
+| Variable | Effect |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string; on Railway reference the Postgres service variable |
+| `ADMIN_PASSWORD` | Password for `/admin/login`; blank disables every admin route |
+| `ADMIN_SESSION_SECRET` | At least 32 unpredictable characters used to sign eight-hour admin sessions |
+| `TRACKING_ALLOWED_HOSTS` | Optional comma-separated HTTPS destination allowlist |
+
+The tables and indexes are created automatically at startup. On Railway, add a
+PostgreSQL database service and set the website service's `DATABASE_URL` to
+`${{Postgres.DATABASE_URL}}` (adjust `Postgres` if you gave the service another name).
+Keep the database private and enable Railway backups. The website can safely use
+multiple replicas because campaign storage is no longer tied to one application disk.
+
+The built-in `meta-quest` record is seeded once from `data/content.mjs`. Website store
+buttons use it with a `placement` parameter while structured data retains Meta's direct
+URL. Editing the record in Admin therefore changes the buttons without changing search
+metadata or requiring a deploy.
 
 ## Design fidelity
 

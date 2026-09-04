@@ -6,6 +6,9 @@ export const links = {
   // Locale-free on purpose: Meta redirects each visitor to their own region and
   // currency. Pinning /en-gb/ or /en-us/ would show everyone else the wrong price.
   metaQuestStore: 'https://www.meta.com/experiences/buried-worlds/1129006663640647/',
+  // Visible calls to action pass through the first-party campaign tracker. The
+  // direct URL above remains canonical for structured data and seed creation.
+  metaQuestStoreCta: '/go/meta-quest',
   subreddit: 'https://www.reddit.com/r/buriedworlds/',
   discord: 'https://discord.gg/2d6XkPrSNU'
 };

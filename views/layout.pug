@@ -12,22 +12,22 @@ html(lang="en")
     - var title = pageTitle || 'Buried Worlds VR — Out now on Meta Quest'
     - var description = pageDescription || "Sweep, dig, pan and travel five of the world's great treasure sites. Out now in Early Access on the Meta Horizon Store for Quest 2, 3, 3S and Pro."
 
-    //- Google tag (gtag.js) — GA4 property G-PVF7WKPPFD.
-    //- The pre-launch property G-YFMCSBH80C was retired on 27 August 2026. Its
-    //- data is not lost, only frozen: whatever it collected up to that date
-    //- still sits in that property, it simply stops receiving new hits. So
-    //- traffic from launch day onward lives here and nowhere else, and any
-    //- before-and-after comparison has to be made across the two.
-    script(async src="https://www.googletagmanager.com/gtag/js?id=G-PVF7WKPPFD")
-    script.
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-PVF7WKPPFD');
+    unless disableAnalytics
+      //- Google tag (gtag.js) — GA4 property G-PVF7WKPPFD.
+      //- The private admin area and redirect error pages opt out so the owner's
+      //- own work never pollutes public campaign reporting.
+      script(async src="https://www.googletagmanager.com/gtag/js?id=G-PVF7WKPPFD")
+      script.
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-PVF7WKPPFD');
 
     title= title
     meta(name="description" content=description)
     link(rel="canonical" href=canonical)
+    if noIndex
+      meta(name="robots" content="noindex,nofollow")
 
     //- Open Graph. Every launch link posted to Reddit, Discord, X or an email
     //- renders from these; without them the site shares as a bare grey url.
@@ -62,19 +62,20 @@ html(lang="en")
     //- the script element early. The payload is ours, but the cost is one call.
     if jsonLd
       script(type="application/ld+json")!= JSON.stringify(jsonLd).replace(/</g, '\\u003c')
-  body
+  body(class=bodyClass)
     block content
 
     //- Outbound store clicks. The site cannot see installs, so views-into-store
     //- -clicks is the only conversion number it can report, and it is the one
     //- number the landing page can actually be changed to improve.
     //- GA4 sends via sendBeacon, which survives the navigation away.
-    script.
-      document.addEventListener('click', function (e) {
-        var a = e.target.closest && e.target.closest('a[data-cta]');
-        if (!a || typeof gtag !== 'function') return;
-        gtag('event', 'store_click', {
-          cta_location: a.getAttribute('data-cta'),
-          link_url: a.href
+    unless disableAnalytics
+      script.
+        document.addEventListener('click', function (e) {
+          var a = e.target.closest && e.target.closest('a[data-cta]');
+          if (!a || typeof gtag !== 'function') return;
+          gtag('event', 'store_click', {
+            cta_location: a.getAttribute('data-cta'),
+            link_url: a.href
+          });
         });
-      });

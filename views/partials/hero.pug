@@ -18,7 +18,7 @@ mixin heroPoster(links, product, trailer)
       span.badge.badge--live Out now · Early Access
       //- CTAs sit above the key art so they stay above the fold on short screens.
       .hero__cta
-        a.btn.btn--primary(href=links.metaQuestStore target="_blank" rel="noopener noreferrer" data-cta="hero") Get it on Meta Quest
+        a.btn.btn--primary(href=links.metaQuestStoreCta + '?placement=hero' target="_blank" rel="noopener noreferrer" data-cta="hero") Get it on Meta Quest
         a.btn.btn--secondary(href="#vr") See how it plays
       //- The price carries its currency because Meta localises the real figure.
       p.hero__meta
@@ -57,7 +57,7 @@ mixin heroSplit(links, product)
         p.serif(style="margin:0;font-size:1.35rem;color:var(--ink-soft);line-height:1.45") Sweep, dig, pan, and travel the world's great gold rushes — from the creeks of Ballarat to a Suffolk field that hid a Roman hoard for sixteen centuries.
         span.badge.badge--live(style="padding:6px 16px;font-size:12.5px") Out now · Early Access
         .hero__cta(style="justify-content:flex-start;margin-top:0")
-          a.btn.btn--primary(href=links.metaQuestStore target="_blank" rel="noopener noreferrer" data-cta="hero-split") Get it on Meta Quest
+          a.btn.btn--primary(href=links.metaQuestStoreCta + '?placement=hero-split' target="_blank" rel="noopener noreferrer" data-cta="hero-split") Get it on Meta Quest
           a.btn.btn--secondary(href="#vr") See how it plays
       .hero-split__art
         span.img-note VR key art — portrait
@@ -71,5 +71,5 @@ mixin heroBanner(links, product)
       h1.h1 Buried Worlds VR
       p.hero-banner__tagline Sweep, dig, pan, and travel the world's great gold rushes.
       .hero__cta(style="justify-content:flex-start;margin-top:0;align-items:center")
-        a.btn.btn--gold.btn--gold-banner(href=links.metaQuestStore target="_blank" rel="noopener noreferrer" data-cta="hero-banner") Get it on Meta Quest
+        a.btn.btn--gold.btn--gold-banner(href=links.metaQuestStoreCta + '?placement=hero-banner' target="_blank" rel="noopener noreferrer" data-cta="hero-banner") Get it on Meta Quest
         span.badge.badge--live.badge--live-light Out now · Early Access

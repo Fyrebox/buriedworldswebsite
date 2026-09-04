@@ -1,0 +1,55 @@
+extends layout
+
+include partials/admin-nav
+
+block content
+  +adminNav()
+  main.admin-shell.admin-shell--narrow
+    a.admin-back(href="/admin/links") ← All campaign links
+    .admin-heading
+      div
+        span.admin-kicker Campaign setup
+        h1= heading
+        p The short URL stays the same when you edit its destination.
+
+    if error
+      p.admin-alert(role="alert")= error
+
+    form.admin-form(action=action method="post")
+      input(type="hidden" name="_csrf" value=csrf)
+      .admin-form__grid
+        label.admin-field
+          span Name
+          input(type="text" name="name" value=link.name maxlength="80" required placeholder="Quest launch on Reddit")
+          small A private label that makes the campaign easy to recognise.
+        label.admin-field
+          span Short name
+          .admin-slug
+            span /go/
+            input(type="text" name="slug" value=link.slug maxlength="48" minlength="3" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="reddit-launch")
+          small Lowercase letters, numbers and single dashes.
+        label.admin-field.admin-field--wide
+          span Destination URL
+          input(type="url" name="destinationUrl" value=link.destinationUrl maxlength="2048" required placeholder="https://www.meta.com/experiences/…")
+          small Must be HTTPS and use a host allowed by the server configuration.
+
+      fieldset.admin-fieldset
+        legend Campaign attribution (optional)
+        p These values are added to the destination URL and saved with every click. Use lowercase consistently.
+        .admin-form__grid.admin-form__grid--four
+          label.admin-field
+            span Source
+            input(type="text" name="utmSource" value=link.utmSource maxlength="100" placeholder="reddit")
+          label.admin-field
+            span Medium
+            input(type="text" name="utmMedium" value=link.utmMedium maxlength="100" placeholder="social")
+          label.admin-field
+            span Campaign
+            input(type="text" name="utmCampaign" value=link.utmCampaign maxlength="100" placeholder="quest-launch")
+          label.admin-field
+            span Content
+            input(type="text" name="utmContent" value=link.utmContent maxlength="100" placeholder="trailer-post")
+
+      .admin-form__actions
+        button.btn.btn--primary(type="submit")= submitLabel
+        a.btn.btn--secondary(href="/admin/links") Cancel

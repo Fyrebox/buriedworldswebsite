@@ -13,7 +13,12 @@
     "node": ">=18"
   },
   "dependencies": {
+    "dotenv": "^16.6.1",
     "express": "^5.1.0",
+    "pg": "^8.23.0",
     "pug": "^3.0.3"
+  },
+  "devDependencies": {
+    "pg-mem": "^3.0.14"
   }
 }

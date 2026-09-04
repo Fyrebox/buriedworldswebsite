@@ -1,0 +1,9 @@
+mixin adminNav()
+  header.admin-nav
+    a.admin-nav__brand(href="/admin/links") Buried Worlds · Campaigns
+    nav.admin-nav__actions(aria-label="Admin")
+      a(href="/admin/links") All links
+      a(href="/admin/links/new") New link
+      form(action="/admin/logout" method="post")
+        input(type="hidden" name="_csrf" value=csrf)
+        button.admin-nav__logout(type="submit") Sign out

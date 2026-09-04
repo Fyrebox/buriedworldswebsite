@@ -1,0 +1,62 @@
+extends layout
+
+include partials/admin-nav
+
+block content
+  +adminNav()
+  main.admin-shell
+    .admin-heading
+      div
+        span.admin-kicker Private dashboard
+        h1 Campaign links
+        p Track which posts, ads, emails and website buttons send people onward.
+      a.btn.btn--primary(href="/admin/links/new") New campaign link
+
+    .admin-metrics
+      .admin-metric
+        span.admin-metric__value= totals.clicks7d
+        span.admin-metric__label Human clicks · 7 days
+      .admin-metric
+        span.admin-metric__value= totals.clicks30d
+        span.admin-metric__label Human clicks · 30 days
+      .admin-metric
+        span.admin-metric__value= totals.humanClicks
+        span.admin-metric__label Human clicks · lifetime
+      .admin-metric
+        span.admin-metric__value= totals.botClicks
+        span.admin-metric__label Filtered previews / bots
+
+    if links.length
+      .admin-table-wrap
+        table.admin-table
+          thead
+            tr
+              th Link
+              th Status
+              th 7 days
+              th 30 days
+              th Lifetime
+              th Last click
+              th
+          tbody
+            each link in links
+              tr
+                td
+                  a.admin-table__name(href=`/admin/links/${link.id}`)= link.name
+                  code #{siteUrl}/go/#{link.slug}
+                td
+                  if link.active
+                    span.admin-status.admin-status--live Active
+                  else
+                    span.admin-status Paused
+                td.admin-table__number= link.clicks7d
+                td.admin-table__number= link.clicks30d
+                td.admin-table__number= link.humanClicks
+                td= link.lastClickedAt ? link.lastClickedAt.slice(0, 10) : '—'
+                td
+                  a.admin-table__action(href=`/admin/links/${link.id}`) View
+    else
+      .admin-empty
+        h2 No links yet
+        p Create the first campaign link to start counting visits.
+        a.btn.btn--primary(href="/admin/links/new") Create a link

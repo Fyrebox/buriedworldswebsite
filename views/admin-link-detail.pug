@@ -1,0 +1,88 @@
+extends layout
+
+include partials/admin-nav
+
+mixin breakdown(title, rows)
+  section.admin-panel
+    h2= title
+    if rows.length
+      ul.admin-breakdown
+        each row in rows
+          li
+            span= row.label
+            strong= row.clicks
+    else
+      p.admin-muted No clicks in this period.
+
+block content
+  +adminNav()
+  main.admin-shell
+    a.admin-back(href="/admin/links") ← All campaign links
+    .admin-heading.admin-heading--detail
+      div
+        .admin-title-line
+          h1= stats.link.name
+          if stats.link.active
+            span.admin-status.admin-status--live Active
+          else
+            span.admin-status Paused
+        p= stats.link.destinationUrl
+      .admin-heading__actions
+        a.btn.btn--secondary(href=`/admin/links/${stats.link.id}/edit`) Edit
+        form(action=`/admin/links/${stats.link.id}/toggle` method="post")
+          input(type="hidden" name="_csrf" value=csrf)
+          button.btn.btn--secondary(type="submit")= stats.link.active ? 'Pause link' : 'Reactivate'
+
+    .admin-copy-link
+      code#public-link #{siteUrl}/go/#{stats.link.slug}
+      button.btn.btn--primary(type="button" data-copy-link) Copy link
+
+    nav.admin-range(aria-label="Analytics period")
+      each range in [7, 30, 90, 365]
+        a(class=stats.days === range ? 'is-active' : '' href=`?days=${range}`) #{range} days
+      a.admin-range__export(href=`/admin/links/${stats.link.id}/export.csv`) Export CSV
+
+    .admin-metrics
+      .admin-metric
+        span.admin-metric__value= stats.humanClicks
+        span.admin-metric__label Human clicks · #{stats.days} days
+      .admin-metric
+        span.admin-metric__value= stats.botClicks
+        span.admin-metric__label Filtered previews / bots
+      .admin-metric
+        span.admin-metric__value= stats.firstClick ? stats.firstClick.slice(0, 10) : '—'
+        span.admin-metric__label First click in period
+      .admin-metric
+        span.admin-metric__value= stats.lastClick ? stats.lastClick.slice(0, 10) : '—'
+        span.admin-metric__label Most recent click
+
+    section.admin-panel
+      h2 Daily human clicks
+      if stats.daily.length
+        .admin-chart
+          each point in stats.daily
+            .admin-chart__row
+              time(datetime=point.day)= point.day
+              .admin-chart__track
+                span.admin-chart__bar(style=`width:${Math.max(3, point.clicks / maxDaily * 100)}%`)
+              strong= point.clicks
+      else
+        p.admin-muted No human clicks in this period.
+
+    .admin-breakdown-grid
+      +breakdown('Referring sites', stats.referrers)
+      +breakdown('Devices', stats.devices)
+      +breakdown('Placements', stats.placements)
+
+  script.
+    (function () {
+      var button = document.querySelector('[data-copy-link]');
+      var value = document.getElementById('public-link');
+      if (!button || !value || !navigator.clipboard) return;
+      button.addEventListener('click', function () {
+        navigator.clipboard.writeText(value.textContent.trim()).then(function () {
+          button.textContent = 'Copied';
+          setTimeout(function () { button.textContent = 'Copy link'; }, 1500);
+        });
+      });
+    })();

@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  main.redirect-error
+    .redirect-error__card
+      span.admin-kicker Expedition interrupted
+      h1 Link unavailable
+      p= reason
+      a.btn.btn--primary(href="/") Visit Buried Worlds VR
