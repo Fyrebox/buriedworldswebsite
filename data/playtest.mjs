@@ -23,7 +23,13 @@ export const study = {
   paymentWindowHours: 48,
   places: 5,
   payoutMethod: 'PayPal',
-  contactEmail: 'playtest@buriedworlds.com',
+  // On bellare.com.au rather than buriedworlds.com on purpose. bellare.com.au is
+  // already a Google Workspace domain with working MX, SPF, DKIM and DMARC, so a
+  // study address there is one alias on an existing mailbox — no DNS change, and
+  // nothing that could disturb the domain serving this website. buriedworlds.com
+  // forwards through Cloudflare Email Routing, which cannot send, so an address
+  // there could receive an applicant's question but never reply to it.
+  contactEmail: 'playtest@bellare.com.au',
   privacyEmail: 'privacy@buriedworlds.com'
 };
 
