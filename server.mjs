@@ -27,6 +27,7 @@ import {
 import { createFeedbackRouter } from './feedback.mjs';
 import { createErrorHandler, notFoundHandler } from './errors.mjs';
 import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
+import { createPlaytestRouter, createPlaytestStore } from './playtest.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -72,6 +73,14 @@ const trackingStore = await createTrackingStore({
     utmCampaign: '',
     utmContent: ''
   }]
+});
+
+// Paid playtest applications. Shares the database and the admin sign-in with
+// campaign tracking, but keeps its own table: this is the only place on the site
+// holding contact details, and folding it into anonymous click records would
+// make both harder to reason about and to delete.
+const playtestStore = await createPlaytestStore({
+  databaseUrl: process.env.DATABASE_URL ?? ''
 });
 
 // Structured data for the landing page. Search and social crawlers read price,
@@ -224,6 +233,20 @@ app.use(
     discordWebhook: process.env.FEEDBACK_DISCORD_WEBHOOK ?? ''
   })
 );
+
+// The paid playtest study: /playtest and its dashboard. Mounted before the
+// tracking router so /admin/playtest is owned outright by this router and its
+// own session guard, rather than falling through the campaign dashboard's.
+app.use(createPlaytestRouter({
+  store: playtestStore,
+  // Recruitment opens and closes between waves. Anything but an explicit
+  // "false" leaves the form open, so a missing variable never silently turns
+  // away applicants a live recruitment post is still sending here.
+  applicationsOpen: (process.env.PLAYTEST_OPEN ?? 'true').toLowerCase() !== 'false',
+  formSecret: process.env.PLAYTEST_FORM_SECRET ?? process.env.ADMIN_SESSION_SECRET ?? '',
+  adminPassword: process.env.ADMIN_PASSWORD ?? '',
+  sessionSecret: process.env.ADMIN_SESSION_SECRET ?? ''
+}));
 
 // First-party campaign redirects and the private management dashboard. This is
 // mounted before the hand-written vanity redirects so /go/:slug always owns its

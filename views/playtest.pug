@@ -1,0 +1,195 @@
+//- The paid playtest application page.
+//-
+//- Order is deliberate: what you get, what you are asked for, what happens if it
+//- goes wrong, what is done with your details — and only then the form. Somebody
+//- handing over an email address and a Meta username has earned the right to
+//- read the whole deal before the first field, not after it.
+extends layout
+
+include partials/footer
+
+block content
+  main.legal.playtest(data-screen-label="Paid playtest")
+    .wrap.legal__inner
+      a.legal__home(href="/") ← Buried Worlds VR
+
+      .section-head
+        .ornament
+          span.rule
+          span.diamond
+          span.rule
+        h1.h2 Paid playtest
+        p.serif-italic #{study.fee} for #{study.totalMinutes} minutes. #{study.places} places. Honest criticism is the thing being paid for.
+
+      .legal__body
+        if !applicationsOpen
+          p.admin-alert(role="status")
+            | Applications for this round have closed. The study runs in small waves —
+            |  if another opens it will be announced on
+            |  #[a(href=links.discord target="_blank" rel="noopener noreferrer") Discord] first.
+
+        p.
+          Buried Worlds VR is a treasure-hunting game for Meta Quest — you sweep a
+          metal detector, dig, pan river gravel and travel between five real places
+          where real treasure was found. It was built by one person, and it has
+          reached the point where the useful question is no longer whether it works
+          but whether a stranger can work out what to do with it.
+        p.
+          So: #{study.places} people, paid #{study.fee} each, to play the opening
+          #{study.playMinutes} minutes without being told how, and then answer
+          #{study.questionnaireMinutes} minutes of questions about where it lost them.
+
+        h2.legal__h What you get and what is asked
+        dl.playtest-terms
+          each item in promises
+            div.playtest-terms__row
+              dt= item.label
+              dd= item.body
+
+        h2.legal__h What you would actually do
+        ol.legal__list
+          li Start a new game. Play without anyone explaining the controls — working out what the game teaches badly is the whole point.
+          li Try detecting, digging and panning. Not being able to find or finish something is a result worth having, not a failure.
+          li Save, quit and come back once, so we learn whether progress returns.
+          li Answer the questionnaire, and send the recording or screenshots we agreed.
+        p.
+          You have #{study.deadlineHours} hours from receiving access. If that stops
+          being realistic, say so — an extension is a message, not a problem.
+
+        h2.legal__h When you get paid
+        p.
+          Payment depends on doing the agreed thing and sending the agreed evidence.
+          It does not depend on whether the feedback is judged good enough, whether
+          you liked the game, or whether you say anything nice in public. There is no
+          minimum number of bugs and no store review is expected or wanted as a
+          condition.
+        .playtest-conditions
+          each row in conditions
+            .playtest-conditions__row
+              span.playtest-conditions__situation= row.situation
+              span.playtest-conditions__outcome= row.outcome
+
+        h2.legal__h What happens to what you type here
+        ul.legal__list
+          each note in privacyNotes
+            li= note
+        p
+          | The rest of the site's policy is at #[a(href="/privacy") Privacy]. The
+          |  game itself collects nothing and has no accounts — that does not change
+          |  because you took part in this.
+
+        if applicationsOpen
+          h2.legal__h Apply
+          p.
+            Applying does not guarantee a place. Selection is for a spread of
+            headsets and VR experience, not for enthusiasm — please do not install,
+            record or buy anything until you have been offered a place and accepted it.
+
+          if error
+            p.admin-alert(role="alert")= error
+
+          form.playtest-form(action="/playtest" method="post" novalidate)
+            input(type="hidden" name="formToken" value=formToken)
+            //- Left unlabelled and taken out of the tab order on purpose: it is
+            //- there for scripts, and a screen reader is told to ignore it.
+            .playtest-hp(aria-hidden="true")
+              label(for="website") Leave this empty
+              input#website(type="text" name="website" tabindex="-1" autocomplete="off" value="")
+
+            .playtest-field(class=(errorField === 'email' ? 'playtest-field--error' : ''))
+              label(for="email") Email address
+              input#email(
+                type="email" name="email" value=values.email
+                maxlength="254" required autocomplete="email"
+                inputmode="email" spellcheck="false"
+              )
+              small This is where the invitation and the key would go. Nothing else is ever sent to it.
+
+            .playtest-field(class=(errorField === 'horizonUsername' ? 'playtest-field--error' : ''))
+              label(for="horizonUsername") Meta Horizon username
+              input#horizonUsername(
+                type="text" name="horizonUsername" value=values.horizonUsername
+                maxlength="65" required autocomplete="off" spellcheck="false"
+              )
+              small.
+                Your Quest profile handle, not your real name — it is in the Meta
+                Horizon phone app under your profile. Used to match your application
+                to the test invitation.
+
+            .playtest-field(class=(errorField === 'headset' ? 'playtest-field--error' : ''))
+              fieldset.playtest-fieldset
+                legend Which headset would you test on?
+                each headset in headsets
+                  label.playtest-choice
+                    input(type="radio" name="headset" value=headset.id checked=(values.headset === headset.id) required)
+                    span= headset.label
+
+            .playtest-field(class=(errorField === 'vrFrequency' ? 'playtest-field--error' : ''))
+              fieldset.playtest-fieldset
+                legend How often do you play VR?
+                each frequency in vrFrequencies
+                  label.playtest-choice
+                    input(type="radio" name="vrFrequency" value=frequency.id checked=(values.vrFrequency === frequency.id) required)
+                    span= frequency.label
+
+            .playtest-field(class=(errorField === 'recentGames' ? 'playtest-field--error' : ''))
+              label(for="recentGames") Two VR games you have played recently
+              input#recentGames(
+                type="text" name="recentGames" value=values.recentGames
+                maxlength="200" required autocomplete="off"
+              )
+              small Any two. There is no right answer and no such thing as a wrong taste here.
+
+            .playtest-field(class=(errorField === 'country' ? 'playtest-field--error' : ''))
+              label(for="country") Which country are you in?
+              input#country(
+                type="text" name="country" value=values.country
+                maxlength="60" required autocomplete="country-name"
+              )
+              small Only to check that a #{study.payoutMethod} payment can reach you before a place is offered.
+
+            .playtest-field(class=(errorField === 'captureMethod' ? 'playtest-field--error' : ''))
+              fieldset.playtest-fieldset
+                legend How could you send evidence of the session?
+                each method in captureMethods
+                  label.playtest-choice
+                    input(type="radio" name="captureMethod" value=method.id checked=(values.captureMethod === method.id) required)
+                    span= method.label
+                small.playtest-fieldset__note Either is fine and neither is worth more. Screenshots plus specific notes are accepted for the full fee.
+
+            .playtest-field
+              label.playtest-choice
+                input(type="checkbox" name="playedBefore" value="yes" checked=values.playedBefore)
+                span I have played Buried Worlds VR before
+              small.
+                Tick it if so — it does not disqualify you, but this round needs
+                people seeing it for the first time, so you would be considered for a
+                later one.
+
+            .playtest-field
+              label(for="notes") Anything else worth knowing? (optional)
+              textarea#notes(name="notes" maxlength="1000" rows="4")= values.notes
+              small.
+                Left-handed, seated only, a comfort condition, a language other than
+                English — anything that changes how the session should be set up.
+
+            .playtest-field.playtest-field--consent
+              label.playtest-choice(class=(errorField === 'over18' ? 'playtest-choice--error' : ''))
+                input(type="checkbox" name="over18" value="yes" checked=values.over18 required)
+                span I am 18 or over
+              label.playtest-choice(class=(errorField === 'canFinish' ? 'playtest-choice--error' : ''))
+                input(type="checkbox" name="canFinish" value="yes" checked=values.canFinish required)
+                span I could finish within #{study.deadlineHours} hours of getting access
+              label.playtest-choice(class=(errorField === 'acceptedTerms' ? 'playtest-choice--error' : ''))
+                input(type="checkbox" name="acceptedTerms" value="yes" checked=values.acceptedTerms required)
+                span I have read the payment conditions and the privacy note above
+
+            .playtest-form__actions
+              button.btn.btn--primary(type="submit") Apply for a place
+              span.playtest-form__aside No account is created. You can ask for this to be deleted at any time.
+
+        p.legal__meta(style="margin-top:48px")
+          | Study terms version #{study.termsVersion}. Questions before applying go to
+          |  #[a(href=`mailto:${study.contactEmail}`)= study.contactEmail].
+
+  +footer(links)

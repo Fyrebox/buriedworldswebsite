@@ -1,0 +1,93 @@
+extends layout
+
+include partials/admin-nav
+
+block content
+  +adminNav()
+  main.admin-shell.admin-shell--narrow
+    a.admin-back(href="/admin/playtest") ← All applications
+    .admin-heading.admin-heading--detail
+      div
+        span.admin-kicker Application
+        h1= application.reference
+        p Applied #{application.createdAt ? application.createdAt.slice(0, 10) : '—'} · terms #{application.termsVersion}
+
+    if notice
+      p.admin-alert.admin-alert--success(role="status")= notice
+
+    .admin-panel(style="margin-bottom:24px")
+      h2 What they told us
+      dl.playtest-terms
+        .playtest-terms__row
+          dt Email
+          dd
+            a(href=`mailto:${application.email}`)= application.email
+        .playtest-terms__row
+          dt Horizon username
+          dd= application.horizonUsername
+        .playtest-terms__row
+          dt Headset
+          dd= application.headsetLabel
+        .playtest-terms__row
+          dt Plays VR
+          dd= application.frequencyLabel
+        .playtest-terms__row
+          dt Recent VR games
+          dd= application.recentGames
+        .playtest-terms__row
+          dt Country
+          dd= application.country
+        .playtest-terms__row
+          dt Evidence
+          dd= application.captureLabel
+        .playtest-terms__row
+          dt Played before
+          dd= application.playedBefore ? 'Yes — consider for a later round' : 'No'
+        if application.notes
+          .playtest-terms__row
+            dt Notes
+            dd= application.notes
+
+    .admin-panel(style="margin-bottom:24px")
+      h2 Verification
+      p(style="margin:0 0 14px;color:var(--ink-soft);font-size:13px").
+        There is no way to look up a Meta account from an email address or a username,
+        and probing Meta's sign-in to find out is account enumeration. The invitation is
+        the check: send it from the developer dashboard, and this application is only
+        confirmed once that address shows as Joined there.
+      dl.playtest-terms
+        .playtest-terms__row
+          dt Invited
+          dd= application.invitedAt ? application.invitedAt.slice(0, 10) : 'not yet'
+        .playtest-terms__row
+          dt Joined
+          dd= application.joinedAt ? application.joinedAt.slice(0, 10) : 'not yet'
+        .playtest-terms__row
+          dt Paid
+          dd= application.paidAt ? application.paidAt.slice(0, 10) : 'not yet'
+
+    form.admin-form(action=`/admin/playtest/${application.id}/status` method="post")
+      input(type="hidden" name="_csrf" value=csrf)
+      .admin-field.admin-field--wide
+        span Status
+        select.playtest-select(name="status")
+          each status in statuses
+            option(value=status.id selected=(status.id === application.status))= `${status.label} — ${status.hint}`
+        small Dates above are stamped the first time a status is reached and never moved, so correcting a mistake cannot rewrite when an invitation actually went out.
+      .admin-field.admin-field--wide(style="margin-top:22px")
+        span Private note
+        textarea.playtest-textarea(name="adminNote" rows="3" maxlength="2000")= application.adminNote
+        small Only ever seen here. Screening reasoning, payment reference, correspondence.
+      .admin-form__actions
+        button.btn.btn--primary(type="submit") Save
+        a.btn.btn--secondary(href="/admin/playtest") Back
+
+    .admin-panel(style="margin-top:32px")
+      h2 Delete
+      p(style="margin:0 0 18px;color:var(--ink-soft);font-size:13px").
+        Erases this application permanently. Use it when they ask, and when the
+        retention window closes: unsuccessful applications 30 days after the study
+        closes, everything else 90 days after final payment.
+      form(action=`/admin/playtest/${application.id}/delete` method="post")
+        input(type="hidden" name="_csrf" value=csrf)
+        button.btn.btn--secondary(type="submit") Delete this application

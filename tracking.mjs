@@ -4,16 +4,21 @@
 // redirect sends the visitor on. We deliberately keep the record coarse: no IP
 // address, full user agent, cookie or fingerprint reaches the database.
 
-import crypto from 'node:crypto';
-
 import express from 'express';
 import { buildQrUrl, createQrPng, createQrSvg } from './qr-code.mjs';
 import { LinkValidationError } from './tracking-store.mjs';
+import {
+  csrfToken,
+  makeSession,
+  readSession,
+  safeEqual,
+  signature,
+  SESSION_AGE_SECONDS,
+  SESSION_COOKIE
+} from './admin-session.mjs';
 
 export { createTrackingStore, LinkValidationError, normaliseLink } from './tracking-store.mjs';
 
-const SESSION_COOKIE = 'bw_admin';
-const SESSION_AGE_SECONDS = 8 * 60 * 60;
 const MAX_FORM_BYTES = 16 * 1024;
 
 export function buildDestination(link) {
@@ -52,45 +57,6 @@ function classifyRequest(req) {
   else if (/mobile|iphone|android/i.test(userAgent)) deviceCategory = 'mobile';
 
   return { isBot, deviceCategory };
-}
-
-function parseCookies(header = '') {
-  const cookies = {};
-  for (const part of header.split(';')) {
-    const at = part.indexOf('=');
-    if (at < 0) continue;
-    cookies[part.slice(0, at).trim()] = decodeURIComponent(part.slice(at + 1).trim());
-  }
-  return cookies;
-}
-
-function signature(secret, value) {
-  return crypto.createHmac('sha256', secret).update(value).digest('base64url');
-}
-
-function safeEqual(left, right) {
-  const a = Buffer.from(String(left));
-  const b = Buffer.from(String(right));
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
-
-function makeSession(secret, expiresAt) {
-  const value = String(expiresAt);
-  return `${value}.${signature(secret, `session:${value}`)}`;
-}
-
-function readSession(req, secret, now) {
-  const value = parseCookies(req.get('cookie'))[SESSION_COOKIE];
-  if (!value) return null;
-  const [expiresRaw, receivedSignature] = value.split('.');
-  const expiresAt = Number(expiresRaw);
-  if (!Number.isSafeInteger(expiresAt) || expiresAt <= now()) return null;
-  if (!safeEqual(receivedSignature, signature(secret, `session:${expiresRaw}`))) return null;
-  return expiresAt;
-}
-
-function csrfToken(secret, expiresAt) {
-  return signature(secret, `csrf:${expiresAt}`);
 }
 
 function csvValue(value) {

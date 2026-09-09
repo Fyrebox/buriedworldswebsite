@@ -37,11 +37,12 @@ logo" rather than naming it.
 - **Express 5** — server + routing
 - **Pug** — server-rendered views (mixins per section)
 
-No forms, no sign-up, no mailing list — community and launch news run through
-Discord, and every call to action is a link out to Discord or Reddit. Two things
-qualify that: Google Analytics (GA4, property `G-PVF7WKPPFD`, loaded in
-`views/layout.pug`) counts visits and sets cookies, and `/api/feedback` receives
-player feedback from the VR build (see below).
+No mailing list and no accounts — community and launch news run through Discord,
+and every call to action on the landing page is a link out to Discord or Reddit.
+Three things qualify that: Google Analytics (GA4, property `G-PVF7WKPPFD`, loaded
+in `views/layout.pug`) counts visits and sets cookies, `/api/feedback` receives
+player feedback from the VR build, and `/playtest` takes applications for the
+paid playtest study (both below).
 
 Both are covered by `/privacy` — **keep that page in step with anything you add
 here**, since the policy commits to being updated before a change ships, not after.
@@ -84,8 +85,10 @@ public/css/styles.css   Token-based stylesheet (values transcribed from the hand
 | `/privacy` | Privacy policy, linked from the footer |
 | `/terms` | Terms of service, linked from the footer |
 | `/discord` | 302 vanity redirect to the Discord invite |
+| `/playtest` | Paid playtest recruitment page and application form |
 | `/go/:slug` | Track a campaign click and 302 to its current destination |
 | `/admin/links` | Private campaign-link dashboard |
+| `/admin/playtest` | Private playtest application dashboard |
 | `POST /api/feedback` | In-game feedback intake from the VR build |
 | `GET /api/feedback` | Read the feedback log back (token-gated) |
 
@@ -169,6 +172,80 @@ The built-in `meta-quest` record is seeded once from `data/content.mjs`. Website
 buttons use it with a `placement` parameter while structured data retains Meta's direct
 URL. Editing the record in Admin therefore changes the buttons without changing search
 metadata or requiring a deploy.
+
+## Playtest recruitment
+
+`/playtest` is the page a paid-playtest recruitment post links to: US$10 for 25
+minutes, five places, with the fee, the payment conditions and the privacy note
+all stated in full before the first form field. `data/playtest.mjs` holds every
+one of those numbers and promises — **change them there, nowhere else**, and bump
+`termsVersion` when the deal changes, because the version on screen when somebody
+applied is stored on their row and is the deal they are owed.
+
+Applications go to a `playtest_applications` table (`playtest-store.mjs`), created
+at startup like the campaign tables. It is the only place on the site holding
+contact details, so it holds nothing that was not typed into the form: no IP
+address, no cookie, no user agent, nothing derived.
+
+### Verifying a tester really has a Quest
+
+There is no way to look up a Meta account from an email address or a username.
+Meta publishes no account-lookup or profile-existence API, Horizon profiles have
+no public web URL to check (meta.com refuses scripted requests outright — every
+URL shape returns HTTP 400 to a plain client), and probing the sign-in or
+password-reset flow to see whether an address is registered is account
+enumeration: against Meta's terms, deliberately uninformative, and it would mean
+feeding an applicant's address into Meta's auth systems without their consent.
+
+**The release-channel invitation is the check instead, and it is stronger than a
+lookup would be.** In the Meta developer dashboard, Distribution → Release
+Channels → the channel's user count → *Email Invite Users*. The Users tab then
+shows each invitee as `Invited`, and as `Joined` once they accept. `Joined` is
+dashboard-visible proof that a working Meta Horizon account holds that address
+and has claimed the build — it proves access *now*, which is what a playtest
+actually needs, rather than registration at some point in the past.
+
+So the funnel invites **before** confirming anyone's place, and the dashboard's
+`invited` and `joined` statuses mirror the two columns in Meta's own Users tab.
+Somebody who never reaches `Joined` costs nothing, because they were never
+promised a slot. The Horizon username collected on the form is a cheap
+pre-filter, not proof; it is stable enough to rely on across a study because Meta
+allows a username change only once every six months.
+
+Statuses run `new → waitlist → invited → joined → testing → submitted → paid`,
+plus `declined`. The `invited`, `joined` and `paid` dates are stamped the first
+time each status is reached and never moved again, so walking an application
+backwards to fix a mistake cannot rewrite when an invitation actually went out.
+
+### Running a round
+
+| Variable | Effect |
+|---|---|
+| `PLAYTEST_OPEN` | `false` closes the public form between waves; anything else leaves it open |
+| `PLAYTEST_FORM_SECRET` | ≥32 chars, signs the form's timestamp. Falls back to `ADMIN_SESSION_SECRET`; blank on both skips that check |
+
+`ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` gate `/admin/playtest` through the
+same sign-in as the campaign dashboard — one password, one cookie, one login page
+(`admin-session.mjs`). Export applications as CSV from the dashboard.
+
+The public page is `noindex` and loads **no analytics**: it is a temporary
+surface holding contact details, and belongs in neither search results nor public
+visitor reporting. Count arrivals with a `/go/` campaign link pointed at
+`/playtest` instead — same number, first-party, no identity stored.
+
+Spam handling is three cheap layers, deliberately none of them a CAPTCHA: an
+off-screen honeypot field (answered with the ordinary thank-you page, so a
+scraper is never taught it was spotted), a signed timestamp rejecting a form
+posted in under three seconds or after twelve hours, and eight applications per
+hour per address. A second application from an address already on file returns
+the original reference and changes nothing — it is nearly always a double-click,
+and a re-application must never overwrite a screening decision.
+
+**`/privacy` § *The paid playtest* covers all of this** and commits to specific
+retention: unsuccessful applications deleted 30 days after the round closes,
+recordings and contact details 90 days after final payment. The dashboard's
+delete button is what keeps those promises — a retention promise that needs a
+database console to honour is one that quietly does not get honoured.
 
 ## Design fidelity
 

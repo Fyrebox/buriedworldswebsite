@@ -1,0 +1,79 @@
+extends layout
+
+include partials/admin-nav
+
+block content
+  +adminNav()
+  main.admin-shell
+    .admin-heading
+      div
+        span.admin-kicker Private dashboard
+        h1 Playtest applications
+        p #{study.fee} for #{study.totalMinutes} minutes · #{study.places} places · terms #{study.termsVersion}
+      a.btn.btn--secondary(href="/admin/playtest/export.csv") Export CSV
+
+    if notice
+      p.admin-alert.admin-alert--success(role="status")= notice
+
+    unless applicationsOpen
+      p.admin-alert(role="status") The public form is closed. Set PLAYTEST_OPEN=true to reopen it.
+
+    .admin-metrics
+      .admin-metric
+        span.admin-metric__value= summary.total
+        span.admin-metric__label Applications
+      .admin-metric
+        span.admin-metric__value= summary.byStatus.invited
+        span.admin-metric__label Invited · waiting to accept
+      .admin-metric
+        span.admin-metric__value= summary.byStatus.joined
+        span.admin-metric__label Joined · account confirmed
+      .admin-metric
+        span.admin-metric__value= summary.byStatus.paid
+        span.admin-metric__label Paid
+
+    .admin-panel(style="margin-bottom:30px")
+      h2 Headsets applied
+      p(style="margin:0;color:var(--ink-soft);font-size:13px")
+        each headset, index in headsets
+          span #{headset.label}: #{summary.byHeadset[headset.id]}
+          if index < headsets.length - 1
+            |  ·
+        |  — hold Quest 2 places open longest; it is the weakest hardware and the likeliest source of comfort and performance findings.
+
+    if applications.length
+      .admin-table-wrap
+        table.admin-table
+          thead
+            tr
+              th Applicant
+              th Headset
+              th Plays VR
+              th Evidence
+              th Status
+              th Applied
+              th
+          tbody
+            each application in applications
+              tr
+                td
+                  a.admin-table__name(href=`/admin/playtest/${application.id}`)= application.reference
+                  code= application.email
+                  if application.playedBefore
+                    br
+                    span.admin-status Played before
+                td= application.headsetLabel
+                td= application.frequencyLabel
+                td= application.captureMethod === 'recording' ? 'Recording' : 'Screenshots'
+                td
+                  if application.status === 'joined' || application.status === 'paid'
+                    span.admin-status.admin-status--live= application.statusLabel
+                  else
+                    span.admin-status= application.statusLabel
+                td= application.createdAt ? application.createdAt.slice(0, 10) : '—'
+                td
+                  a.admin-table__action(href=`/admin/playtest/${application.id}`) Open
+    else
+      .admin-empty
+        h2 No applications yet
+        p The form is live at /playtest. Point the recruitment post at a #[a(href="/admin/links") campaign link] so arrivals are counted without putting analytics on the study page.

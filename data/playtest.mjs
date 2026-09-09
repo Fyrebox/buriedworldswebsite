@@ -1,0 +1,141 @@
+// The paid playtest study: its terms, its numbers and the shape of the
+// application form.
+//
+// Everything a would-be tester is promised lives here rather than in the
+// template, for the same reason the store facts do: the fee appears in the page
+// copy, in the conditions table, in the confirmation page and in the Reddit post
+// that sends people here, and a study is exactly when those drift apart.
+//
+// `termsVersion` is stored with every application. If the terms change, bump it —
+// an applicant is owed the deal that was on screen when they applied, and after a
+// change the only way to know which one that was is the version on their row.
+
+export const study = {
+  termsVersion: '2026-09-09',
+  fee: 'US$10',
+  feeAmount: '10',
+  feeCurrency: 'USD',
+  playMinutes: 20,
+  questionnaireMinutes: 5,
+  // Deliberately the sum of the two above, not a round number chosen separately.
+  totalMinutes: 25,
+  deadlineHours: 72,
+  paymentWindowHours: 48,
+  places: 5,
+  payoutMethod: 'PayPal',
+  contactEmail: 'playtest@buriedworlds.com',
+  privacyEmail: 'privacy@buriedworlds.com'
+};
+
+// Supported headsets. Kept separate from product.devicesList because the study
+// recruits for a subset: Quest Pro is in the product's device list, but there is
+// no point holding a paid place open for a headset almost nobody testing owns.
+export const headsets = [
+  { id: 'quest-2', label: 'Meta Quest 2' },
+  { id: 'quest-3', label: 'Meta Quest 3' },
+  { id: 'quest-3s', label: 'Meta Quest 3S' },
+  { id: 'quest-pro', label: 'Meta Quest Pro' }
+];
+
+export const vrFrequencies = [
+  { id: 'weekly-plus', label: 'Most weeks or more' },
+  { id: 'monthly', label: 'A few times a month' },
+  { id: 'rarely', label: 'Rarely — it mostly sits on the shelf' },
+  { id: 'new', label: 'I am new to VR' }
+];
+
+export const captureMethods = [
+  { id: 'recording', label: 'I can record gameplay video from the headset' },
+  { id: 'screenshots', label: 'Screenshots and written notes instead' }
+];
+
+// The application's status as the study moves through it. `invited` and `joined`
+// are the two that matter: `invited` means an email invitation to the release
+// channel has gone out, `joined` means the Meta developer dashboard now shows
+// that address as having accepted it. That transition is the only proof the
+// website can get that an applicant really holds a working Meta account — see
+// README § Playtest recruitment.
+export const statuses = [
+  { id: 'new', label: 'New', hint: 'Applied. Not yet screened.' },
+  { id: 'waitlist', label: 'Waitlist', hint: 'Suitable, held in reserve.' },
+  { id: 'invited', label: 'Invited', hint: 'Release-channel invitation sent. Waiting for them to accept.' },
+  { id: 'joined', label: 'Joined', hint: 'Shows as Joined in the Meta dashboard. Account confirmed — the place can be offered.' },
+  { id: 'testing', label: 'Testing', hint: 'Brief sent. Inside their 72 hours.' },
+  { id: 'submitted', label: 'Submitted', hint: 'Questionnaire and evidence received.' },
+  { id: 'paid', label: 'Paid', hint: 'Payment sent.' },
+  { id: 'declined', label: 'Declined', hint: 'Not selected, or withdrew.' }
+];
+
+// What the page promises before it asks for anything. Each is a commitment that
+// has to survive contact with a tester who reads it back to you.
+export const promises = [
+  {
+    label: 'Pay',
+    body: `${study.fee} by ${study.payoutMethod}, sent within ${study.paymentWindowHours} hours of your submission arriving. Payment does not depend on liking the game, finding bugs, or posting a review.`
+  },
+  {
+    label: 'Time',
+    body: `About ${study.playMinutes} minutes playing plus a ${study.questionnaireMinutes}-minute questionnaire. Breaks and the download do not count.`
+  },
+  {
+    label: 'Hardware',
+    body: 'Meta Quest 2, Quest 3, Quest 3S or Quest Pro, and working controllers.'
+  },
+  {
+    label: 'Access',
+    body: 'A free key after selection, sent as an invitation to a test release channel. Yours to keep.'
+  },
+  {
+    label: 'Feedback',
+    body: 'A short private questionnaire, plus a gameplay recording or screenshots — whichever we agree before you start. No webcam, no room footage.'
+  },
+  {
+    label: 'Eligibility',
+    body: `18 or over, new to Buried Worlds VR, and able to receive a ${study.payoutMethod} payment where you live.`
+  }
+];
+
+// The payment conditions, published before anyone applies and repeated in the
+// invitation. Written as situations rather than as rules so that the awkward
+// cases — the ones where a tester would otherwise wonder whether they are about
+// to be argued with — each have a stated answer.
+export const conditions = [
+  {
+    situation: 'You complete the session and send the questionnaire with the evidence we agreed',
+    outcome: `Paid ${study.fee}.`
+  },
+  {
+    situation: 'You disliked the game, found no bugs, or could not work out how to play it',
+    outcome: 'Paid in full. Getting stuck is the finding, not a failed test.'
+  },
+  {
+    situation: 'A crash, a blocker or motion discomfort stops the session',
+    outcome: 'Stop. Send a short note about what happened with whatever evidence you have. Paid in full — nobody is asked to sit through discomfort twice.'
+  },
+  {
+    situation: 'Your recording failed',
+    outcome: 'Send screenshots and specific notes instead. No unpaid replay.'
+  },
+  {
+    situation: 'Something is missing from your submission',
+    outcome: 'You will be told exactly what, within three days, and given a week to send it.'
+  },
+  {
+    situation: 'The study is cancelled after you accepted a place',
+    outcome: `Paid ${study.fee} if you had started, half if you had not.`
+  },
+  {
+    situation: 'A submission is copied, fabricated, or claimed twice',
+    outcome: 'Not paid, with the specific reason given and a week to dispute it.'
+  }
+];
+
+// Stated in full on the page before the first form field. The study collects
+// contact details, which is a different promise from the one the rest of the
+// site makes, so it is made explicitly rather than by link.
+export const privacyNotes = [
+  `Your email address, Meta Horizon username, country and answers are stored so the study can be run. They are never sold, never used to advertise to you, and never added to a mailing list.`,
+  `Unsuccessful applications are deleted 30 days after the study closes. Recordings and contact details are deleted 90 days after final payment. Findings are kept only with names and addresses removed.`,
+  `This page carries no analytics and sets no cookies.`,
+  `You can ask to see, correct or delete your application at any time, before or after the study, by writing to ${study.privacyEmail}. Quote the reference shown when you apply.`
+];

@@ -1,0 +1,60 @@
+//- Rendered straight from the POST rather than reached by redirect, so the
+//- reference never lands in a URL, a history entry or a referrer header.
+extends layout
+
+include partials/footer
+
+block content
+  main.legal.playtest(data-screen-label="Playtest application received")
+    .wrap.legal__inner
+      a.legal__home(href="/") ← Buried Worlds VR
+
+      .section-head
+        .ornament
+          span.rule
+          span.diamond
+          span.rule
+        h1.h2 Application received
+        p.serif-italic Thank you. Nothing else is needed from you yet.
+
+      .legal__body
+        if reference
+          .playtest-reference
+            span.playtest-reference__label Your reference
+            span.playtest-reference__code= reference
+            span.playtest-reference__note Worth keeping. It is how to ask about your application, or to have it deleted, without sending your details again.
+
+        if duplicate
+          p.admin-alert(role="status").
+            You had already applied with that email address, so this did not create a
+            second application — the reference above is your original one, and its
+            place in the queue is unchanged.
+
+        h2.legal__h What happens next
+        ol.legal__list
+          li Applications are read as they arrive, and selection is for a spread of headsets and VR experience.
+          li.
+            If you are selected you will get an email invitation to a test release
+            channel. Accepting it is what confirms your place — until it shows as
+            accepted, the place is not yet yours.
+          li After that, the brief, the key and your #{study.deadlineHours} hours.
+          li Payment lands within #{study.paymentWindowHours} hours of your submission arriving.
+        p.
+          Please do not install, record or buy anything yet. Nothing you do before a
+          place is offered and accepted is paid, and nothing is expected of you in the
+          meantime.
+        p.
+          If you are not selected this round you will be told when selection closes,
+          rather than left waiting. Not being picked is usually about which headsets
+          were already covered.
+
+        h2.legal__h Changing your mind
+        p
+          | Write to #[a(href=`mailto:${study.contactEmail}`)= study.contactEmail] quoting
+          |  your reference and the application will be withdrawn and deleted. No reason
+          |  is needed, and it costs you nothing.
+
+        p.legal__meta(style="margin-top:40px")
+          | Study terms version #{study.termsVersion}.
+
+  +footer(links)
