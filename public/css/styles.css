@@ -1431,3 +1431,115 @@ html { scroll-behavior: smooth; }
   .playtest-conditions__row { grid-template-columns: 1fr; gap: 6px; }
   .playtest-form { padding: 22px 18px; }
 }
+
+/* ---------- Destination pages (/destinations/:slug) ---------- */
+/* The homepage card is now a link. It keeps its card styling and gains only
+   what an anchor needs: no underline, inherited colour, a keyboard focus ring. */
+.dest-card--link { display: block; color: inherit; text-decoration: none; }
+.dest-card--link:hover { color: inherit; }
+.dest-card--link:focus-visible { outline: 2px solid var(--bronze); outline-offset: 3px; }
+
+.destination { padding: 56px 24px 88px; background: var(--paper); }
+.destination__inner { max-width: 860px; margin: 0 auto; }
+
+.destination__crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink-soft); }
+.destination__crumbs a { color: var(--ink-soft); text-decoration: none; }
+.destination__crumbs a:hover { color: var(--bronze); text-decoration: underline; }
+.destination__crumb-sep { color: var(--bronze); }
+
+.destination__head { margin-top: 44px; }
+.destination__kicker {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--bronze);
+  font: 600 12px var(--font-display);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.destination__head .h1 { margin: 0; }
+.destination__tagline { margin: 14px 0 0; font-size: 1.35rem; line-height: 1.4; color: var(--ink-soft); }
+
+.destination__hero {
+  margin: 36px 0 0;
+  border-radius: 14px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--parchment);
+}
+.destination__hero-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.destination__hero--gradient { display: grid; place-items: center; }
+.destination__hero-img--contain { width: min(100%, 640px); height: auto; border-radius: 10px; opacity: .92; }
+
+.destination__facts {
+  margin: 28px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 32px;
+  padding: 6px 26px;
+  border: 1px solid rgba(31, 33, 31, .12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .26);
+}
+.destination__facts > div { padding: 14px 0; border-bottom: 1px solid rgba(31, 33, 31, .09); }
+.destination__facts > div:nth-last-child(-n+1) { border-bottom: 0; }
+.destination__facts dt {
+  margin-bottom: 4px;
+  color: var(--bronze);
+  font: 600 11.5px var(--font-display);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.destination__facts dd { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--ink); }
+
+.destination__section { margin-top: 12px; }
+.destination__section p { font-size: 15.5px; line-height: 1.65; color: var(--ink); margin: 0 0 16px; }
+.destination__h3 {
+  margin: 22px 0 6px;
+  font: 600 1.05rem var(--font-display);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.destination__beats { margin: 0 0 16px; padding-left: 22px; }
+.destination__beats li { margin-bottom: 12px; font-size: 15.5px; line-height: 1.62; color: var(--ink); }
+.destination__beats li::marker { color: var(--bronze); font-weight: 600; }
+.destination__beats strong { color: var(--ink); }
+.destination__reward { padding-left: 18px; border-left: 3px solid var(--bronze); color: var(--ink-soft) !important; }
+.destination__note { font-size: 13px !important; color: var(--ink-soft) !important; }
+
+/* YouTube facade. Sized by the poster so nothing shifts when the player
+   arrives; the iframe fills the same box. */
+.yt-facade {
+  position: relative;
+  margin: 8px 0 12px;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--bw-bg);
+}
+.yt-facade__poster { display: block; width: 100%; height: 100%; object-fit: cover; }
+.yt-facade__play { text-decoration: none; }
+.yt-facade__frame { display: block; width: 100%; height: 100%; border: 0; }
+
+.destination__siblings {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 44px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(31, 33, 31, .15);
+}
+.destination__sibling { display: flex; flex-direction: column; gap: 3px; text-decoration: none; color: var(--ink); }
+.destination__sibling--next { text-align: right; }
+.destination__sibling-label { color: var(--bronze); font: 600 11.5px var(--font-display); letter-spacing: .08em; text-transform: uppercase; }
+.destination__sibling-name { font-family: var(--font-serif); font-weight: 600; font-size: 1.35rem; }
+.destination__sibling:hover .destination__sibling-name { color: var(--bronze); }
+
+.destination__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 40px; }
+.destination__cta .hero__meta { flex-basis: 100%; margin: 6px 0 0; }
+
+@media (max-width: 720px) {
+  .destination__facts { grid-template-columns: 1fr; padding: 4px 20px; }
+  .destination__facts > div:nth-last-child(-n+1) { border-bottom: 0; }
+  .destination__tagline { font-size: 1.15rem; }
+}

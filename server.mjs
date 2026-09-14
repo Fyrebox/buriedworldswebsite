@@ -24,6 +24,7 @@ import {
   screenshots,
   art
 } from './data/press.mjs';
+import { createDestinationsRouter } from './destinations.mjs';
 import { createFeedbackRouter } from './feedback.mjs';
 import { createErrorHandler, notFoundHandler } from './errors.mjs';
 import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
@@ -166,6 +167,9 @@ app.get('/', (req, res) => {
     jsonLd: gameJsonLd
   });
 });
+
+// One page per destination, linked from the homepage cards (destinations.mjs).
+app.use(createDestinationsRouter({ siteUrl, product }));
 
 // Privacy policy — linked from the footer, and the URL the Meta store listing
 // and Data Use Checkup point at.

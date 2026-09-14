@@ -9,6 +9,12 @@ html(lang="en")
     //- only discover after the link is already in somebody's inbox.
     - var canonical = siteUrl + (pagePath || '/')
     - var shareImage = siteUrl + (pageImage || '/images/og-cover.jpg')
+    //- A page that supplies its own share image must supply its size and alt
+    //- text with it — otherwise the cover's 1200×630 and Bolonia description
+    //- would be claimed for a screenshot they do not describe.
+    - var shareWidth = pageImage ? (pageImageWidth || '') : '1200'
+    - var shareHeight = pageImage ? (pageImageHeight || '') : '630'
+    - var shareAlt = pageImage ? (pageImageAlt || '') : "The game's logo above the Roman ruins at Bolonia, columns standing in pale sand."
     - var title = pageTitle || 'Buried Worlds VR — Out now on Meta Quest'
     - var description = pageDescription || "Sweep, dig, pan and travel five of the world's great treasure sites. Out now in Early Access on the Meta Horizon Store for Quest 2, 3, 3S and Pro."
 
@@ -38,9 +44,12 @@ html(lang="en")
     meta(property="og:description" content=description)
     meta(property="og:url" content=canonical)
     meta(property="og:image" content=shareImage)
-    meta(property="og:image:width" content="1200")
-    meta(property="og:image:height" content="630")
-    meta(property="og:image:alt" content="The game's logo above the Roman ruins at Bolonia, columns standing in pale sand.")
+    if shareWidth
+      meta(property="og:image:width" content=shareWidth)
+    if shareHeight
+      meta(property="og:image:height" content=shareHeight)
+    if shareAlt
+      meta(property="og:image:alt" content=shareAlt)
 
     meta(name="twitter:card" content="summary_large_image")
     meta(name="twitter:title" content=title)

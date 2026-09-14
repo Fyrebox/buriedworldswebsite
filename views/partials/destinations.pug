@@ -1,6 +1,11 @@
 //- Section 4 — Destinations gallery
+//-
+//- Each card is a link to its own page at /destinations/:slug. The whole card
+//- is the anchor rather than just the name, so the hit area is the thing the
+//- visitor is already looking at, and the hover outline the cards had before
+//- now means what it looked like it meant.
 mixin destinations(worlds, showLockedCard)
-  section.destinations(data-screen-label="Destinations")
+  section#destinations.destinations(data-screen-label="Destinations")
     .destinations__inner
       .section-head
         .ornament
@@ -11,7 +16,7 @@ mixin destinations(worlds, showLockedCard)
         p.serif-italic Five real places, five real rushes. Every field seeded by history.
       .dest-grid
         each w in worlds
-          .dest-card
+          a.dest-card.dest-card--link(href=`/destinations/${w.slug}` aria-label=`${w.name} — read about this destination`)
             .dest-card__img(style=`background:${w.gradient}`)
               img.dest-card__photo(src=w.image alt=`${w.name} — terrain screenshot` loading="lazy" width="384" height="256")
             .dest-card__meta

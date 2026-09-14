@@ -62,9 +62,11 @@ Set `PORT` to override the default (`PORT=4000 npm start`).
 ```
 server.mjs              Express 5 app: routes + view config
 data/content.mjs        All page copy + per-world gradients (single source of truth)
+data/destinations.mjs   The five destination pages — copy, facts, images, the Ballarat teaser
 views/
   layout.pug            HTML shell, Google Fonts (optional pageTitle/pageDescription)
   index.pug             Composes the five sections
+  destination.pug       /destinations/:slug — one world, its expedition, its real history
   privacy.pug           /privacy — long-form policy on parchment
   terms.pug             /terms — same treatment
   partials/
@@ -81,6 +83,7 @@ public/css/styles.css   Token-based stylesheet (values transcribed from the hand
 | Path | What it does |
 |---|---|
 | `/` | The landing page |
+| `/destinations/:slug` | One page per destination — ballarat, coloma, carcassonne, hoxne, bolonia |
 | `/press` | Press kit — fact sheet, descriptions, screenshots, art, trailer |
 | `/privacy` | Privacy policy, linked from the footer |
 | `/terms` | Terms of service, linked from the footer |
@@ -310,6 +313,32 @@ load is ~1 MB, and the 14 MB file is not among it.
 
 **Note:** `public/video/` puts 16 MB of binaries in git. Fine at this size; if more
 trailers arrive, move them to object storage rather than growing the repo.
+
+## Destination pages
+
+Each homepage card links to `/destinations/:slug`. The copy lives in
+`data/destinations.mjs`, written from `~/Documents/VRVault/BuriedWorlds/Destination
+Gameplay.md`, which is the source of record for unlock thresholds, buried-item counts
+and reward values — change a number there first. `destinations.mjs` decides what a
+crawler is told: a unique title and description per page, the page's own screenshot as
+its share image, a BreadcrumbList, and on Ballarat a VideoObject for the teaser.
+
+A test enforces that every card in `worlds` has a page and every page has a card,
+that titles fit a search result (≤ 65 chars) and descriptions a snippet (120–160),
+that every referenced image exists, that each page renders at least 350 words of its
+own copy, and that Kimberley — built, withheld, and removed from the project in
+August 2026 — appears nowhere.
+
+**The Ballarat teaser** is a click-to-load facade, not an embed. Opening the page loads
+nothing from YouTube: the poster is our own screenshot, and the play control is a plain
+link to the watch page that JavaScript upgrades into a `youtube-nocookie.com` player
+in place. `/privacy` § *This website* describes it. Keep it that way — a normal
+YouTube iframe sets cookies on page load, which the policy would then have to cover.
+
+**Hoxne has no full-size screenshot** (the trailer cut has no Hoxne footage), so its
+page shows the 384 px card image over the terrain gradient and keeps the site cover
+as its share image. Drop a 1920×1080 capture into `public/press/screenshots/`,
+point `hero.src` at it and remove `hero.gradient`, and both fix themselves.
 
 ## Press kit
 

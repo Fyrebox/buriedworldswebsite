@@ -1,0 +1,142 @@
+//- One destination, /destinations/:slug.
+//-
+//- The page is built to be found from a search for the place, and then to be
+//- read: the real location first, the one verb that makes this world different,
+//- what the expedition actually asks of your hands, and a plain statement of
+//- which parts are history and which are invented. Everything on it comes
+//- from data/destinations.mjs; this file decides only the order and the shape.
+extends layout
+
+include partials/footer
+
+block content
+  main.destination(data-screen-label=`Destination — ${d.name}`)
+    .destination__inner
+      nav.destination__crumbs(aria-label="Breadcrumb")
+        a(href="/") Buried Worlds VR
+        span.destination__crumb-sep(aria-hidden="true") ›
+        a(href="/#destinations") Destinations
+        span.destination__crumb-sep(aria-hidden="true") ›
+        span(aria-current="page")= d.name
+
+      header.destination__head
+        span.destination__kicker Destination #{String(d.order).padStart(2, '0')} of #{String(total).padStart(2, '0')} · #{d.region}
+        h1.h1= d.name
+        p.serif-italic.destination__tagline= d.tagline
+
+      //- Hoxne has no full-size capture yet, so its card image sits on the
+      //- terrain gradient the homepage card uses, rather than a blurred
+      //- upscale pretending to be a screenshot.
+      if d.hero.gradient
+        .destination__hero.destination__hero--gradient(style=`background:${d.hero.gradient}`)
+          img.destination__hero-img.destination__hero-img--contain(src=d.hero.src alt=d.hero.alt width=d.hero.width height=d.hero.height)
+      else
+        .destination__hero
+          img.destination__hero-img(src=d.hero.src alt=d.hero.alt width=d.hero.width height=d.hero.height fetchpriority="high")
+
+      dl.destination__facts
+        div
+          dt Unlocks
+          dd
+            if typeof d.unlock === 'number'
+              | At #{d.unlock.toLocaleString('en-AU')} lifetime recovered value
+            else
+              = d.unlock
+        div
+          dt The verb
+          dd= d.verb
+        div
+          dt Your tools
+          dd= d.facts.tool
+        div
+          dt Buried loot
+          dd= d.facts.finds
+        div
+          dt Signature find
+          dd= d.facts.signature
+
+      section.destination__section
+        h2.legal__h What it feels like
+        each paragraph in d.atmosphere
+          p= paragraph
+
+      section.destination__section
+        h2.legal__h The expedition: #{d.story.name}
+        p= d.story.intro
+        ol.destination__beats
+          each beat in d.story.beats
+            li
+              strong= beat.name
+              |  —
+              | #{beat.body}
+        p.destination__reward= d.story.reward
+
+      section.destination__section
+        h2.legal__h On the side
+        each item in d.side
+          h3.destination__h3= item.name
+          p= item.body
+
+      if d.video
+        section.destination__section
+          h2.legal__h Watch the teaser
+          //- Nothing loads from YouTube until the visitor presses play. The
+          //- link works without JavaScript by simply going to YouTube; with it,
+          //- the click swaps in a youtube-nocookie.com player in place. The
+          //- poster is our own screenshot, not YouTube's thumbnail, so the page
+          //- makes no third-party request on the strength of merely opening it.
+          .yt-facade#yt-facade(data-yt-id=d.video.youtubeId data-yt-title=d.video.name)
+            img.yt-facade__poster(src=d.video.poster.src alt=d.video.poster.alt width=d.video.poster.width height=d.video.poster.height loading="lazy")
+            a.keyart__play.yt-facade__play(href=`https://www.youtube.com/watch?v=${d.video.youtubeId}` target="_blank" rel="noopener noreferrer")
+              span.keyart__play-icon(aria-hidden="true")
+              span Watch the teaser · #{d.video.durationLabel}
+          p.destination__note
+            | Plays from youtube-nocookie.com, and loads nothing from YouTube until you press play.
+            |  Once you do, #[a(href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer") Google's privacy policy] applies to the player.
+
+      section.destination__section
+        h2.legal__h The real place
+        p= d.history
+
+      nav.destination__siblings(aria-label="Other destinations")
+        if previous
+          a.destination__sibling.destination__sibling--prev(href=`/destinations/${previous.slug}`)
+            span.destination__sibling-label ← Previous
+            span.destination__sibling-name= previous.name
+        else
+          span
+        if next
+          a.destination__sibling.destination__sibling--next(href=`/destinations/${next.slug}`)
+            span.destination__sibling-label Next →
+            span.destination__sibling-name= next.name
+
+      .destination__cta
+        a.btn.btn--primary(href=links.metaQuestStoreCta + `?placement=destination-${d.slug}` target="_blank" rel="noopener noreferrer" data-cta=`destination-${d.slug}`) Get it on Meta Quest
+        a.btn.btn--secondary(href="/#destinations") All five destinations
+        p.hero__meta
+          | #{product.price} on the #{product.store}
+          span.hero__meta-dot ·
+          | #{product.devices}
+
+  +footer(links)
+
+  if d.video
+    script.
+      (function () {
+        var facade = document.getElementById('yt-facade');
+        if (!facade) return;
+        facade.addEventListener('click', function (e) {
+          var play = e.target.closest && e.target.closest('.yt-facade__play');
+          if (!play) return;
+          e.preventDefault();
+          var frame = document.createElement('iframe');
+          frame.src = 'https://www.youtube-nocookie.com/embed/' + facade.dataset.ytId + '?autoplay=1&rel=0';
+          frame.title = facade.dataset.ytTitle;
+          frame.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+          frame.setAttribute('allowfullscreen', '');
+          frame.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+          frame.className = 'yt-facade__frame';
+          facade.replaceChildren(frame);
+          if (typeof gtag === 'function') gtag('event', 'teaser_open', { destination: '#{d.slug}' });
+        });
+      })();
