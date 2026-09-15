@@ -63,10 +63,12 @@ Set `PORT` to override the default (`PORT=4000 npm start`).
 server.mjs              Express 5 app: routes + view config
 data/content.mjs        All page copy + per-world gradients (single source of truth)
 data/destinations.mjs   The five destination pages — copy, facts, images, the Ballarat teaser
+data/pages.mjs          The eight guide pages — sections, FAQ entries, the updates log
 views/
   layout.pug            HTML shell, Google Fonts (optional pageTitle/pageDescription)
   index.pug             Composes the five sections
   destination.pug       /destinations/:slug — one world, its expedition, its real history
+  guide.pug             The guide pages — sections, FAQ, updates, from data/pages.mjs
   privacy.pug           /privacy — long-form policy on parchment
   terms.pug             /terms — same treatment
   partials/
@@ -84,6 +86,8 @@ public/css/styles.css   Token-based stylesheet (values transcribed from the hand
 |---|---|
 | `/` | The landing page |
 | `/destinations/:slug` | One page per destination — ballarat, coloma, carcassonne, hoxne, bolonia |
+| `/vr-metal-detecting-game`, `/gold-panning-vr`, `/seated-vr`, `/hoxne-hoard` | Guide pages, each built to own one generic search |
+| `/how-to-play`, `/faq`, `/about`, `/updates` | Guide pages — structure, trust, and the changelog |
 | `/press` | Press kit — fact sheet, descriptions, screenshots, art, trailer |
 | `/privacy` | Privacy policy, linked from the footer |
 | `/terms` | Terms of service, linked from the footer |
@@ -339,6 +343,38 @@ YouTube iframe sets cookies on page load, which the policy would then have to co
 page shows the 384 px card image over the terrain gradient and keeps the site cover
 as its share image. Drop a 1920×1080 capture into `public/press/screenshots/`,
 point `hero.src` at it and remove `hero.gradient`, and both fix themselves.
+
+## Guide pages
+
+The homepage is a brand page, and the brand loses every search to a television
+series of the same name (`buried worlds` autocompletes to *Buried Worlds with Don
+Wildman*). So `data/pages.mjs` holds eight pages each built to own one generic query
+the homepage never can — the query is the H1 and the page answers it — and to link out
+to the destinations so ranking power flows through the site rather than pooling on `/`.
+
+| Page | Owns |
+|---|---|
+| `/vr-metal-detecting-game` | "vr metal detecting game", "metal detecting simulator" |
+| `/gold-panning-vr` | "gold panning vr", "gold mining vr" |
+| `/seated-vr` | "vr games sitting down", "quest 3 cozy games" |
+| `/hoxne-hoard` | "hoxne hoard hammer", "hoxne hoard worth" — verified against the British Museum record |
+| `/how-to-play`, `/faq`, `/about`, `/updates` | Structure and trust: a hub, long-tail questions, who is behind the site, a dated changelog |
+
+`guides.mjs` mounts them and decides what a crawler is told: BreadcrumbList, a WebPage
+/ FAQPage / AboutPage node, the page's own screenshot as share image. The same tests as
+the destinations apply — title ≤ 65, description 120–160, ≥ 350 words, every image on
+disk, every internal link resolving, nothing about Kimberley — plus FAQPage carrying
+every question, and the updates log dated newest-first with the release recorded.
+
+**Every fact on these pages is sourced** — the gameplay document, the store listing,
+`product`, and for the hoard the British Museum record via Wikipedia. Where a claim
+could not be sourced it was cut rather than kept (Quest 2 "tested", "no sudden loud
+sounds" — there is dynamite). Keep it that way: these pages are the ones a
+detectorist or an archaeologist will read closely.
+
+**`/updates` is only worth having if it is kept.** Add an entry to `updates` in
+`data/pages.mjs` when a build actually ships, newest first, with a real date. A
+changelog whose last entry is the launch reads as an abandoned game.
 
 ## Press kit
 

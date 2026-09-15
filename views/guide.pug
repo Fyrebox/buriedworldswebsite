@@ -1,0 +1,104 @@
+//- A guide page: one query, answered. Everything comes from data/pages.mjs;
+//- this file decides only the shape. It shares the destination page's
+//- styling so the two read as one site rather than two.
+extends layout
+
+include partials/footer
+
+block content
+  main.destination.guide(data-screen-label=`Guide — ${page.h1}`)
+    .destination__inner
+      nav.destination__crumbs(aria-label="Breadcrumb")
+        a(href="/") Buried Worlds VR
+        span.destination__crumb-sep(aria-hidden="true") ›
+        span(aria-current="page")= page.h1
+
+      header.destination__head
+        span.destination__kicker= page.kicker
+        h1.h1.guide__h1= page.h1
+        p.serif-italic.destination__tagline= page.tagline
+
+      if page.hero
+        .destination__hero
+          img.destination__hero-img(src=page.hero.src alt=page.hero.alt width=page.hero.width height=page.hero.height fetchpriority="high")
+
+      each section in page.sections
+        section.destination__section
+          h2.legal__h= section.heading
+          each block in section.blocks
+            if block.p
+              p= block.p
+            else if block.note
+              p.destination__reward= block.note
+            else if block.list
+              ul.legal__list.guide__list
+                each item in block.list
+                  li= item
+            else if block.steps
+              ol.destination__beats
+                each step in block.steps
+                  li
+                    strong= step.name
+                    |  —
+                    | #{step.body}
+            else if block.table
+              .guide__table-wrap
+                table.guide__table
+                  thead
+                    tr
+                      each cell in block.table.head
+                        th= cell
+                  tbody
+                    each row in block.table.rows
+                      tr
+                        each cell in row
+                          td= cell
+            else if block.links
+              ul.guide__links
+                each link in block.links
+                  li
+                    if link.external
+                      a(href=link.href target="_blank" rel="noopener noreferrer")= link.label
+                    else
+                      a(href=link.href)= link.label
+                    if link.note
+                      span.guide__link-note= link.note
+
+      if page.faq
+        section.destination__section.guide__faq
+          each item in page.faq
+            .guide__faq-item
+              h2.guide__q= item.q
+              p= item.a
+
+      if page.updates
+        section.destination__section
+          h2.legal__h Shipped
+          each entry in page.updates
+            article.guide__update(id=entry.date)
+              h3.guide__update-title
+                time(datetime=entry.date)= entry.label
+                |  ·
+                | #{entry.title}
+              each paragraph in entry.body
+                p= paragraph
+
+      if page.related && page.related.length
+        section.destination__section
+          h2.legal__h Read next
+          ul.guide__links
+            each link in page.related
+              li
+                a(href=link.href)= link.label
+                if link.note
+                  span.guide__link-note= link.note
+
+      .destination__cta
+        a.btn.btn--primary(href=links.metaQuestStoreCta + `?placement=guide-${page.slug}` target="_blank" rel="noopener noreferrer" data-cta=`guide-${page.slug}`) Get it on Meta Quest
+        a.btn.btn--secondary(href="/#destinations") The five destinations
+        p.hero__meta
+          | #{product.price} on the #{product.store}
+          span.hero__meta-dot ·
+          | #{product.devices}
+
+  +footer(links)

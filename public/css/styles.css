@@ -1543,3 +1543,49 @@ html { scroll-behavior: smooth; }
   .destination__facts > div:nth-last-child(-n+1) { border-bottom: 0; }
   .destination__tagline { font-size: 1.15rem; }
 }
+
+/* ---------- Guide pages (/how-to-play, /faq, /about, …) ---------- */
+.guide__h1 { font-size: clamp(2rem, 4.6vw, 3.1rem); text-transform: none; letter-spacing: 0; line-height: 1.12; }
+.guide__list { margin: 0 0 16px; }
+.guide__list li { font-size: 15.5px; line-height: 1.6; color: var(--ink); }
+
+.guide__table-wrap { margin: 4px 0 18px; overflow-x: auto; border: 1px solid rgba(31, 33, 31, .12); border-radius: 12px; }
+.guide__table { width: 100%; border-collapse: collapse; background: rgba(255, 255, 255, .22); }
+.guide__table th {
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(31, 33, 31, .14);
+  color: var(--ink-soft);
+  font: 600 11px var(--font-display);
+  letter-spacing: .07em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.guide__table td { padding: 12px 16px; border-bottom: 1px solid rgba(31, 33, 31, .09); font-size: 14.5px; color: var(--ink); }
+.guide__table tbody tr:last-child td { border-bottom: 0; }
+.guide__table td:last-child { color: var(--ink-soft); }
+
+.guide__links { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; }
+.guide__links li {
+  padding: 13px 16px;
+  border: 1px solid rgba(31, 33, 31, .12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .22);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+.guide__links a { font-family: var(--font-serif); font-weight: 600; font-size: 1.15rem; text-decoration: none; color: var(--ink); }
+.guide__links a:hover { color: var(--bronze); text-decoration: underline; }
+.guide__link-note { color: var(--ink-soft); font-size: 13.5px; line-height: 1.45; }
+
+.guide__faq { margin-top: 8px; }
+.guide__faq-item { padding: 18px 0; border-bottom: 1px solid rgba(31, 33, 31, .1); }
+.guide__faq-item:last-child { border-bottom: 0; }
+.guide__q { margin: 0 0 8px; font: 600 1.2rem var(--font-serif); color: var(--ink); }
+.guide__faq-item p { margin: 0; }
+
+.guide__update { padding: 20px 0 6px; border-top: 1px solid rgba(31, 33, 31, .1); }
+.guide__update:first-of-type { border-top: 0; padding-top: 6px; }
+.guide__update-title { margin: 0 0 10px; font: 600 1.15rem var(--font-serif); color: var(--ink); }
+.guide__update-title time { color: var(--bronze); font: 600 12px var(--font-display); letter-spacing: .08em; text-transform: uppercase; }

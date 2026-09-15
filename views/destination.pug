@@ -97,6 +97,11 @@ block content
       section.destination__section
         h2.legal__h The real place
         p= d.history
+        if d.historyLink
+          ul.guide__links
+            li
+              a(href=d.historyLink.href)= d.historyLink.label
+              span.guide__link-note= d.historyLink.note
 
       nav.destination__siblings(aria-label="Other destinations")
         if previous
@@ -113,6 +118,7 @@ block content
       .destination__cta
         a.btn.btn--primary(href=links.metaQuestStoreCta + `?placement=destination-${d.slug}` target="_blank" rel="noopener noreferrer" data-cta=`destination-${d.slug}`) Get it on Meta Quest
         a.btn.btn--secondary(href="/#destinations") All five destinations
+        a.btn.btn--secondary(href="/how-to-play") How the game works
         p.hero__meta
           | #{product.price} on the #{product.store}
           span.hero__meta-dot ·

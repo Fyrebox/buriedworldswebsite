@@ -405,7 +405,12 @@ export const destinations = [
       + 'Hoxne Hoard — the largest hoard of late Roman gold and silver ever discovered in '
       + 'Britain. The hammer was recovered too, and sits with the hoard in the British '
       + 'Museum, Room 49. Eric Lawes and Peter Whatling were real. The farmer you meet in the '
-      + 'game is not.'
+      + 'game is not.',
+    historyLink: {
+      href: '/hoxne-hoard',
+      label: 'The Hoxne Hoard: the real story',
+      note: 'What was in the chest, why it matters, and where to see it.'
+    }
   },
 
   {

@@ -25,6 +25,7 @@ import {
   art
 } from './data/press.mjs';
 import { createDestinationsRouter } from './destinations.mjs';
+import { createGuidesRouter } from './guides.mjs';
 import { createFeedbackRouter } from './feedback.mjs';
 import { createErrorHandler, notFoundHandler } from './errors.mjs';
 import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
@@ -170,6 +171,10 @@ app.get('/', (req, res) => {
 
 // One page per destination, linked from the homepage cards (destinations.mjs).
 app.use(createDestinationsRouter({ siteUrl, product }));
+
+// The guide pages — each built to own one generic search the brand page never
+// can, and to send its visitors on to the destinations (guides.mjs).
+app.use(createGuidesRouter({ siteUrl, product }));
 
 // Privacy policy — linked from the footer, and the URL the Meta store listing
 // and Data Use Checkup point at.
