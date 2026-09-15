@@ -12,7 +12,8 @@ import {
   makeReference,
   normaliseApplication
 } from './playtest-store.mjs';
-import { createPlaytestRouter } from './playtest.mjs';
+import { applicationNotice, createPlaytestRouter } from './playtest.mjs';
+import { createMailer } from './mailer.mjs';
 import { makeSession } from './admin-session.mjs';
 import { study } from './data/playtest.mjs';
 
@@ -340,6 +341,95 @@ test('one connection cannot bury the study in applications', async () => {
   } finally {
     await server.stop();
   }
+});
+
+// ---- Notification ------------------------------------------------------
+
+test('the developer is told once per new application, and never given the applicant\u2019s details', async () => {
+  const sent = [];
+  const server = await startServer({
+    siteUrl: 'https://www.buriedworlds.com',
+    notify: { to: 'owner@example.com', sendQuietly: async (message) => { sent.push(message); } }
+  });
+  try {
+    await (await apply(server.url)).text();
+    const [stored] = await server.store.listApplications();
+    // sendQuietly is fire-and-forget; give the microtask a tick.
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    assert.equal(sent.length, 1);
+    const [message] = sent;
+    assert.equal(message.to, 'owner@example.com');
+    assert.ok(message.subject.includes(stored.reference));
+    assert.ok(message.subject.includes('Meta Quest 3'));
+    assert.ok(message.text.includes(`https://www.buriedworlds.com/admin/playtest/${stored.id}`));
+    for (const secret of ['tester@example.com', 'WarriorMama365', 'Canada', 'Walkabout']) {
+      assert.ok(!message.text.includes(secret), `notification must not carry: ${secret}`);
+      assert.ok(!message.subject.includes(secret), `subject must not carry: ${secret}`);
+    }
+
+    // A second application from the same address returns the original and says nothing.
+    await (await apply(server.url, applicationInput({ headset: 'quest-2' }))).text();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(sent.length, 1, 'duplicates do not notify');
+  } finally {
+    await server.stop();
+  }
+});
+
+test('a mail server that is down never fails the applicant', async () => {
+  const errors = [];
+  const server = await startServer({
+    siteUrl: 'https://www.buriedworlds.com',
+    notify: { to: 'owner@example.com', sendQuietly: () => Promise.reject(new Error('SMTP refused')) },
+    onError: (error) => errors.push(error)
+  });
+  try {
+    const response = await apply(server.url);
+    const html = await response.text();
+    assert.equal(response.status, 201, 'the application is accepted');
+    assert.equal((await server.store.listApplications()).length, 1, 'and stored');
+    assert.ok(html.includes('Application received'));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(errors.length, 1, 'the failure is reported, not swallowed');
+  } finally {
+    await server.stop();
+  }
+});
+
+test('with no notifier configured, applications are simply stored', async () => {
+  const server = await startServer({ notify: null });
+  try {
+    const response = await apply(server.url);
+    await response.text();
+    assert.equal(response.status, 201);
+  } finally {
+    await server.stop();
+  }
+});
+
+test('the notice reads as a note to a person, with the reference and a link and nothing private', () => {
+  const notice = applicationNotice({
+    id: 7, reference: 'BW-ABC234', headset: 'quest-2', vrFrequency: 'rarely', captureMethod: 'screenshots',
+    playedBefore: true, email: 'x@y.z', horizonUsername: 'Handle', country: 'France', notes: 'private'
+  }, { siteUrl: 'https://example.test' });
+  assert.equal(notice.subject, 'New playtest application BW-ABC234 — Meta Quest 2');
+  assert.ok(notice.text.includes('screenshots and notes'));
+  assert.ok(notice.text.includes('has played before'));
+  assert.ok(notice.text.includes('https://example.test/admin/playtest/7'));
+  for (const secret of ['x@y.z', 'Handle', 'France', 'private']) assert.ok(!notice.text.includes(secret), secret);
+});
+
+test('the mailer is off without SMTP_URL, and takes its From from the URL\u2019s user', () => {
+  assert.equal(createMailer({}), null);
+  assert.equal(createMailer({ smtpUrl: '' }), null);
+  const mailer = createMailer({ smtpUrl: 'smtps://cyril%40bellare.com.au:app-password@smtp.gmail.com:465' });
+  assert.equal(mailer.from, 'cyril@bellare.com.au');
+  mailer.close();
+  const explicit = createMailer({ smtpUrl: 'smtp://user:pw@mail.example.com:587', from: 'notes@example.com' });
+  assert.equal(explicit.from, 'notes@example.com');
+  explicit.close();
+  assert.throws(() => createMailer({ smtpUrl: 'smtp://mail.example.com:587' }), /SMTP_FROM is required/);
 });
 
 // ---- The dashboard -----------------------------------------------------

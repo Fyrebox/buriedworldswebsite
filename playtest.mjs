@@ -64,12 +64,44 @@ function csvValue(value) {
   return `"${string.replaceAll('"', '""')}"`;
 }
 
+/**
+ * The note sent to the developer when an application arrives. No applicant
+ * data on purpose: the page promises Meta is the only third party details go
+ * to, and this transits a mail provider. The dashboard has everything else.
+ */
+export function applicationNotice(application, { siteUrl }) {
+  const headset = HEADSET_LABELS[application.headset] ?? application.headset;
+  const frequency = FREQUENCY_LABELS[application.vrFrequency] ?? application.vrFrequency;
+  const evidence = application.captureMethod === 'recording' ? 'can record gameplay' : 'screenshots and notes';
+  const before = application.playedBefore ? 'has played before' : 'new to the game';
+  return {
+    subject: `New playtest application ${application.reference} — ${headset}`,
+    text: [
+      `A new playtest application has arrived.`,
+      ``,
+      `Reference:  ${application.reference}`,
+      `Headset:    ${headset}`,
+      `Plays VR:   ${frequency}`,
+      `Evidence:   ${evidence}`,
+      `History:    ${before}`,
+      ``,
+      `Open it:    ${siteUrl}/admin/playtest/${application.id}`,
+      ``,
+      `This note carries no contact details by design; they are on the dashboard.`
+    ].join('\n')
+  };
+}
+
 export function createPlaytestRouter({
   store,
+  siteUrl = '',
   applicationsOpen = true,
   formSecret = '',
   adminPassword = '',
   sessionSecret = '',
+  // { to, sendQuietly } — a mailer from mailer.mjs plus the recipient. Absent,
+  // applications are stored and nobody is told; the dashboard still shows them.
+  notify = null,
   now = () => Date.now(),
   onError = (error) => console.error('[playtest]', error)
 }) {
@@ -209,6 +241,15 @@ export function createPlaytestRouter({
             'Your application could not be saved just now. Nothing was lost — please send it again in a minute, ' +
             `or email ${study.contactEmail}.`
         });
+      }
+
+      // Told once, on the first application from an address. A refresh or a
+      // second submission returns the original and says nothing again. Fire
+      // and forget: a mail server that is down must not turn into an applicant
+      // being told their application failed.
+      if (notify && notify.to && !result.duplicate) {
+        const notice = applicationNotice(result.application, { siteUrl });
+        Promise.resolve(notify.sendQuietly({ to: notify.to, ...notice })).catch(onError);
       }
 
       // Rendered rather than redirected so the reference never appears in a URL,

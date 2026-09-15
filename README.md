@@ -230,6 +230,18 @@ backwards to fix a mistake cannot rewrite when an invitation actually went out.
 |---|---|
 | `PLAYTEST_OPEN` | `false` closes the public form between waves; anything else leaves it open |
 | `PLAYTEST_FORM_SECRET` | ≥32 chars, signs the form's timestamp. Falls back to `ADMIN_SESSION_SECRET`; blank on both skips that check |
+| `PLAYTEST_NOTIFY_TO` | Email a note here when an application arrives. Needs `SMTP_URL` too; either unset ⇒ nothing sent |
+| `SMTP_URL` | `smtps://user%40domain:APP_PASSWORD@smtp.gmail.com:465` for Google Workspace (`@` in the user is `%40`) |
+| `SMTP_FROM` | Optional; defaults to the `SMTP_URL` user, which is what Gmail rewrites From to anyway |
+
+**The notification carries no applicant data** (`applicationNotice` in `playtest.mjs`):
+reference, headset, VR frequency, evidence method, played-before, and a link to the
+dashboard row. The page promises applicants that Meta is the only third party their
+details go to, and an email transits Google — so the note says that someone applied and
+where to look, and the dashboard has the rest. It is sent once, on the first application
+from an address, fire-and-forget: a refused connection is logged and the applicant still
+sees their reference. With no `SMTP_URL`, the site behaves exactly as before — the
+dashboard is the only place applications appear.
 
 `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` gate `/admin/playtest` through the
 same sign-in as the campaign dashboard — one password, one cookie, one login page

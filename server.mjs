@@ -30,6 +30,7 @@ import { createGuidesRouter } from './guides.mjs';
 import { createFeedbackRouter } from './feedback.mjs';
 import { createErrorHandler, notFoundHandler } from './errors.mjs';
 import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
+import { createMailer } from './mailer.mjs';
 import { createPlaytestRouter, createPlaytestStore } from './playtest.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -250,8 +251,21 @@ app.use(
 // The paid playtest study: /playtest and its dashboard. Mounted before the
 // tracking router so /admin/playtest is owned outright by this router and its
 // own session guard, rather than falling through the campaign dashboard's.
+// A note to the developer when an application arrives. Both variables must be
+// set for anything to be sent; either missing, and the dashboard is the only
+// place applications show up — which is how the site ran before this existed.
+const playtestMailer = createMailer({
+  smtpUrl: process.env.SMTP_URL ?? '',
+  from: process.env.SMTP_FROM ?? ''
+});
+const playtestNotify = playtestMailer && process.env.PLAYTEST_NOTIFY_TO
+  ? { to: process.env.PLAYTEST_NOTIFY_TO, sendQuietly: (message) => playtestMailer.sendQuietly(message) }
+  : null;
+
 app.use(createPlaytestRouter({
   store: playtestStore,
+  siteUrl,
+  notify: playtestNotify,
   // Recruitment opens and closes between waves. Anything but an explicit
   // "false" leaves the form open, so a missing variable never silently turns
   // away applicants a live recruitment post is still sending here.
