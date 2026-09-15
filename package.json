@@ -13,6 +13,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.1132.0",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "nodemailer": "^10.0.10",

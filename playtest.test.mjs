@@ -420,16 +420,47 @@ test('the notice reads as a note to a person, with the reference and a link and 
   for (const secret of ['x@y.z', 'Handle', 'France', 'private']) assert.ok(!notice.text.includes(secret), secret);
 });
 
-test('the mailer is off without SMTP_URL, and takes its From from the URL\u2019s user', () => {
+test('the mailer is off with nothing configured, and SMTP takes its From from the URL\u2019s user', () => {
   assert.equal(createMailer({}), null);
-  assert.equal(createMailer({ smtpUrl: '' }), null);
+  assert.equal(createMailer({ smtpUrl: '', sesRegion: '' }), null);
   const mailer = createMailer({ smtpUrl: 'smtps://cyril%40bellare.com.au:app-password@smtp.gmail.com:465' });
+  assert.equal(mailer.transport, 'smtp');
   assert.equal(mailer.from, 'cyril@bellare.com.au');
   mailer.close();
-  const explicit = createMailer({ smtpUrl: 'smtp://user:pw@mail.example.com:587', from: 'notes@example.com' });
+  const explicit = createMailer({ smtpUrl: 'smtp://user:pw@mail.example.com:587', smtpFrom: 'notes@example.com' });
   assert.equal(explicit.from, 'notes@example.com');
   explicit.close();
   assert.throws(() => createMailer({ smtpUrl: 'smtp://mail.example.com:587' }), /SMTP_FROM is required/);
+});
+
+test('SES sends a plain-text message from the verified identity, and wins over SMTP when both are set', async () => {
+  assert.throws(() => createMailer({ sesRegion: 'ap-southeast-2' }), /MAIL_FROM is required/);
+
+  const commands = [];
+  const client = { send: async (command) => { commands.push(command.input); return { MessageId: 'test-id' }; } };
+  const mailer = createMailer({
+    sesRegion: 'ap-southeast-2', mailFrom: 'cyril@bellare.com.au', sesClient: client,
+    smtpUrl: 'smtps://ignored:ignored@smtp.example.com:465'
+  });
+  assert.equal(mailer.transport, 'ses');
+  const result = await mailer.send({ to: 'cyril@bellare.com.au', subject: 'Hello', text: 'Body' });
+  assert.equal(result.MessageId, 'test-id');
+  assert.equal(commands.length, 1);
+  assert.deepEqual(commands[0], {
+    FromEmailAddress: 'cyril@bellare.com.au',
+    Destination: { ToAddresses: ['cyril@bellare.com.au'] },
+    Content: { Simple: { Subject: { Data: 'Hello', Charset: 'UTF-8' }, Body: { Text: { Data: 'Body', Charset: 'UTF-8' } } } }
+  });
+
+  // sendQuietly swallows a refusal and reports it.
+  const errors = [];
+  const failing = createMailer({
+    sesRegion: 'ap-southeast-2', mailFrom: 'cyril@bellare.com.au',
+    sesClient: { send: async () => { throw new Error('MessageRejected'); } },
+    onError: (error) => errors.push(error)
+  });
+  await failing.sendQuietly({ to: 'x@example.com', subject: 's', text: 't' });
+  assert.equal(errors.length, 1);
 });
 
 // ---- The dashboard -----------------------------------------------------

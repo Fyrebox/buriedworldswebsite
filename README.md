@@ -230,9 +230,14 @@ backwards to fix a mistake cannot rewrite when an invitation actually went out.
 |---|---|
 | `PLAYTEST_OPEN` | `false` closes the public form between waves; anything else leaves it open |
 | `PLAYTEST_FORM_SECRET` | ≥32 chars, signs the form's timestamp. Falls back to `ADMIN_SESSION_SECRET`; blank on both skips that check |
-| `PLAYTEST_NOTIFY_TO` | Email a note here when an application arrives. Needs `SMTP_URL` too; either unset ⇒ nothing sent |
-| `SMTP_URL` | `smtps://user%40domain:APP_PASSWORD@smtp.gmail.com:465` for Google Workspace (`@` in the user is `%40`) |
-| `SMTP_FROM` | Optional; defaults to the `SMTP_URL` user, which is what Gmail rewrites From to anyway |
+| `PLAYTEST_NOTIFY_TO` | Email a note here when an application arrives. Needs a way out (below) too; otherwise nothing is sent |
+| `SES_REGION`, `MAIL_FROM` | Send through Amazon SES (preferred). `MAIL_FROM` must be a verified identity in that region; the SDK reads `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` from the environment |
+| `SMTP_URL`, `SMTP_FROM` | Or any SMTP server, e.g. `smtps://user%40domain:APP_PASSWORD@smtp.gmail.com:465` for Workspace. `SMTP_FROM` defaults to the URL's user |
+
+SES is preferred because the IAM key can be scoped to `ses:SendEmail` on one identity and
+revoked without touching anything else. The SES sandbox is not an obstacle: it restricts
+*recipients* to verified addresses, and a note to yourself has the same address at both
+ends. The SDK is imported lazily, so an SMTP deployment never loads it.
 
 **The notification carries no applicant data** (`applicationNotice` in `playtest.mjs`):
 reference, headset, VR frequency, evidence method, played-before, and a link to the

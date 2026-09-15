@@ -251,12 +251,16 @@ app.use(
 // The paid playtest study: /playtest and its dashboard. Mounted before the
 // tracking router so /admin/playtest is owned outright by this router and its
 // own session guard, rather than falling through the campaign dashboard's.
-// A note to the developer when an application arrives. Both variables must be
-// set for anything to be sent; either missing, and the dashboard is the only
-// place applications show up — which is how the site ran before this existed.
+// A note to the developer when an application arrives. PLAYTEST_NOTIFY_TO
+// names the recipient; SES_REGION + MAIL_FROM (with AWS keys in the
+// environment) or SMTP_URL names the way out. Anything missing, and the
+// dashboard is the only place applications show up — which is how the site
+// ran before this existed.
 const playtestMailer = createMailer({
+  sesRegion: process.env.SES_REGION ?? '',
+  mailFrom: process.env.MAIL_FROM ?? '',
   smtpUrl: process.env.SMTP_URL ?? '',
-  from: process.env.SMTP_FROM ?? ''
+  smtpFrom: process.env.SMTP_FROM ?? ''
 });
 const playtestNotify = playtestMailer && process.env.PLAYTEST_NOTIFY_TO
   ? { to: process.env.PLAYTEST_NOTIFY_TO, sendQuietly: (message) => playtestMailer.sendQuietly(message) }
