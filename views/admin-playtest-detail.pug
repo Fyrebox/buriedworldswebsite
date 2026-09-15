@@ -41,6 +41,12 @@ block content
           dt Evidence
           dd= application.captureLabel
         .playtest-terms__row
+          dt Age
+          dd
+            = application.ageLabel
+            if application.ageGroup === 'minor'
+              |  — a parent or guardian agreed and receives the payment. Confirm with them by email before offering a place.
+        .playtest-terms__row
           dt Played before
           dd= application.playedBefore ? 'Yes — consider for a later round' : 'No'
         if application.notes

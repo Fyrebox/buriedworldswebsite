@@ -14,6 +14,7 @@ import express from 'express';
 
 import { createRateLimiter } from './feedback.mjs';
 import {
+  ageGroups,
   captureMethods,
   conditions,
   headsets,
@@ -40,6 +41,7 @@ const STATUS_LABELS = Object.fromEntries(statuses.map((status) => [status.id, st
 const HEADSET_LABELS = Object.fromEntries(headsets.map((headset) => [headset.id, headset.label]));
 const FREQUENCY_LABELS = Object.fromEntries(vrFrequencies.map((entry) => [entry.id, entry.label]));
 const CAPTURE_LABELS = Object.fromEntries(captureMethods.map((entry) => [entry.id, entry.label]));
+const AGE_SHORT = { adult: '18 or over', minor: '13–17, with a guardian' };
 
 /** Everything the form posted, kept so a rejected submission re-renders filled in. */
 function formValues(body = {}) {
@@ -52,8 +54,9 @@ function formValues(body = {}) {
     recentGames: String(body.recentGames ?? '').slice(0, LIMITS.recentGames),
     country: String(body.country ?? '').slice(0, LIMITS.country),
     playedBefore: Boolean(body.playedBefore),
+    ageGroup: String(body.ageGroup ?? ''),
     notes: String(body.notes ?? '').slice(0, LIMITS.notes),
-    over18: Boolean(body.over18),
+    paypalOk: Boolean(body.paypalOk),
     canFinish: Boolean(body.canFinish),
     acceptedTerms: Boolean(body.acceptedTerms)
   };
@@ -74,6 +77,7 @@ export function applicationNotice(application, { siteUrl }) {
   const frequency = FREQUENCY_LABELS[application.vrFrequency] ?? application.vrFrequency;
   const evidence = application.captureMethod === 'recording' ? 'can record gameplay' : 'screenshots and notes';
   const before = application.playedBefore ? 'has played before' : 'new to the game';
+  const age = AGE_SHORT[application.ageGroup] ?? application.ageGroup;
   return {
     subject: `New playtest application ${application.reference} — ${headset}`,
     text: [
@@ -84,6 +88,7 @@ export function applicationNotice(application, { siteUrl }) {
       `Plays VR:   ${frequency}`,
       `Evidence:   ${evidence}`,
       `History:    ${before}`,
+      `Age:        ${age}`,
       ``,
       `Open it:    ${siteUrl}/admin/playtest/${application.id}`,
       ``,
@@ -153,6 +158,7 @@ export function createPlaytestRouter({
       headsets,
       vrFrequencies,
       captureMethods,
+      ageGroups,
       applicationsOpen,
       formToken: issueFormToken(),
       values,
@@ -293,6 +299,7 @@ export function createPlaytestRouter({
       headsetLabel: HEADSET_LABELS[application.headset] ?? application.headset,
       frequencyLabel: FREQUENCY_LABELS[application.vrFrequency] ?? application.vrFrequency,
       captureLabel: CAPTURE_LABELS[application.captureMethod] ?? application.captureMethod,
+      ageLabel: AGE_SHORT[application.ageGroup] ?? application.ageGroup,
       statusLabel: STATUS_LABELS[application.status] ?? application.status
     };
   }
@@ -301,7 +308,7 @@ export function createPlaytestRouter({
   router.get('/admin/playtest/export.csv', async (req, res) => {
     const columns = [
       'reference', 'created_at', 'status', 'email', 'horizon_username', 'headset',
-      'vr_frequency', 'capture_method', 'recent_games', 'country', 'played_before',
+      'vr_frequency', 'capture_method', 'recent_games', 'country', 'played_before', 'age_group',
       'notes', 'admin_note', 'terms_version', 'invited_at', 'joined_at', 'paid_at'
     ];
     const applications = await store.listApplications();
@@ -309,7 +316,7 @@ export function createPlaytestRouter({
       application.reference, application.createdAt, application.status, application.email,
       application.horizonUsername, application.headset, application.vrFrequency,
       application.captureMethod, application.recentGames, application.country,
-      application.playedBefore, application.notes, application.adminNote,
+      application.playedBefore, application.ageGroup, application.notes, application.adminNote,
       application.termsVersion, application.invitedAt, application.joinedAt, application.paidAt
     ]);
     const csv = [

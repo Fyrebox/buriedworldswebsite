@@ -11,7 +11,7 @@
 // change the only way to know which one that was is the version on their row.
 
 export const study = {
-  termsVersion: '2026-09-09',
+  termsVersion: '2026-09-15',
   fee: 'US$10',
   feeAmount: '10',
   feeCurrency: 'USD',
@@ -23,6 +23,12 @@ export const study = {
   paymentWindowHours: 48,
   places: 5,
   payoutMethod: 'PayPal',
+  // 13 is the floor for three separate reasons: Meta requires it for a Quest
+  // account, the game is rated IARC 13+, and the privacy policy promises not
+  // to collect anything from anyone younger. Under 18 needs a parent or
+  // guardian — PayPal's own terms require account holders to be 18, so the
+  // payment goes to the guardian's account and the agreement is theirs.
+  minAge: 13,
   // On bellare.com.au rather than buriedworlds.com on purpose. bellare.com.au is
   // already a Google Workspace domain with working MX, SPF, DKIM and DMARC, so a
   // study address there is one alias on an existing mailbox — no DNS change, and
@@ -48,6 +54,17 @@ export const vrFrequencies = [
   { id: 'monthly', label: 'A few times a month' },
   { id: 'rarely', label: 'Rarely — it mostly sits on the shelf' },
   { id: 'new', label: 'I am new to VR' }
+];
+
+// Who is applying. PayPal will not open an account for anyone under 18, so a
+// younger tester's payment has to go to a parent or guardian — which also
+// makes that adult the person who agrees to the study on the tester's behalf.
+export const ageGroups = [
+  { id: 'adult', label: 'I am 18 or over' },
+  {
+    id: 'minor',
+    label: 'I am 13 to 17. A parent or guardian has agreed to my taking part, and the payment will go to their PayPal account.'
+  }
 ];
 
 export const captureMethods = [
@@ -97,7 +114,10 @@ export const promises = [
   },
   {
     label: 'Eligibility',
-    body: `18 or over, new to Buried Worlds VR, and able to receive a ${study.payoutMethod} payment where you live.`
+    body: `${study.minAge} or over, and new to Buried Worlds VR. Under 18 is welcome with a parent or `
+      + `guardian's agreement — the payment then goes to their ${study.payoutMethod} account, since `
+      + `${study.payoutMethod} requires account holders to be 18. Either way, there must be a `
+      + `${study.payoutMethod} account the money can reach where you live.`
   }
 ];
 
@@ -142,6 +162,7 @@ export const conditions = [
 export const privacyNotes = [
   `Your email address, Meta Horizon username, country and answers are stored so the study can be run. They are never sold, never used to advertise to you, and never added to a mailing list.`,
   `Unsuccessful applications are deleted 30 days after the study closes. Recordings and contact details are deleted 90 days after final payment. Findings are kept only with names and addresses removed.`,
+  `If you are under 18, we store that a parent or guardian agreed rather than who they are, and we may ask them to confirm by email before a place is offered. Nothing is collected from anyone under ${study.minAge}.`,
   `This page carries no analytics and sets no cookies.`,
   `You can ask to see, correct or delete your application at any time, before or after the study, by writing to ${study.privacyEmail}. Quote the reference shown when you apply.`
 ];

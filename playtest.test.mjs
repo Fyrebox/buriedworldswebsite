@@ -37,7 +37,8 @@ function applicationInput(overrides = {}) {
     recentGames: 'Walkabout Mini Golf, Red Matter 2',
     country: 'Canada',
     notes: '',
-    over18: 'yes',
+    ageGroup: 'adult',
+    paypalOk: 'yes',
     canFinish: 'yes',
     acceptedTerms: 'yes',
     ...overrides
@@ -96,7 +97,7 @@ test('an application is normalised, and the answers that gate it are required', 
   assert.equal(application.playedBefore, false);
   assert.equal(application.termsVersion, study.termsVersion, 'the deal on screen is stored with the row');
 
-  for (const field of ['over18', 'canFinish', 'acceptedTerms']) {
+  for (const field of ['paypalOk', 'canFinish', 'acceptedTerms']) {
     assert.throws(
       () => normaliseApplication(applicationInput({ [field]: '' })),
       (error) => error instanceof ApplicationValidationError && error.field === field,
@@ -114,7 +115,9 @@ test('validation rejects bad values and names the field that failed', () => {
     ['vrFrequency', { vrFrequency: 'sometimes' }],
     ['captureMethod', { captureMethod: 'telepathy' }],
     ['recentGames', { recentGames: '' }],
-    ['country', { country: '' }]
+    ['country', { country: '' }],
+    ['ageGroup', { ageGroup: '' }],
+    ['ageGroup', { ageGroup: 'child' }]
   ];
   for (const [field, overrides] of cases) {
     assert.throws(
@@ -122,6 +125,37 @@ test('validation rejects bad values and names the field that failed', () => {
       (error) => error instanceof ApplicationValidationError && error.field === field,
       `${field}: ${JSON.stringify(overrides)}`
     );
+  }
+});
+
+test('a 13-to-17 applicant is accepted, recorded, and flagged for the developer', async () => {
+  const minor = normaliseApplication(applicationInput({ ageGroup: 'minor' }));
+  assert.equal(minor.ageGroup, 'minor');
+
+  const sent = [];
+  const server = await startServer({
+    siteUrl: 'https://www.buriedworlds.com',
+    notify: { to: 'owner@example.com', sendQuietly: async (message) => { sent.push(message); } }
+  });
+  try {
+    const response = await apply(server.url, applicationInput({ ageGroup: 'minor' }));
+    assert.equal(response.status, 201);
+    await response.text();
+    const [stored] = await server.store.listApplications();
+    assert.equal(stored.ageGroup, 'minor');
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.ok(sent[0].text.includes('Age:        13–17, with a guardian'));
+
+    const cookie = adminCookie();
+    const list = await (await fetch(`${server.url}/admin/playtest`, { headers: { cookie } })).text();
+    assert.ok(list.includes('Under 18 · guardian'));
+    const detail = await (await fetch(`${server.url}/admin/playtest/${stored.id}`, { headers: { cookie } })).text();
+    assert.ok(detail.includes('a parent or guardian agreed and receives the payment'));
+    const csv = await (await fetch(`${server.url}/admin/playtest/export.csv`, { headers: { cookie } })).text();
+    assert.ok(csv.split('\n')[0].includes('age_group'));
+    assert.ok(csv.includes('"minor"'));
+  } finally {
+    await server.stop();
   }
 });
 
@@ -159,6 +193,34 @@ test('a second application from one address returns the original, unchanged', as
 
     const summary = await store.summarise();
     assert.equal(summary.total, 1);
+  } finally {
+    await store.close();
+  }
+});
+
+test('a table from before the age question gains the column, with earlier rows as adults', async () => {
+  const pool = createMemoryPool();
+  // The table as it shipped on 9 September, one row in it.
+  await pool.query(`
+    CREATE TABLE playtest_applications (
+      id BIGSERIAL PRIMARY KEY, reference TEXT NOT NULL, email TEXT NOT NULL,
+      horizon_username TEXT NOT NULL, headset TEXT NOT NULL, vr_frequency TEXT NOT NULL,
+      capture_method TEXT NOT NULL, recent_games TEXT NOT NULL DEFAULT '', country TEXT NOT NULL DEFAULT '',
+      played_before BOOLEAN NOT NULL DEFAULT FALSE, notes TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'new', admin_note TEXT NOT NULL DEFAULT '', terms_version TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      invited_at TIMESTAMPTZ, joined_at TIMESTAMPTZ, paid_at TIMESTAMPTZ
+    )`);
+  await pool.query(`INSERT INTO playtest_applications (reference, email, horizon_username, headset, vr_frequency, capture_method)
+    VALUES ('BW-OLD001', 'old@example.com', 'Old', 'quest-2', 'monthly', 'recording')`);
+
+  const store = await createPlaytestStore({ pool });
+  try {
+    const [old] = await store.listApplications();
+    assert.equal(old.reference, 'BW-OLD001');
+    assert.equal(old.ageGroup, 'adult', 'the form required 18+ at the time, so earlier rows are adults');
+    const { application } = await store.createApplication(applicationInput({ ageGroup: 'minor' }));
+    assert.equal(application.ageGroup, 'minor', 'and new rows use the column');
   } finally {
     await store.close();
   }
@@ -217,6 +279,8 @@ test('the page states the fee and carries neither analytics nor an index invitat
     assert.ok(html.includes(study.fee), 'the fee is on the page');
     assert.ok(!html.includes('googletagmanager'), 'the study page runs no analytics');
     assert.ok(html.includes('name="acceptedTerms"'), 'the consent boxes are present');
+    assert.ok(html.includes('name="ageGroup"') && html.includes('name="paypalOk"'), 'age and PayPal are asked');
+    assert.ok(!html.includes('name="over18"'), 'the old 18+ box is gone');
   } finally {
     await server.stop();
   }

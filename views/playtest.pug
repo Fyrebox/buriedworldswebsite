@@ -173,10 +173,22 @@ block content
                 Left-handed, seated only, a comfort condition, a language other than
                 English — anything that changes how the session should be set up.
 
+            .playtest-field(class=(errorField === 'ageGroup' ? 'playtest-field--error' : ''))
+              fieldset.playtest-fieldset
+                legend How old are you?
+                each group in ageGroups
+                  label.playtest-choice
+                    input(type="radio" name="ageGroup" value=group.id checked=(values.ageGroup === group.id) required)
+                    span= group.label
+                small.playtest-fieldset__note.
+                  #{study.payoutMethod} does not open accounts for anyone under 18, which is why a
+                  younger tester's payment goes to a parent or guardian. We may email them to
+                  confirm before a place is offered. Nobody under #{study.minAge} can take part.
+
             .playtest-field.playtest-field--consent
-              label.playtest-choice(class=(errorField === 'over18' ? 'playtest-choice--error' : ''))
-                input(type="checkbox" name="over18" value="yes" checked=values.over18 required)
-                span I am 18 or over
+              label.playtest-choice(class=(errorField === 'paypalOk' ? 'playtest-choice--error' : ''))
+                input(type="checkbox" name="paypalOk" value="yes" checked=values.paypalOk required)
+                span There is a #{study.payoutMethod} account the payment can go to — mine, or a parent or guardian's
               label.playtest-choice(class=(errorField === 'canFinish' ? 'playtest-choice--error' : ''))
                 input(type="checkbox" name="canFinish" value="yes" checked=values.canFinish required)
                 span I could finish within #{study.deadlineHours} hours of getting access

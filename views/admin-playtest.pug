@@ -59,8 +59,11 @@ block content
                 td
                   a.admin-table__name(href=`/admin/playtest/${application.id}`)= application.reference
                   code= application.email
-                  if application.playedBefore
+                  if application.playedBefore || application.ageGroup === 'minor'
                     br
+                  if application.ageGroup === 'minor'
+                    span.admin-status Under 18 · guardian
+                  if application.playedBefore
                     span.admin-status Played before
                 td= application.headsetLabel
                 td= application.frequencyLabel

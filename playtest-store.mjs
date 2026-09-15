@@ -10,13 +10,14 @@ import crypto from 'node:crypto';
 
 import pg from 'pg';
 
-import { captureMethods, headsets, statuses, study, vrFrequencies } from './data/playtest.mjs';
+import { ageGroups, captureMethods, headsets, statuses, study, vrFrequencies } from './data/playtest.mjs';
 
 const { Pool } = pg;
 
 const HEADSET_IDS = new Set(headsets.map((headset) => headset.id));
 const FREQUENCY_IDS = new Set(vrFrequencies.map((frequency) => frequency.id));
 const CAPTURE_IDS = new Set(captureMethods.map((method) => method.id));
+const AGE_IDS = new Set(ageGroups.map((group) => group.id));
 const STATUS_IDS = new Set(statuses.map((status) => status.id));
 
 export const LIMITS = {
@@ -119,7 +120,12 @@ export function normaliseApplication(input = {}) {
     country: cleanText(input.country, 'country', 'Country', LIMITS.country),
     playedBefore: isTicked(input.playedBefore),
     notes: cleanText(input.notes, 'notes', 'Anything else', LIMITS.notes, { required: false }),
-    over18: requireTick(input.over18, 'over18', 'You must be 18 or over to take part'),
+    ageGroup: pickOption(input.ageGroup, AGE_IDS, 'ageGroup', 'Your age'),
+    paypalOk: requireTick(
+      input.paypalOk,
+      'paypalOk',
+      `Please confirm there is a ${study.payoutMethod} account the payment can go to`
+    ),
     canFinish: requireTick(
       input.canFinish,
       'canFinish',
@@ -151,6 +157,7 @@ function rowToApplication(row) {
     recentGames: row.recent_games,
     country: row.country,
     playedBefore: Boolean(row.played_before),
+    ageGroup: row.age_group,
     notes: row.notes,
     status: row.status,
     adminNote: row.admin_note,
@@ -176,8 +183,15 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
     options: '-c timezone=UTC'
   });
 
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS playtest_applications (
+  // Created only when absent, and otherwise migrated. Postgres would accept
+  // CREATE TABLE IF NOT EXISTS on an existing table, but pg-mem — which the
+  // tests run against — does not, and the migration path below is the one
+  // worth testing: it is what the live database runs after every change here.
+  const exists = await pool.query(`
+    SELECT 1 FROM information_schema.tables WHERE table_name = 'playtest_applications'
+  `);
+  if (exists.rows.length === 0) await pool.query(`
+    CREATE TABLE playtest_applications (
       id BIGSERIAL PRIMARY KEY,
       reference TEXT NOT NULL,
       email TEXT NOT NULL,
@@ -188,6 +202,7 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
       recent_games TEXT NOT NULL DEFAULT '',
       country TEXT NOT NULL DEFAULT '',
       played_before BOOLEAN NOT NULL DEFAULT FALSE,
+      age_group TEXT NOT NULL DEFAULT 'adult',
       notes TEXT NOT NULL DEFAULT '',
       status TEXT NOT NULL DEFAULT 'new',
       admin_note TEXT NOT NULL DEFAULT '',
@@ -199,13 +214,31 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
       paid_at TIMESTAMPTZ
     );
 
-    CREATE UNIQUE INDEX IF NOT EXISTS playtest_applications_email_lower
+    CREATE UNIQUE INDEX playtest_applications_email_lower
       ON playtest_applications (LOWER(email));
-    CREATE UNIQUE INDEX IF NOT EXISTS playtest_applications_reference
+    CREATE UNIQUE INDEX playtest_applications_reference
       ON playtest_applications (reference);
-    CREATE INDEX IF NOT EXISTS playtest_applications_created
+    CREATE INDEX playtest_applications_created
       ON playtest_applications (created_at DESC);
   `);
+
+  // Columns added after the table first shipped. Each is applied only when the
+  // catalogue says it is missing, so a database from before the change gains
+  // it once and a fresh one is never altered. age_group: every earlier row is
+  // an adult, because that is what the form required at the time. A fresh
+  // table already has every column, so this loop is a no-op for it.
+  const added = [
+    ['age_group', `TEXT NOT NULL DEFAULT 'adult'`]
+  ];
+  for (const [column, definition] of added) {
+    const present = await pool.query(`
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'playtest_applications' AND column_name = $1
+    `, [column]);
+    if (present.rows.length === 0) {
+      await pool.query(`ALTER TABLE playtest_applications ADD COLUMN ${column} ${definition}`);
+    }
+  }
 
   async function getByReference(reference) {
     const result = await pool.query(
@@ -237,13 +270,13 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
         const result = await pool.query(`
           INSERT INTO playtest_applications
             (reference, email, horizon_username, headset, vr_frequency, capture_method,
-             recent_games, country, played_before, notes, terms_version)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+             recent_games, country, played_before, age_group, notes, terms_version)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
           RETURNING *
         `, [
           reference, application.email, application.horizonUsername, application.headset,
           application.vrFrequency, application.captureMethod, application.recentGames,
-          application.country, application.playedBefore, application.notes,
+          application.country, application.playedBefore, application.ageGroup, application.notes,
           application.termsVersion
         ]);
         return { application: rowToApplication(result.rows[0]), duplicate: false };
