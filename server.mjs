@@ -167,6 +167,8 @@ app.get('/', (req, res) => {
     worlds,
     signalRows,
     pagePath: '/',
+    // The hero poster is the largest paint on the homepage.
+    preloadImage: trailer.poster,
     jsonLd: gameJsonLd
   });
 });

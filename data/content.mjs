@@ -67,7 +67,7 @@ export const product = {
 // (preload="none"), so the page still costs well under a megabyte to open.
 export const trailer = {
   loop: '/video/hero-loop-detector.mp4',
-  poster: '/images/hero-poster.jpg',
+  poster: '/images/hero-poster.webp',
   full: '/video/buried-worlds-trailer-720p.mp4',
   fullPoster: '/images/og-cover.jpg',
   duration: '2:00'

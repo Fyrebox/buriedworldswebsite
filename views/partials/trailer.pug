@@ -28,10 +28,17 @@ mixin trailerModal(trailer)
       if (!modal || !video) return;
 
       // Somebody who has asked their system to reduce motion did not ask for a
-      // clip looping under the headline. The poster still shows, so the hero
-      // loses nothing but the movement.
+      // clip looping under the headline, and a phone on a mobile connection
+      // did not ask for 647 KB of decoration. The loop's source is attached
+      // only when neither applies; otherwise the poster stands alone and the
+      // hero loses nothing but the movement.
       var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
-      if (loop && still && still.matches) {
+      var wide = window.matchMedia && window.matchMedia('(min-width: 720px)');
+      var source = loop && loop.querySelector('source[data-src]');
+      if (source && wide && wide.matches && !(still && still.matches)) {
+        source.src = source.dataset.src;
+        loop.load();
+      } else if (loop) {
         loop.autoplay = false;
         loop.pause();
         loop.removeAttribute('loop');
@@ -73,6 +80,6 @@ mixin trailerModal(trailer)
       modal.addEventListener('close', function () {
         video.pause();
         video.currentTime = 0;
-        if (loop && !(still && still.matches)) loop.play();
+        if (loop && loop.currentSrc) loop.play();
       });
     })();

@@ -22,12 +22,33 @@ html(lang="en")
       //- Google tag (gtag.js) — GA4 property G-PVF7WKPPFD.
       //- The private admin area and redirect error pages opt out so the owner's
       //- own work never pollutes public campaign reporting.
-      script(async src="https://www.googletagmanager.com/gtag/js?id=G-PVF7WKPPFD")
+      //-
+      //- The 175 KB script is fetched once the page is idle, or on the first
+      //- interaction, whichever comes first — not as a blocking part of the
+      //- initial load. The stub below queues every gtag() call made in the
+      //- meantime, so nothing is lost; the visit is reported a second or two
+      //- later than it was.
       script.
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-PVF7WKPPFD');
+        (function () {
+          var loaded = false;
+          function load() {
+            if (loaded) return;
+            loaded = true;
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://www.googletagmanager.com/gtag/js?id=G-PVF7WKPPFD';
+            document.head.appendChild(s);
+          }
+          ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (type) {
+            window.addEventListener(type, load, { once: true, passive: true });
+          });
+          if ('requestIdleCallback' in window) requestIdleCallback(load, { timeout: 3000 });
+          else setTimeout(load, 2000);
+        })();
 
     title= title
     meta(name="description" content=description)
@@ -62,9 +83,15 @@ html(lang="en")
     link(rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16.png")
     link(rel="apple-touch-icon" href="/apple-touch-icon.png")
 
-    link(rel="preconnect" href="https://fonts.googleapis.com")
-    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous")
-    link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@400;500;600&display=swap")
+    //- Fonts are self-hosted (public/fonts, SIL OFL) — no third-party round
+    //- trip before first paint. The two faces that render above the fold on
+    //- every page are preloaded; the serif and italic load with the CSS.
+    link(rel="preload" as="font" type="font/woff2" href="/fonts/oswald-latin.woff2" crossorigin="anonymous")
+    link(rel="preload" as="font" type="font/woff2" href="/fonts/inter-latin.woff2" crossorigin="anonymous")
+    //- A page whose largest paint is a known image names it, so the browser
+    //- fetches it before it has parsed as far as the element.
+    if preloadImage
+      link(rel="preload" as="image" href=preloadImage fetchpriority="high")
     //- The version is a hash of the stylesheet's bytes, set at startup, so the
     //- year-long cache on /css/* is busted by a CSS change and by nothing else.
     //- Templates rendered without it (tests) fall back to the bare path.

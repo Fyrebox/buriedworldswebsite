@@ -269,13 +269,27 @@ mechanism:
   URL changes; deploy without touching it, and the cache stands.
 - Images, video and fonts do not. **Replace one under the same filename and anyone who
   has visited before is served the old bytes for a year.** New poster: `hero-poster-2.webp`,
-  then point `data/content.mjs` at it. Never overwrite `hero-poster.jpg` in place.
+  then point `data/content.mjs` at it. Never overwrite `hero-poster.webp` in place.
 - The exceptions are the files that change in place by design and are fetched by robots
   rather than browsers: `sitemap.xml`, `robots.txt` and the press kit zip get an hour.
 
 Cloudflare respects the origin's `Cache-Control` as long as the zone's Browser Cache TTL
 is left at *Respect Existing Headers* (the default). If a static asset ever comes back
 with `max-age=14400`, that setting has been changed.
+
+## Fonts and third-party scripts
+
+The three typefaces are self-hosted from `public/fonts/` — the same variable WOFF2
+files Google Fonts serves, latin subset, one file per family and style, 147 KB in all,
+under the SIL Open Font License (`OFL-*.txt` beside them). Self-hosting removed a
+~800 ms render-blocking round trip on mobile and took Google Fonts out of the privacy
+policy. Oswald and Inter are preloaded from the layout; the serif loads with the CSS.
+
+`gtag.js` is fetched on idle or first interaction rather than as a blocking `<head>`
+script. The inline stub queues `gtag()` calls made before it arrives, so `store_click`
+and `trailer_open` events from an early click still land; the pageview is simply
+reported a second or two later. A visitor who leaves in under two seconds without
+touching anything is no longer counted — accepted, since such a visit tells us nothing.
 
 ## Design fidelity
 
@@ -324,7 +338,7 @@ with `+faststart`:
 
 | File | What | Size |
 |---|---|---|
-| `hero-loop-detector.mp4` | The detector sweep — the game's core verb. **Shipped** | 630 KB |
+| `hero-loop-detector.mp4` | The detector sweep — the game's core verb. **Shipped**, on screens ≥ 720 px only | 630 KB |
 | `hero-loop-well.mp4` | Magnet fishing a well under Carcassonne | 710 KB |
 | `hero-loop-ruins.mp4` | The camera crossing the ruins at Bolonia | 640 KB |
 | `buried-worlds-trailer-720p.mp4` | The full trailer, click-to-play | 14 MB |
@@ -332,8 +346,11 @@ with `+faststart`:
 Swap the hero's mood by pointing `trailer.loop` in `data/content.mjs` at a different
 one. The 1080p master stays out of this repo — it is what press and YouTube should get.
 
-Two things keep the page light despite all that: the full trailer is `preload="none"`,
-and the modal's poster lives in `data-poster` and is promoted to `poster` on first open.
+Three things keep the page light despite all that: the hero loop's `<source>` carries
+`data-src` and is attached by `trailer.pug` only on screens 720 px and wider without a
+reduced-motion preference, so phones download the 97 KB WebP poster and nothing else;
+the full trailer is `preload="none"`; and the modal's poster lives in `data-poster` and
+is promoted to `poster` on first open.
 A `poster` named in the markup is fetched **eagerly even under `preload="none"`**, which
 billed every visitor 166 KB for an image most never saw. Measured page weight on first
 load is ~1 MB, and the 14 MB file is not among it.

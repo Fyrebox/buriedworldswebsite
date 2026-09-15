@@ -29,6 +29,12 @@ mixin heroPoster(links, product, trailer)
       //- the video fades in over it rather than the slot sitting empty. The
       //- clip is decorative — muted, looping, no controls — so it is hidden
       //- from assistive technology and the play button carries the meaning.
+      //-
+      //- The source is data-src, not src: a <source src> starts downloading
+      //- as soon as it is parsed, and the 647 KB loop was the largest thing
+      //- on the mobile critical path. trailer.pug attaches it only on screens
+      //- wide enough to show it and only without a reduced-motion preference.
+      //- Phones, and anyone without JavaScript, get the poster alone.
       .keyart
         video.keyart__video(
           poster=trailer.poster
@@ -37,7 +43,7 @@ mixin heroPoster(links, product, trailer)
           aria-hidden="true"
           tabindex="-1"
         )
-          source(src=trailer.loop type="video/mp4")
+          source(data-src=trailer.loop type="video/mp4")
         button.keyart__play(type="button" data-trailer-open)
           span.keyart__play-icon(aria-hidden="true")
           span Watch the trailer · #{trailer.duration}
