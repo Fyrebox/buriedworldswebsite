@@ -161,9 +161,9 @@ export function statusEmails(application, { siteUrl, key = '' }) {
         `The brief and the questions are here:`,
         `${siteUrl}/playtest/questionnaire`,
         ``,
-        `You have ${study.deadlineHours} hours from this email. Play about ${study.playMinutes} minutes without looking anything up, capture a short clip or a few screenshots, then submit on that page with your reference (${ref}) and this email address. Payment of ${study.fee} follows by ${study.payoutMethod} within ${study.paymentWindowHours} hours — whether or not you liked it, found anything, or finished anything.`,
+        `You have ${study.deadlineLabel} from this email. Play about ${study.playMinutes} minutes without looking anything up, capture a short clip or a few screenshots, then submit on that page with your reference (${ref}) and this email address. Payment of ${study.fee} follows by ${study.payoutMethod} within ${study.paymentWindowHours} hours — whether or not you liked it, found anything, or finished anything.`,
         ``,
-        `If the ${study.deadlineHours} hours stop being realistic, say so before they run out and you'll get more. If a crash, a blocker or motion discomfort stops the session, stop, submit what you have, and you're still paid in full.`
+        `If ${study.deadlineLabel} stops being realistic, say so before it runs out and you'll get more. If a crash, a blocker or motion discomfort stops the session, stop, submit what you have, and you're still paid in full.`
       ].join('\n')
     },
     declined: {

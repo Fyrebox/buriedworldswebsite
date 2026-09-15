@@ -202,7 +202,7 @@ Then, on an application:
 
 - **Invited** takes the oldest unused key, records which key went to whom, and emails
   the applicant: the key, how to redeem it in the Meta Horizon app, the brief link, and
-  their 72 hours. With no keys left it refuses and changes nothing — a "you're in" with
+  their week. With no keys left it refuses and changes nothing — a "you're in" with
   no key in it would be worse than silence.
 - **Declined** emails "not this round". **Paid** emails "payment sent".
 - Everything else only records. Saving a note without changing status sends nothing;

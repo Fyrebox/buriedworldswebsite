@@ -136,7 +136,7 @@ export function normaliseApplication(input = {}) {
     canFinish: requireTick(
       input.canFinish,
       'canFinish',
-      `Please confirm you can finish within ${study.deadlineHours} hours of getting access`
+      `Please confirm you can finish within ${study.deadlineLabel} of getting access`
     ),
     acceptedTerms: requireTick(
       input.acceptedTerms,

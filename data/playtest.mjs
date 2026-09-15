@@ -11,7 +11,7 @@
 // change the only way to know which one that was is the version on their row.
 
 export const study = {
-  termsVersion: '2026-09-15',
+  termsVersion: '2026-09-15b',
   fee: 'US$10',
   feeAmount: '10',
   feeCurrency: 'USD',
@@ -19,7 +19,9 @@ export const study = {
   questionnaireMinutes: 5,
   // Deliberately the sum of the two above, not a round number chosen separately.
   totalMinutes: 25,
-  deadlineHours: 72,
+  deadlineHours: 168,
+  // How the deadline reads in copy — "168 hours" reads like fine print.
+  deadlineLabel: 'a week',
   paymentWindowHours: 48,
   places: 5,
   payoutMethod: 'PayPal',
@@ -79,7 +81,7 @@ export const statuses = [
   { id: 'waitlist', label: 'Waitlist', hint: 'Suitable, held in reserve.' },
   { id: 'invited', label: 'Invited', hint: 'Key emailed. Waiting for them to redeem it.' },
   { id: 'joined', label: 'Key redeemed', hint: 'The Keys page in the Meta dashboard shows it redeemed. They have the game.' },
-  { id: 'testing', label: 'Testing', hint: 'Playing, inside their 72 hours.' },
+  { id: 'testing', label: 'Testing', hint: 'Playing, inside their week.' },
   { id: 'submitted', label: 'Submitted', hint: 'Questionnaire and evidence received.' },
   { id: 'paid', label: 'Paid', hint: 'Payment sent.' },
   { id: 'declined', label: 'Declined', hint: 'Not selected, or withdrew.' }

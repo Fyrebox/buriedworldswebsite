@@ -745,7 +745,7 @@ test('Invited takes the next key, emails it, and never hands the same applicatio
     assert.ok(email.subject.includes(application.reference) && email.subject.includes("you're in"));
     assert.ok(email.text.includes('KEY01-AAAAA-AAAAA-AAAAA-AAAAA'), 'with the key');
     assert.ok(email.text.includes('https://www.buriedworlds.com/playtest/questionnaire'), 'and the brief');
-    assert.ok(email.text.includes('72 hours'));
+    assert.ok(email.text.includes('a week from this email'));
 
     // Saving a note without changing status sends nothing and spends nothing.
     sent.length = 0;

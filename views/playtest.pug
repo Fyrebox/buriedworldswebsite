@@ -53,7 +53,7 @@ block content
           li Save, quit and come back once, so we learn whether progress returns.
           li Answer the questionnaire, and send the recording or screenshots we agreed.
         p.
-          You have #{study.deadlineHours} hours from receiving access. If that stops
+          You have #{study.deadlineLabel} from receiving access. If that stops
           being realistic, say so — an extension is a message, not a problem.
 
         h2.legal__h When you get paid
@@ -191,7 +191,7 @@ block content
                 span There is a #{study.payoutMethod} account the payment can go to — mine, or a parent or guardian's
               label.playtest-choice(class=(errorField === 'canFinish' ? 'playtest-choice--error' : ''))
                 input(type="checkbox" name="canFinish" value="yes" checked=values.canFinish required)
-                span I could finish within #{study.deadlineHours} hours of getting access
+                span I could finish within #{study.deadlineLabel} of getting access
               label.playtest-choice(class=(errorField === 'acceptedTerms' ? 'playtest-choice--error' : ''))
                 input(type="checkbox" name="acceptedTerms" value="yes" checked=values.acceptedTerms required)
                 span I have read the payment conditions and the privacy note above
