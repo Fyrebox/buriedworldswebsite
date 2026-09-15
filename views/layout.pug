@@ -72,6 +72,9 @@ html(lang="en")
     if jsonLd
       script(type="application/ld+json")!= JSON.stringify(jsonLd).replace(/</g, '\\u003c')
   body(class=bodyClass)
+    //- First focusable thing on every page. Off-screen until it is tabbed to,
+    //- then it sits over the header and takes a keyboard user past it.
+    a.skip(href="#content") Skip to content
     block content
 
     //- Outbound store clicks. The site cannot see installs, so views-into-store

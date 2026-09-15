@@ -17,11 +17,14 @@ block content
   //- ask. Before launch the Reddit band was the primary call to action, which
   //- is the right shape for a page with nothing to sell and the wrong one now.
   +hero(heroVariant, links, product, trailer)
-  +vr(loopSteps)
-  +destinations(worlds, showLockedCard)
-  +earlyaccess(links, product)
-  +reddit(links, signalRows)
-  +discord(links)
+  //- One landmark for the whole run of sections, so a screen reader has a
+  //- "main" to jump to and the skip link in the layout has somewhere to land.
+  main#content
+    +vr(loopSteps)
+    +destinations(worlds, showLockedCard)
+    +earlyaccess(links, product)
+    +reddit(links, signalRows)
+    +discord(links)
   +footer(links)
   +buybar(links, product)
   +trailerModal(trailer)

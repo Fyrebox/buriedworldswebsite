@@ -29,9 +29,9 @@ mixin footer(links)
       .footer__bottom
         span.footer__copy
           | © 2026 Buried Worlds VR. Real places, real hoards.
-          |  ·
+          span.footer__sep(aria-hidden="true")  · 
           a.footer__legal(href="/privacy") Privacy
-          |  ·
+          span.footer__sep(aria-hidden="true")  · 
           a.footer__legal(href="/terms") Terms
         .ornament.ornament--footer
           span.rule

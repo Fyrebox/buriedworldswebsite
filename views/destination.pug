@@ -10,7 +10,7 @@ extends layout
 include partials/footer
 
 block content
-  main.destination(data-screen-label=`Destination — ${d.name}`)
+  main#content.destination(data-screen-label=`Destination — ${d.name}`)
     .destination__inner
       nav.destination__crumbs(aria-label="Breadcrumb")
         a(href="/") Buried Worlds VR

@@ -11,8 +11,8 @@
   --parchment: #EDE6D1;    /* cards + alternating section */
   --ink: #1F211F;
   --ink-soft: #4C574F;
-  --bronze: #8C6133;       /* THE accent */
-  --bronze-link: #7A5227;  /* darkened link/hover bronze */
+  --bronze: #8C6133;       /* THE accent — fills, borders, ornaments, large text */
+  --bronze-link: #7A5227;  /* bronze for SMALL text and pale-text fills: --bronze is 4.35:1 on parchment, under WCAG's 4.5 */
   --bronze-hover: #A0713C; /* button hover on ink footer */
   --sage: #788C7A;
   --track: rgba(31, 33, 31, .18);
@@ -133,15 +133,19 @@ html { scroll-behavior: smooth; }
   cursor: pointer;
   transition: background-color .15s ease, color .15s ease;
 }
+/* Filled with --bronze-link rather than --bronze: parchment text on the brand
+   bronze measures 4.35:1, a hair under WCAG's 4.5:1 for small text, and the
+   darker link bronze clears it at 5.5:1. Hover lightens back to the brand
+   colour, which reads as a lift rather than a change of identity. */
 .btn--primary {
-  background: var(--bronze);
+  background: var(--bronze-link);
   color: var(--parchment);
   border: none;
   border-radius: 12px;
   padding: 14px 26px;
   font-size: 15px;
 }
-.btn--primary:hover { background: var(--bronze-link); color: var(--paper); }
+.btn--primary:hover { background: var(--bronze); color: var(--paper); }
 
 .btn--secondary {
   border: 1px solid var(--bronze);
@@ -167,6 +171,50 @@ html { scroll-behavior: smooth; }
    button's text colour via fill="currentColor", so it recolours on hover too. */
 .btn--icon { display: inline-flex; align-items: center; gap: 9px; }
 .icon { flex: none; display: block; }
+
+/* A keyboard user tabbing to a bronze button got only the browser's default
+   ring, near-invisible on the fill. Ink on parchment, and parchment on the
+   dark Reddit band, are unmistakable on both. */
+.btn:focus-visible,
+.footer__link:focus-visible,
+.footer__legal:focus-visible,
+.footer__cta:focus-visible,
+.ea-card__link:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+.btn--gold:focus-visible,
+.footer__link:focus-visible,
+.footer__legal:focus-visible,
+.footer__cta:focus-visible { outline-color: var(--bw-text); }
+
+/* Keyboard users skip the header with this; everyone else never sees it. */
+.skip { position: absolute; left: -9999px; }
+.skip:focus {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  z-index: 999;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  outline: 2px solid var(--ink);
+  font: 600 14px var(--font-display);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+/* The hero video already pauses for reduced motion (trailer.pug). This covers
+   the transitions and the smooth scroll the stylesheet adds on its own. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 /* ============================================================
    HERO — poster (default)
@@ -444,7 +492,7 @@ html { scroll-behavior: smooth; }
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  background: var(--bronze);
+  background: var(--bronze-link); /* 5.5:1 on parchment; --bronze is 4.35:1 */
   color: var(--parchment);
   border-radius: 10px;
   padding: 13px 22px;
@@ -543,8 +591,11 @@ html { scroll-behavior: smooth; }
   color: var(--ink-soft);
 }
 
-/* Footer privacy link sits inline with the copyright line. */
-.footer__legal { color: #C89A62; text-decoration: none; font-size: 12.5px; }
+/* Footer privacy link sits inline with the copyright line. Underlined because
+   it sits inside running text: no gold reaches 3:1 against that grey, so on a
+   greyscale display colour alone would leave it invisible as a link. */
+.footer__sep { margin: 0 6px; }
+.footer__legal { color: #C89A62; text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; font-size: 12.5px; }
 .footer__legal:hover { color: var(--bw-gold); text-decoration: underline; }
 
 /* ============================================================
@@ -556,7 +607,7 @@ html { scroll-behavior: smooth; }
    promise and wrong for a state. Filled bronze reads as live without becoming
    a second button competing with the call to action beside it. */
 .badge--live {
-  background: var(--bronze);
+  background: var(--bronze-link); /* 5.5:1 on parchment; --bronze is 4.35:1 */
   color: var(--parchment);
   padding: 7px 18px;
   font-size: 13px;
@@ -627,7 +678,7 @@ html { scroll-behavior: smooth; }
   font-size: 13px;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--bronze);
+  color: var(--bronze-link);
 }
 .ea-card__list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 9px; }
 .ea-card__list li { font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
@@ -778,7 +829,7 @@ html { scroll-behavior: smooth; }
   font-size: 12.5px;
   letter-spacing: .06em;
   text-transform: uppercase;
-  color: var(--bronze);
+  color: var(--bronze-link);
 }
 .press-facts__list dd { margin: 0; font-size: 14.5px; color: var(--ink); line-height: 1.5; }
 
@@ -798,7 +849,7 @@ html { scroll-behavior: smooth; }
   font-size: 12px;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--bronze);
+  color: var(--bronze-link);
   margin-bottom: 10px;
 }
 .press-copy__text { margin: 0 0 12px; font-size: 15px; line-height: 1.62; color: var(--ink); }
@@ -822,7 +873,7 @@ html { scroll-behavior: smooth; }
   font-size: 12px;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--bronze);
+  color: var(--bronze-link);
 }
 .press-world__blurb { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink); }
 .press-world__history { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); }
@@ -923,7 +974,7 @@ html { scroll-behavior: smooth; }
 .admin-login p,
 .redirect-error p { margin: 0; max-width: 680px; color: var(--ink-soft); line-height: 1.55; }
 .admin-kicker {
-  color: var(--bronze);
+  color: var(--bronze-link);
   font: 600 12px var(--font-display);
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -1076,7 +1127,7 @@ html { scroll-behavior: smooth; }
   flex: none;
   border: 0;
   background: none;
-  color: var(--bronze);
+  color: var(--bronze-link);
   cursor: pointer;
   font: 600 12px var(--font-body);
   text-decoration: underline;
@@ -1201,7 +1252,7 @@ html { scroll-behavior: smooth; }
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: var(--bronze);
+  color: var(--bronze-link);
   font: 600 12px var(--font-display);
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -1300,7 +1351,7 @@ html { scroll-behavior: smooth; }
 }
 .playtest-terms__row:last-child { border-bottom: 0; }
 .playtest-terms dt {
-  color: var(--bronze);
+  color: var(--bronze-link);
   font: 600 12px var(--font-display);
   letter-spacing: .07em;
   text-transform: uppercase;
@@ -1418,7 +1469,7 @@ html { scroll-behavior: smooth; }
   background: var(--parchment);
 }
 .playtest-reference__label {
-  color: var(--bronze);
+  color: var(--bronze-link);
   font: 600 12px var(--font-display);
   letter-spacing: .09em;
   text-transform: uppercase;
@@ -1451,7 +1502,7 @@ html { scroll-behavior: smooth; }
 .destination__kicker {
   display: block;
   margin-bottom: 14px;
-  color: var(--bronze);
+  color: var(--bronze-link);
   font: 600 12px var(--font-display);
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -1484,7 +1535,7 @@ html { scroll-behavior: smooth; }
 .destination__facts > div:nth-last-child(-n+1) { border-bottom: 0; }
 .destination__facts dt {
   margin-bottom: 4px;
-  color: var(--bronze);
+  color: var(--bronze-link);
   font: 600 11.5px var(--font-display);
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -1531,7 +1582,7 @@ html { scroll-behavior: smooth; }
 }
 .destination__sibling { display: flex; flex-direction: column; gap: 3px; text-decoration: none; color: var(--ink); }
 .destination__sibling--next { text-align: right; }
-.destination__sibling-label { color: var(--bronze); font: 600 11.5px var(--font-display); letter-spacing: .08em; text-transform: uppercase; }
+.destination__sibling-label { color: var(--bronze-link); font: 600 11.5px var(--font-display); letter-spacing: .08em; text-transform: uppercase; }
 .destination__sibling-name { font-family: var(--font-serif); font-weight: 600; font-size: 1.35rem; }
 .destination__sibling:hover .destination__sibling-name { color: var(--bronze); }
 
@@ -1588,4 +1639,4 @@ html { scroll-behavior: smooth; }
 .guide__update { padding: 20px 0 6px; border-top: 1px solid rgba(31, 33, 31, .1); }
 .guide__update:first-of-type { border-top: 0; padding-top: 6px; }
 .guide__update-title { margin: 0 0 10px; font: 600 1.15rem var(--font-serif); color: var(--ink); }
-.guide__update-title time { color: var(--bronze); font: 600 12px var(--font-display); letter-spacing: .08em; text-transform: uppercase; }
+.guide__update-title time { color: var(--bronze-link); font: 600 12px var(--font-display); letter-spacing: .08em; text-transform: uppercase; }

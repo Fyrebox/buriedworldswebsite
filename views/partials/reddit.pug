@@ -22,5 +22,7 @@ mixin reddit(links, signalRows)
                 .signal__fill(style=`width:${row.pct}%;background:${row.color}`)
         .share
           span.share__title Share your route
-          span.share__grid ⬛🟫🟫💎
+          //- Decorative: read aloud it is "black large square, brick, brick,
+          //- gem stone". The caption below carries the meaning.
+          span.share__grid(aria-hidden="true") ⬛🟫🟫💎
           span.share__caption Found it in 4 — same field, different route than yours.
