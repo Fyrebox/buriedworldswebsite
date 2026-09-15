@@ -166,3 +166,30 @@ export const privacyNotes = [
   `This page carries no analytics and sets no cookies.`,
   `You can ask to see, correct or delete your application at any time, before or after the study, by writing to ${study.privacyEmail}. Quote the reference shown when you apply.`
 ];
+
+// The questionnaire, from the strategy document. Seven questions, in this
+// order, and all of them about the tester's own experience rather than the
+// game's quality — a stuck player is the most useful result the study can
+// produce, and the questions are shaped so that saying so is easy.
+export const questionnaire = {
+  before: [
+    'Start a new game in an empty save slot. Do not look up the controls, watch a video or ask anyone — working out what the game teaches badly is the whole point, and getting stuck is a result, not a failure.',
+    `Play for about ${study.playMinutes} minutes. Breaks do not count; if a crash, a blocker or motion discomfort stops you, stop, and tell us what happened. You are paid in full either way.`,
+    'If you agreed to record, start the headset recording before you begin. If you agreed to screenshots, take one whenever something confuses or pleases you — a dozen is plenty.',
+    'Then quit to the hub and come back into the same save once, so we learn whether your progress returns.'
+  ],
+  questions: [
+    'What did you think you were supposed to do first?',
+    'Where did you get confused, and what did you try next?',
+    'How did detecting and digging feel? Describe anything awkward or satisfying.',
+    'What was your most satisfying discovery or moment?',
+    'Was there a point where you wanted to stop? What caused it?',
+    'Did you experience discomfort, difficulty reaching objects, unreadable text or technical problems?',
+    'Would you voluntarily play again? What would you want to do next?'
+  ],
+  details: [
+    'Which headset you played on',
+    'Roughly how many minutes you played',
+    'Whether your progress was still there when you came back in'
+  ]
+};

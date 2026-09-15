@@ -407,6 +407,30 @@ test('one connection cannot bury the study in applications', async () => {
   }
 });
 
+test('the questionnaire page states every question, the address, and the reference instruction', async () => {
+  const server = await startServer();
+  try {
+    const response = await fetch(`${server.url}/playtest/questionnaire`);
+    const html = await response.text();
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow');
+    assert.ok(!html.includes('googletagmanager'), 'no analytics on study pages');
+    const { questionnaire } = await import('./data/playtest.mjs');
+    assert.equal(questionnaire.questions.length, 7);
+    for (const question of questionnaire.questions) {
+      assert.ok(html.includes(question.replace(/'/g, '&#39;').replace(/"/g, '&quot;')), question);
+    }
+    assert.ok(html.includes('mailto:playtest@bellare.com.au'));
+    assert.ok(html.includes('BW-code'));
+    assert.ok(html.includes(`${study.deadlineHours} hours`));
+
+    const applied = await (await apply(server.url)).text();
+    assert.ok(applied.includes('href="/playtest/questionnaire"'), 'the confirmation page links to it');
+  } finally {
+    await server.stop();
+  }
+});
+
 // ---- Notification ------------------------------------------------------
 
 test('the developer is told once per new application, and never given the applicant\u2019s details', async () => {

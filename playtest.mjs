@@ -20,6 +20,7 @@ import {
   headsets,
   privacyNotes,
   promises,
+  questionnaire,
   statuses,
   study,
   vrFrequencies
@@ -173,6 +174,19 @@ export function createPlaytestRouter({
   });
 
   router.get('/playtest', (req, res) => renderForm(req, res));
+
+  // The brief a selected tester is sent to. Public, so it can be read before
+  // applying — the fewer surprises after a place is offered, the better — but
+  // noindex like the rest of the study.
+  router.get('/playtest/questionnaire', (req, res) => res.render('playtest-questionnaire', {
+    pageTitle: 'Playtest questionnaire — Buried Worlds VR',
+    pageDescription: `The ${questionnaire.questions.length} questions a Buried Worlds VR playtester answers after their session, and how to send them.`,
+    pagePath: '/playtest/questionnaire',
+    noIndex: true,
+    disableAnalytics: true,
+    study,
+    questionnaire
+  }));
 
   router.post(
     '/playtest',

@@ -1,0 +1,65 @@
+//- The brief and the questionnaire a selected tester follows. One page, so the
+//- link in the invitation is the whole instruction set; nothing is in an email
+//- that is not also here.
+extends layout
+
+include partials/footer
+
+block content
+  main#content.legal.playtest(data-screen-label="Playtest questionnaire")
+    .wrap.legal__inner
+      a.legal__home(href="/playtest") ← Paid playtest
+
+      .section-head
+        .ornament
+          span.rule
+          span.diamond
+          span.rule
+        h1.h2 Your session, and the questions after it
+        p.serif-italic About #{study.playMinutes} minutes of play, then #{questionnaire.questions.length} questions. Honest and specific beats polite every time.
+
+      .legal__body
+        p.
+          This is the whole brief. If you have been offered a place and accepted
+          it, everything you need is on this page; if you are reading before
+          applying, this is what you would be agreeing to.
+
+        h2.legal__h Before you start
+        ol.legal__list
+          each step in questionnaire.before
+            li= step
+
+        h2.legal__h The questions
+        p.
+          Answer in your own words, as long or short as you like. There are no
+          right answers and nothing is scored — a sentence that says "I had no
+          idea what the pickaxe was for" is worth more to us than a paragraph of
+          praise.
+        ol.legal__list.playtest-questions
+          each question in questionnaire.questions
+            li= question
+
+        h2.legal__h Two or three details
+        ul.legal__list
+          each detail in questionnaire.details
+            li= detail
+
+        h2.legal__h Sending it
+        p
+          | Email your answers, your recording or screenshots, and the details above to
+          |  #[a(href=`mailto:${study.contactEmail}`)= study.contactEmail]
+          |  with your reference — the BW-code you were shown when you applied — in the
+          |  subject line. A large recording can be a link to a private upload rather than
+          |  an attachment.
+        p.
+          You have #{study.deadlineHours} hours from receiving access. If that stops
+          being realistic, say so before it runs out — an extension is a message, not
+          a problem. Payment of #{study.fee} is sent by #{study.payoutMethod} within
+          #{study.paymentWindowHours} hours of your submission arriving, and it does not
+          depend on liking the game, finding bugs, or finishing anything.
+
+        p.legal__meta(style="margin-top:40px")
+          | Study terms version #{study.termsVersion}. The full payment conditions are on the
+          |  #[a(href="/playtest") application page].
+
+  +footer(links)
