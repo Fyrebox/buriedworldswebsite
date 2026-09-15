@@ -14,6 +14,8 @@ block content
 
     if notice
       p.admin-alert.admin-alert--success(role="status")= notice
+    if problem
+      p.admin-alert(role="alert")= problem
 
     .admin-panel(style="margin-bottom:24px")
       h2 What they told us
@@ -53,6 +55,17 @@ block content
           .playtest-terms__row
             dt Notes
             dd= application.notes
+
+    .admin-panel(style="margin-bottom:24px")
+      h2 Key
+      if held
+        p(style="margin:0;font-size:13px;color:var(--ink-soft)")
+          | Sent #{held.assignedAt.slice(0, 10)}:
+          |  #[code= held.key]
+          |  — the Keys page in the Meta dashboard shows whether it has been redeemed.
+      else
+        p(style="margin:0;font-size:13px;color:var(--ink-soft)")
+          | None yet. Setting Invited below assigns the next unused key (#{keys.unused} left) and emails it.
 
     .admin-panel(style="margin-bottom:24px")
       h2 Verification
@@ -114,7 +127,10 @@ block content
         select.playtest-select(name="status")
           each status in statuses
             option(value=status.id selected=(status.id === application.status))= `${status.label} — ${status.hint}`
-        small Dates above are stamped the first time a status is reached and never moved, so correcting a mistake cannot rewrite when an invitation actually went out.
+        small.
+          Invited, Declined and Paid each email the applicant — the exact text is below.
+          Dates above are stamped the first time a status is reached and never moved, so
+          correcting a mistake cannot rewrite when an invitation actually went out.
       .admin-field.admin-field--wide(style="margin-top:22px")
         span Private note
         textarea.playtest-textarea(name="adminNote" rows="3" maxlength="2000")= application.adminNote
@@ -122,6 +138,21 @@ block content
       .admin-form__actions
         button.btn.btn--primary(type="submit") Save
         a.btn.btn--secondary(href="/admin/playtest") Back
+
+    .admin-panel(style="margin-top:32px")
+      h2 What they receive
+      p(style="margin:0 0 14px;color:var(--ink-soft);font-size:13px")
+        | Sent to #[code= application.email] when the status changes to each of these. Nothing else is ever sent.
+        if !mailConfigured
+          |  #[strong Mail is not configured on this deployment; nothing will be sent.]
+      each name in ['invited', 'declined', 'paid']
+        details(style="margin-bottom:10px")
+          summary(style="cursor:pointer;font:600 13px var(--font-display);letter-spacing:.04em;text-transform:uppercase")= name
+          pre(style="white-space:pre-wrap;font:13px/1.5 var(--font-body);background:var(--paper);padding:14px;border-radius:8px;margin:8px 0 0")
+            strong Subject: #{previews[name].subject}
+            | 
+            | 
+            = previews[name].text
 
     .admin-panel(style="margin-top:32px")
       h2 Delete

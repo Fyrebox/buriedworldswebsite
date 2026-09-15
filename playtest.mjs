@@ -141,6 +141,54 @@ export function submissionReceipt(application, { corrected, siteUrl }) {
   };
 }
 
+/**
+ * The emails a status change sends to the applicant. Plain text, one screen,
+ * and each says what happens next and what the applicant need not do.
+ * Rendered on the dashboard before the click, so nothing goes out unseen.
+ */
+export function statusEmails(application, { siteUrl, key = '' }) {
+  const ref = application.reference;
+  return {
+    invited: {
+      subject: `Buried Worlds VR playtest ${ref} — you're in`,
+      text: [
+        `You've been offered a place in the Buried Worlds VR playtest.`,
+        ``,
+        `Your key:   ${key || '(no key on file)'}`,
+        ``,
+        `Redeem it on the Meta account you own the headset with: open the Meta Horizon app on your phone, go to Store → Redeem Code (or Menu → Redeem Code, depending on version), and enter it. The game then installs on your headset like any purchase. The key is yours to keep.`,
+        ``,
+        `The brief and the questions are here:`,
+        `${siteUrl}/playtest/questionnaire`,
+        ``,
+        `You have ${study.deadlineHours} hours from this email. Play about ${study.playMinutes} minutes without looking anything up, capture a short clip or a few screenshots, then submit on that page with your reference (${ref}) and this email address. Payment of ${study.fee} follows by ${study.payoutMethod} within ${study.paymentWindowHours} hours — whether or not you liked it, found anything, or finished anything.`,
+        ``,
+        `If the ${study.deadlineHours} hours stop being realistic, say so before they run out and you'll get more. If a crash, a blocker or motion discomfort stops the session, stop, submit what you have, and you're still paid in full.`
+      ].join('\n')
+    },
+    declined: {
+      subject: `Buried Worlds VR playtest ${ref} — not this round`,
+      text: [
+        `Thanks for applying to the Buried Worlds VR playtest. There isn't a place for you this round.`,
+        ``,
+        `That's almost always about which headsets were already covered, not about you. If another round opens it will be announced on the Discord first, and you're welcome to apply again.`,
+        ``,
+        `Your application will be deleted 30 days after this round closes, as the page said. Nothing else will be sent to this address.`
+      ].join('\n')
+    },
+    paid: {
+      subject: `Buried Worlds VR playtest ${ref} — payment sent`,
+      text: [
+        `${study.fee} has been sent by ${study.payoutMethod} to the account you gave with your submission. It can take a little while to show.`,
+        ``,
+        `Thank you — what you wrote is going straight into the next build. Your answers and details are deleted 90 days from now; the game key is yours to keep.`,
+        ``,
+        `Nothing else will be sent to this address.`
+      ].join('\n')
+    }
+  };
+}
+
 export function createPlaytestRouter({
   store,
   siteUrl = '',
@@ -558,6 +606,12 @@ export function createPlaytestRouter({
       store.listApplications(),
       store.summarise()
     ]);
+    const keys = await store.keySummary();
+    let notice = req.query.saved === '1' ? 'Application updated.' : '';
+    if (req.query.keys !== undefined) {
+      notice = `${Number(req.query.keys) || 0} key${Number(req.query.keys) === 1 ? '' : 's'} added`
+        + (Number(req.query.skipped) ? `, ${Number(req.query.skipped)} already on file or not a key.` : '.');
+    }
     return res.render('admin-playtest', {
       pageTitle: 'Playtest applications — Buried Worlds VR',
       pagePath: '/admin/playtest',
@@ -565,11 +619,13 @@ export function createPlaytestRouter({
       disableAnalytics: true,
       applications: applications.map(decorate),
       summary,
+      keys,
       statuses,
       headsets,
       study,
       applicationsOpen,
-      notice: req.query.saved === '1' ? 'Application updated.' : ''
+      mailConfigured: Boolean(notify),
+      notice
     });
   });
 
@@ -591,7 +647,18 @@ export function createPlaytestRouter({
   router.get('/admin/playtest/:id', async (req, res) => {
     const application = await store.getById(Number(req.params.id));
     if (!application) return res.status(404).send('Not found');
-    const submission = await store.getSubmission(application.id);
+    const [submission, held, keys] = await Promise.all([
+      store.getSubmission(application.id), store.keyFor(application.id), store.keySummary()
+    ]);
+    const sentLabels = {
+      invited: 'Application updated. The invitation, with their key, has been emailed to them.',
+      declined: 'Application updated. They have been emailed that there is no place this round.',
+      paid: 'Application updated. They have been emailed that payment was sent.',
+      unconfigured: 'Application updated — but no email was sent: mail is not configured on this deployment. Tell them yourself.'
+    };
+    let notice = req.query.saved === '1' ? (sentLabels[req.query.sent] ?? 'Application updated.') : '';
+    let problem = '';
+    if (req.query.problem === 'no-keys') problem = 'Not invited: there are no unused keys. Paste more on the applications page, then try again.';
     return res.render('admin-playtest-detail', {
       pageTitle: `${application.reference} — Buried Worlds VR`,
       pagePath: req.path,
@@ -599,23 +666,57 @@ export function createPlaytestRouter({
       disableAnalytics: true,
       application: decorate(application),
       submission: submission && { ...submission, headsetLabel: HEADSET_LABELS[submission.headsetPlayed] ?? submission.headsetPlayed },
+      held,
+      keys,
+      previews: statusEmails(application, { siteUrl, key: held ? held.key : '(the next unused key)' }),
+      mailConfigured: Boolean(notify),
       questionnaire,
       statuses,
       study,
-      notice: req.query.saved === '1' ? 'Application updated.' : ''
+      notice,
+      problem
     });
   });
 
+  // Three transitions write to the applicant; the rest only record. Invited
+  // needs a key and refuses without one — a "you're in" email with no key in
+  // it would be worse than no email. The email goes out after the status is
+  // saved, fire and forget, and the redirect says which one was sent so the
+  // dashboard can confirm it.
   router.post('/admin/playtest/:id/status', requireCsrf, async (req, res) => {
     const application = await store.getById(Number(req.params.id));
     if (!application) return res.status(404).send('Not found');
+    const nextStatus = String(req.body.status ?? '');
+    const changed = nextStatus !== application.status;
+    let key = '';
+    if (nextStatus === 'invited' && changed) {
+      const assigned = await store.assignKey(application.id);
+      if (!assigned) return res.redirect(303, `/admin/playtest/${application.id}?problem=no-keys`);
+      key = assigned.key;
+    }
+    let updated;
     try {
-      await store.setStatus(application.id, String(req.body.status ?? ''), req.body.adminNote ?? '');
+      updated = await store.setStatus(application.id, nextStatus, req.body.adminNote ?? '');
     } catch (error) {
       if (!(error instanceof ApplicationValidationError)) throw error;
       return res.status(400).send(error.message);
     }
-    return res.redirect(303, `/admin/playtest/${application.id}?saved=1`);
+    let sent = '';
+    if (changed && ['invited', 'declined', 'paid'].includes(nextStatus)) {
+      if (notify) {
+        const email = statusEmails(updated, { siteUrl, key })[nextStatus];
+        Promise.resolve(notify.sendQuietly({ to: updated.email, ...email })).catch(onError);
+        sent = nextStatus;
+      } else {
+        sent = 'unconfigured';
+      }
+    }
+    return res.redirect(303, `/admin/playtest/${application.id}?saved=1${sent ? `&sent=${sent}` : ''}`);
+  });
+
+  router.post('/admin/playtest/keys', requireCsrf, async (req, res) => {
+    const result = await store.addKeys(req.body.keys ?? '');
+    return res.redirect(303, `/admin/playtest?keys=${result.added}&skipped=${result.skipped}`);
   });
 
   // Erasure on request. The study promises deletion on demand and after the

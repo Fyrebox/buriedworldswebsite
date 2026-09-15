@@ -69,18 +69,17 @@ export const captureMethods = [
   { id: 'screenshots', label: 'Screenshots and written notes instead' }
 ];
 
-// The application's status as the study moves through it. `invited` and `joined`
-// are the two that matter: `invited` means an email invitation to the release
-// channel has gone out, `joined` means the Meta developer dashboard now shows
-// that address as having accepted it. That transition is the only proof the
-// website can get that an applicant really holds a working Meta account — see
-// README § Playtest recruitment.
+// The application's status as the study moves through it. `invited` means the
+// site emailed them a store key; `joined` (shown as "Key redeemed") means the
+// Keys page in the Meta developer dashboard shows that key redeemed — the one
+// proof available that a real Meta account now holds the game. The id stays
+// `joined` because rows were written under it.
 export const statuses = [
   { id: 'new', label: 'New', hint: 'Applied. Not yet screened.' },
   { id: 'waitlist', label: 'Waitlist', hint: 'Suitable, held in reserve.' },
-  { id: 'invited', label: 'Invited', hint: 'Release-channel invitation sent. Waiting for them to accept.' },
-  { id: 'joined', label: 'Joined', hint: 'Shows as Joined in the Meta dashboard. Account confirmed — the place can be offered.' },
-  { id: 'testing', label: 'Testing', hint: 'Brief sent. Inside their 72 hours.' },
+  { id: 'invited', label: 'Invited', hint: 'Key emailed. Waiting for them to redeem it.' },
+  { id: 'joined', label: 'Key redeemed', hint: 'The Keys page in the Meta dashboard shows it redeemed. They have the game.' },
+  { id: 'testing', label: 'Testing', hint: 'Playing, inside their 72 hours.' },
   { id: 'submitted', label: 'Submitted', hint: 'Questionnaire and evidence received.' },
   { id: 'paid', label: 'Paid', hint: 'Payment sent.' },
   { id: 'declined', label: 'Declined', hint: 'Not selected, or withdrew.' }
@@ -103,7 +102,7 @@ export const promises = [
   },
   {
     label: 'Access',
-    body: 'A free key after selection, sent as an invitation to a test release channel. Yours to keep.'
+    body: 'A free key after selection, emailed to you, redeemed in the Meta Horizon app on the account you own the headset with. Yours to keep.'
   },
   {
     label: 'Feedback',
@@ -161,6 +160,7 @@ export const privacyNotes = [
   `The PayPal account the payment goes to is asked for only when you submit your session, and only from testers who were offered a place. It is stored with your application and deleted with it.`,
   `Unsuccessful applications are deleted 30 days after the study closes. Recordings and contact details are deleted 90 days after final payment. Findings are kept only with names and addresses removed.`,
   `If you are under 18, we store that a parent or guardian agreed rather than who they are, and we may ask them to confirm by email before a place is offered. Nothing is collected from anyone under ${study.minAge}.`,
+  `If you are offered a place, your key is emailed to you by this site. Nothing about you is sent to Meta by us; Meta learns of you only when you redeem the key, under Meta's own terms.`,
   `This page carries no analytics and sets no cookies.`,
   `You can ask to see, correct or delete your application at any time, before or after the study, through the privacy page. Quote the reference shown when you apply.`
 ];

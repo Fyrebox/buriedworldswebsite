@@ -349,6 +349,24 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
       ON playtest_submissions (application_id);
   `);
 
+  // Redeemable store keys from the Meta developer dashboard, pasted in by the
+  // developer and handed out one per invited applicant. A key with assigned_at
+  // set is spent for good: it was emailed, so it cannot be offered again even
+  // if the application it went to is later deleted.
+  const keysExist = await pool.query(`
+    SELECT 1 FROM information_schema.tables WHERE table_name = 'playtest_keys'
+  `);
+  if (keysExist.rows.length === 0) await pool.query(`
+    CREATE TABLE playtest_keys (
+      id BIGSERIAL PRIMARY KEY,
+      key TEXT NOT NULL,
+      application_id BIGINT REFERENCES playtest_applications(id),
+      added_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      assigned_at TIMESTAMPTZ
+    );
+    CREATE UNIQUE INDEX playtest_keys_key ON playtest_keys (key);
+  `);
+
   async function getByReference(reference) {
     const result = await pool.query(
       'SELECT * FROM playtest_applications WHERE reference = $1',
@@ -430,8 +448,10 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
   }
 
   async function deleteApplication(id) {
-    // The submission holds the payment detail; it goes first, and always.
+    // The submission holds the payment detail; it goes first, and always. A
+    // key that went to this applicant stays on record as spent, unlinked.
     await pool.query('DELETE FROM playtest_submissions WHERE application_id = $1', [id]);
+    await pool.query('UPDATE playtest_keys SET application_id = NULL WHERE application_id = $1', [id]);
     const result = await pool.query('DELETE FROM playtest_applications WHERE id = $1', [id]);
     return result.rowCount > 0;
   }
@@ -495,6 +515,75 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
     return { submission: rowToSubmission(saved.rows[0]), application: updated, corrected: Boolean(existing) };
   }
 
+  /**
+   * Add keys pasted from the Meta dashboard, one per line. Anything that is
+   * not a plausible key is skipped, and so is a key already on file — pasting
+   * the same list twice is harmless.
+   */
+  async function addKeys(text) {
+    const candidates = [...new Set(
+      String(text ?? '').split(/[\s,;]+/).map((entry) => entry.trim().toUpperCase()).filter((entry) => /^[A-Z0-9-]{12,64}$/.test(entry))
+    )];
+    let added = 0;
+    for (const key of candidates) {
+      const existing = await pool.query('SELECT 1 FROM playtest_keys WHERE key = $1', [key]);
+      if (existing.rows.length) continue;
+      await pool.query('INSERT INTO playtest_keys (key) VALUES ($1)', [key]);
+      added += 1;
+    }
+    return { added, skipped: candidates.length - added };
+  }
+
+  async function keySummary() {
+    const result = await pool.query(`
+      SELECT
+        COUNT(*)::int AS total,
+        SUM(CASE WHEN assigned_at IS NULL THEN 1 ELSE 0 END)::int AS unused
+      FROM playtest_keys
+    `);
+    const row = result.rows[0] ?? {};
+    return { total: Number(row.total ?? 0), unused: Number(row.unused ?? 0) };
+  }
+
+  async function keyFor(applicationId) {
+    const result = await pool.query(
+      'SELECT key, assigned_at FROM playtest_keys WHERE application_id = $1',
+      [applicationId]
+    );
+    return result.rows[0] ? { key: result.rows[0].key, assignedAt: iso(result.rows[0].assigned_at) } : null;
+  }
+
+  /**
+   * The key for an application: the one it already has, or the oldest unused
+   * one, now marked spent. Null only when there are none left — in which case
+   * nothing has changed, and the caller must not invite.
+   */
+  async function assignKey(applicationId) {
+    const held = await keyFor(applicationId);
+    if (held) return held;
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const next = await client.query(`
+        SELECT id, key FROM playtest_keys WHERE assigned_at IS NULL ORDER BY added_at ASC, id ASC LIMIT 1
+      `);
+      if (!next.rows[0]) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+      const result = await client.query(`
+        UPDATE playtest_keys SET application_id = $1, assigned_at = NOW() WHERE id = $2 RETURNING key, assigned_at
+      `, [applicationId, next.rows[0].id]);
+      await client.query('COMMIT');
+      return { key: result.rows[0].key, assignedAt: iso(result.rows[0].assigned_at) };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async function listSubmissions() {
     const result = await pool.query(`
       SELECT s.*, a.reference, a.email, a.status
@@ -531,6 +620,10 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
     setStatus,
     deleteApplication,
     findForSubmission,
+    addKeys,
+    keySummary,
+    keyFor,
+    assignKey,
     getSubmission,
     saveSubmission,
     listSubmissions,

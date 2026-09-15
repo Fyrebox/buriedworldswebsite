@@ -35,6 +35,22 @@ block content
         span.admin-metric__label Paid
 
     .admin-panel(style="margin-bottom:30px")
+      h2 Keys
+      p(style="margin:0 0 14px;color:var(--ink-soft);font-size:13px")
+        strong= keys.unused
+        |  unused of #{keys.total} on file. Setting an application to Invited takes the next one and emails it to them; with none left, Invited is refused.
+        if !mailConfigured
+          |  #[strong Mail is not configured on this deployment], so no invitation would be sent — the key would only show on the application page.
+      form(action="/admin/playtest/keys" method="post")
+        input(type="hidden" name="_csrf" value=csrf)
+        .admin-field.admin-field--wide
+          span Paste keys from the Meta dashboard
+          textarea.playtest-textarea(name="keys" rows="4" placeholder="One per line. Distribution → Keys → Generate, then copy them here." spellcheck="false")
+          small Keys already on file are skipped, so pasting the same list twice does nothing.
+        .admin-form__actions
+          button.btn.btn--secondary(type="submit") Add keys
+
+    .admin-panel(style="margin-bottom:30px")
       h2 Headsets applied
       p(style="margin:0;color:var(--ink-soft);font-size:13px")
         each headset, index in headsets

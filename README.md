@@ -194,6 +194,25 @@ at startup like the campaign tables. It is the only place on the site holding
 contact details, so it holds nothing that was not typed into the form: no IP
 address, no cookie, no user agent, nothing derived.
 
+### Keys and the three emails
+
+Selection is two clicks per tester. Generate store keys in the Meta developer dashboard
+(Distribution → Keys → Generate) and paste them into the box on `/admin/playtest`.
+Then, on an application:
+
+- **Invited** takes the oldest unused key, records which key went to whom, and emails
+  the applicant: the key, how to redeem it in the Meta Horizon app, the brief link, and
+  their 72 hours. With no keys left it refuses and changes nothing — a "you're in" with
+  no key in it would be worse than silence.
+- **Declined** emails "not this round". **Paid** emails "payment sent".
+- Everything else only records. Saving a note without changing status sends nothing;
+  walking an application back and re-inviting reuses the key it already holds.
+
+The exact text of all three is shown on the detail page before you click. An emailed key
+is spent for good — deleting the application unlinks it but keeps it counted, so it can
+never be offered twice. Keys unlock the **store build**; if a later wave needs an
+unreleased fix, that is a release-channel invite from the Meta dashboard again.
+
 ### Verifying a tester really has a Quest
 
 There is no way to look up a Meta account from an email address or a username.
@@ -204,19 +223,12 @@ password-reset flow to see whether an address is registered is account
 enumeration: against Meta's terms, deliberately uninformative, and it would mean
 feeding an applicant's address into Meta's auth systems without their consent.
 
-**The release-channel invitation is the check instead, and it is stronger than a
-lookup would be.** In the Meta developer dashboard, Distribution → Release
-Channels → the channel's user count → *Email Invite Users*. The Users tab then
-shows each invitee as `Invited`, and as `Joined` once they accept. `Joined` is
-dashboard-visible proof that a working Meta Horizon account holds that address
-and has claimed the build — it proves access *now*, which is what a playtest
-actually needs, rather than registration at some point in the past.
-
-So the funnel invites **before** confirming anyone's place, and the dashboard's
-`invited` and `joined` statuses mirror the two columns in Meta's own Users tab.
-Somebody who never reaches `Joined` costs nothing, because they were never
-promised a slot. The Horizon username collected on the form is a cheap
-pre-filter, not proof; it is stable enough to rely on across a study because Meta
+**Redemption is the check instead.** The Keys page in the Meta developer dashboard
+shows each key as redeemed or not. A redeemed key is dashboard-visible proof that a
+working Meta Horizon account now holds the game — it proves access *now*, which is
+what a playtest actually needs. The dashboard status `joined` (labelled *Key redeemed*;
+the id predates the keys) records it. The Horizon username collected on the form is a
+cheap pre-filter, not proof; it is stable enough to rely on across a study because Meta
 allows a username change only once every six months.
 
 Statuses run `new → waitlist → invited → joined → testing → submitted → paid`,

@@ -690,6 +690,159 @@ test('a database from before submissions gains the table on startup', async () =
   }
 });
 
+// ---- Keys and status emails --------------------------------------------
+
+async function adminPost(server, cookie, path, fields) {
+  return fetch(`${server.url}${path}`, {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(fields),
+    redirect: 'manual'
+  });
+}
+
+async function csrfFor(server, cookie, id) {
+  const html = await (await fetch(`${server.url}/admin/playtest/${id}`, { headers: { cookie } })).text();
+  return /name="_csrf" value="([^"]+)"/.exec(html)[1];
+}
+
+test('keys pasted from the dashboard are parsed, deduplicated, and counted', async () => {
+  const store = await createPlaytestStore({ pool: createMemoryPool() });
+  try {
+    const first = await store.addKeys('ABCDE-FGHIJ-KLMNO-PQRST-UVWXY\nabcde-fghij-klmno-pqrst-uvwxz\n\nnot a key\nABCDE-FGHIJ-KLMNO-PQRST-UVWXY');
+    assert.deepEqual(first, { added: 2, skipped: 0 }, 'two keys, the duplicate line collapsed before counting');
+    const again = await store.addKeys('ABCDE-FGHIJ-KLMNO-PQRST-UVWXY, 11111-22222-33333-44444-55555');
+    assert.deepEqual(again, { added: 1, skipped: 1 });
+    assert.deepEqual(await store.keySummary(), { total: 3, unused: 3 });
+  } finally {
+    await store.close();
+  }
+});
+
+test('Invited takes the next key, emails it, and never hands the same application a second one', async () => {
+  const sent = [];
+  const server = await startServer({
+    siteUrl: 'https://www.buriedworlds.com',
+    notify: { to: 'owner@example.com', sendQuietly: async (message) => { sent.push(message); } }
+  });
+  try {
+    await server.store.addKeys('KEY01-AAAAA-AAAAA-AAAAA-AAAAA\nKEY02-BBBBB-BBBBB-BBBBB-BBBBB');
+    const { application } = await server.store.createApplication(applicationInput());
+    const cookie = adminCookie();
+    const csrf = await csrfFor(server, cookie, application.id);
+
+    const invite = await adminPost(server, cookie, `/admin/playtest/${application.id}/status`, { status: 'invited', adminNote: '', _csrf: csrf });
+    assert.equal(invite.status, 303);
+    assert.ok(invite.headers.get('location').endsWith('?saved=1&sent=invited'));
+    assert.equal((await server.store.getById(application.id)).status, 'invited');
+    assert.deepEqual(await server.store.keySummary(), { total: 2, unused: 1 });
+    const held = await server.store.keyFor(application.id);
+    assert.equal(held.key, 'KEY01-AAAAA-AAAAA-AAAAA-AAAAA', 'the oldest unused key');
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const email = sent.find((message) => message.to === 'tester@example.com');
+    assert.ok(email, 'the applicant is emailed');
+    assert.ok(email.subject.includes(application.reference) && email.subject.includes("you're in"));
+    assert.ok(email.text.includes('KEY01-AAAAA-AAAAA-AAAAA-AAAAA'), 'with the key');
+    assert.ok(email.text.includes('https://www.buriedworlds.com/playtest/questionnaire'), 'and the brief');
+    assert.ok(email.text.includes('72 hours'));
+
+    // Saving a note without changing status sends nothing and spends nothing.
+    sent.length = 0;
+    await adminPost(server, cookie, `/admin/playtest/${application.id}/status`, { status: 'invited', adminNote: 'Quest 3 slot.', _csrf: csrf });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(sent.length, 0);
+    assert.deepEqual(await server.store.keySummary(), { total: 2, unused: 1 });
+
+    // Walking back to New and inviting again reuses the key already held.
+    await adminPost(server, cookie, `/admin/playtest/${application.id}/status`, { status: 'new', adminNote: '', _csrf: csrf });
+    await adminPost(server, cookie, `/admin/playtest/${application.id}/status`, { status: 'invited', adminNote: '', _csrf: csrf });
+    assert.equal((await server.store.keyFor(application.id)).key, 'KEY01-AAAAA-AAAAA-AAAAA-AAAAA');
+    assert.deepEqual(await server.store.keySummary(), { total: 2, unused: 1 });
+
+    // The detail page shows the key and the previews.
+    const detail = await (await fetch(`${server.url}/admin/playtest/${application.id}`, { headers: { cookie } })).text();
+    assert.ok(detail.includes('KEY01-AAAAA-AAAAA-AAAAA-AAAAA'));
+    assert.ok(detail.includes('not this round') && detail.includes('payment sent'), 'email previews');
+  } finally {
+    await server.stop();
+  }
+});
+
+test('with no keys left, Invited is refused and the status does not change', async () => {
+  const sent = [];
+  const server = await startServer({ notify: { to: 'owner@example.com', sendQuietly: async (message) => { sent.push(message); } } });
+  try {
+    const { application } = await server.store.createApplication(applicationInput());
+    const cookie = adminCookie();
+    const csrf = await csrfFor(server, cookie, application.id);
+    const invite = await adminPost(server, cookie, `/admin/playtest/${application.id}/status`, { status: 'invited', adminNote: '', _csrf: csrf });
+    assert.equal(invite.status, 303);
+    assert.ok(invite.headers.get('location').endsWith('?problem=no-keys'));
+    assert.equal((await server.store.getById(application.id)).status, 'new');
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(sent.length, 0, 'no "you\u2019re in" without a key');
+    const detail = await (await fetch(`${server.url}/admin/playtest/${application.id}?problem=no-keys`, { headers: { cookie } })).text();
+    assert.ok(detail.includes('no unused keys'));
+  } finally {
+    await server.stop();
+  }
+});
+
+test('Declined and Paid email the applicant; Waitlist and Testing do not', async () => {
+  const sent = [];
+  const server = await startServer({ notify: { to: 'owner@example.com', sendQuietly: async (message) => { sent.push(message); } } });
+  try {
+    const { application } = await server.store.createApplication(applicationInput());
+    const cookie = adminCookie();
+    const csrf = await csrfFor(server, cookie, application.id);
+    for (const [status, expectMail, marker] of [['waitlist', false], ['testing', false], ['declined', true, 'not this round'], ['paid', true, 'payment sent']]) {
+      sent.length = 0;
+      await adminPost(server, cookie, `/admin/playtest/${application.id}/status`, { status, adminNote: '', _csrf: csrf });
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      assert.equal(sent.length, expectMail ? 1 : 0, status);
+      if (expectMail) {
+        assert.equal(sent[0].to, 'tester@example.com');
+        assert.ok(sent[0].subject.includes(marker), status);
+        assert.ok(!sent[0].text.includes('paypal'), 'no payment detail echoed');
+      }
+    }
+  } finally {
+    await server.stop();
+  }
+});
+
+test('deleting an invited application keeps its key on record as spent', async () => {
+  const server = await startServer();
+  try {
+    await server.store.addKeys('KEY01-AAAAA-AAAAA-AAAAA-AAAAA');
+    const { application } = await server.store.createApplication(applicationInput());
+    await server.store.assignKey(application.id);
+    await server.store.deleteApplication(application.id);
+    assert.deepEqual(await server.store.keySummary(), { total: 1, unused: 0 }, 'an emailed key is never offered again');
+  } finally {
+    await server.stop();
+  }
+});
+
+test('the keys form needs the admin token, and the list page shows the count', async () => {
+  const server = await startServer();
+  try {
+    const cookie = adminCookie();
+    const forged = await adminPost(server, cookie, '/admin/playtest/keys', { keys: 'KEY01-AAAAA-AAAAA-AAAAA-AAAAA', _csrf: 'nope' });
+    assert.equal(forged.status, 403);
+    const list = await (await fetch(`${server.url}/admin/playtest`, { headers: { cookie } })).text();
+    const csrf = /name="_csrf" value="([^"]+)"/.exec(list)[1];
+    const ok = await adminPost(server, cookie, '/admin/playtest/keys', { keys: 'KEY01-AAAAA-AAAAA-AAAAA-AAAAA\nKEY02-BBBBB-BBBBB-BBBBB-BBBBB', _csrf: csrf });
+    assert.equal(ok.status, 303);
+    const after = await (await fetch(`${server.url}${ok.headers.get('location')}`, { headers: { cookie } })).text();
+    assert.ok(after.includes('2 keys added'));
+    assert.ok(after.includes('<strong>2</strong>'), 'unused count');
+  } finally {
+    await server.stop();
+  }
+});
+
 // ---- Notification ------------------------------------------------------
 
 test('the developer is told once per new application, and never given the applicant\u2019s details', async () => {
@@ -879,6 +1032,7 @@ test('an application can be opened and walked through the study', async () => {
   try {
     await (await apply(server.url)).text();
     const [stored] = await server.store.listApplications();
+    await server.store.addKeys('KEY01-AAAAA-AAAAA-AAAAA-AAAAA'); // Invited needs one
     const cookie = adminCookie();
 
     const detail = await fetch(`${server.url}/admin/playtest/${stored.id}`, { headers: { cookie } });
