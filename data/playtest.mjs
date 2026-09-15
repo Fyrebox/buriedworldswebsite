@@ -29,13 +29,10 @@ export const study = {
   // guardian — PayPal's own terms require account holders to be 18, so the
   // payment goes to the guardian's account and the agreement is theirs.
   minAge: 13,
-  // On bellare.com.au rather than buriedworlds.com on purpose. bellare.com.au is
-  // already a Google Workspace domain with working MX, SPF, DKIM and DMARC, so a
-  // study address there is one alias on an existing mailbox — no DNS change, and
-  // nothing that could disturb the domain serving this website. buriedworlds.com
-  // forwards through Cloudflare Email Routing, which cannot send, so an address
-  // there could receive an applicant's question but never reply to it.
-  contactEmail: 'playtest@bellare.com.au',
+  // No study contact address is published. Questions go to the Discord, which
+  // every page already links; submissions come in through the questionnaire
+  // form; and data requests go to the privacy address on /privacy, which a
+  // privacy policy has to carry. The site sends its own mail through SES.
   privacyEmail: 'privacy@buriedworlds.com'
 };
 
@@ -110,7 +107,7 @@ export const promises = [
   },
   {
     label: 'Feedback',
-    body: 'A short private questionnaire, plus a gameplay recording or screenshots — whichever we agree before you start. No webcam, no room footage.'
+    body: 'A short questionnaire on this site, plus a link to a short clip or a few screenshots from your session — enough to show you played, not a record of all of it. No webcam, no room footage.'
   },
   {
     label: 'Eligibility',
@@ -127,7 +124,7 @@ export const promises = [
 // to be argued with — each have a stated answer.
 export const conditions = [
   {
-    situation: 'You complete the session and send the questionnaire with the evidence we agreed',
+    situation: 'You complete the session and submit the questionnaire with a clip or screenshots',
     outcome: `Paid ${study.fee}.`
   },
   {
@@ -140,11 +137,11 @@ export const conditions = [
   },
   {
     situation: 'Your recording failed',
-    outcome: 'Send screenshots and specific notes instead. No unpaid replay.'
+    outcome: 'Screenshots and specific notes are accepted instead. No unpaid replay.'
   },
   {
     situation: 'Something is missing from your submission',
-    outcome: 'You will be told exactly what, within three days, and given a week to send it.'
+    outcome: 'You will be emailed exactly what, within three days, and can update your submission for a week.'
   },
   {
     situation: 'The study is cancelled after you accepted a place',
@@ -160,11 +157,12 @@ export const conditions = [
 // contact details, which is a different promise from the one the rest of the
 // site makes, so it is made explicitly rather than by link.
 export const privacyNotes = [
-  `Your email address, Meta Horizon username, country and answers are stored so the study can be run. They are never sold, never used to advertise to you, and never added to a mailing list.`,
+  `Your email address, Meta Horizon username, country and answers are stored so the study can be run. They are never sold, never used to advertise to you, and never added to a mailing list. The only email you will get from us is about your own application: a note when your submission arrives, and anything missing from it.`,
+  `The PayPal account the payment goes to is asked for only when you submit your session, and only from testers who were offered a place. It is stored with your application and deleted with it.`,
   `Unsuccessful applications are deleted 30 days after the study closes. Recordings and contact details are deleted 90 days after final payment. Findings are kept only with names and addresses removed.`,
   `If you are under 18, we store that a parent or guardian agreed rather than who they are, and we may ask them to confirm by email before a place is offered. Nothing is collected from anyone under ${study.minAge}.`,
   `This page carries no analytics and sets no cookies.`,
-  `You can ask to see, correct or delete your application at any time, before or after the study, by writing to ${study.privacyEmail}. Quote the reference shown when you apply.`
+  `You can ask to see, correct or delete your application at any time, before or after the study, through the privacy page. Quote the reference shown when you apply.`
 ];
 
 // The questionnaire, from the strategy document. Seven questions, in this
@@ -175,21 +173,36 @@ export const questionnaire = {
   before: [
     'Start a new game in an empty save slot. Do not look up the controls, watch a video or ask anyone — working out what the game teaches badly is the whole point, and getting stuck is a result, not a failure.',
     `Play for about ${study.playMinutes} minutes. Breaks do not count; if a crash, a blocker or motion discomfort stops you, stop, and tell us what happened. You are paid in full either way.`,
-    'If you agreed to record, start the headset recording before you begin. If you agreed to screenshots, take one whenever something confuses or pleases you — a dozen is plenty.',
+    'Capture something that shows you played: a clip of two or three minutes, or a handful of screenshots. It does not need to cover the whole session — it is there to show the session happened.',
     'Then quit to the hub and come back into the same save once, so we learn whether your progress returns.'
   ],
+  // Stable ids: answers are stored against these, so reordering or rewording a
+  // question never orphans what a tester already wrote.
   questions: [
-    'What did you think you were supposed to do first?',
-    'Where did you get confused, and what did you try next?',
-    'How did detecting and digging feel? Describe anything awkward or satisfying.',
-    'What was your most satisfying discovery or moment?',
-    'Was there a point where you wanted to stop? What caused it?',
-    'Did you experience discomfort, difficulty reaching objects, unreadable text or technical problems?',
-    'Would you voluntarily play again? What would you want to do next?'
+    { id: 'first-goal', text: 'What did you think you were supposed to do first?' },
+    { id: 'confusion', text: 'Where did you get confused, and what did you try next?' },
+    { id: 'detect-dig', text: 'How did detecting and digging feel? Describe anything awkward or satisfying.' },
+    { id: 'best-moment', text: 'What was your most satisfying discovery or moment?' },
+    { id: 'wanted-to-stop', text: 'Was there a point where you wanted to stop? What caused it?' },
+    { id: 'discomfort', text: 'Did you experience discomfort, difficulty reaching objects, unreadable text or technical problems?' },
+    { id: 'play-again', text: 'Would you voluntarily play again? What would you want to do next?' }
   ],
-  details: [
-    'Which headset you played on',
-    'Roughly how many minutes you played',
-    'Whether your progress was still there when you came back in'
+  progressOptions: [
+    { id: 'yes', label: 'Yes, everything was there' },
+    { id: 'no', label: 'No, something was missing or reset' },
+    { id: 'unsure', label: 'Not sure' }
+  ],
+  // How to get a clip or screenshots off a Quest, because most people never have.
+  evidenceHelp: [
+    'On the headset, press the Meta button, open Camera, and choose Record or Take photo. The controller shortcut is Meta button + trigger.',
+    'Open the Meta Horizon app on your phone → Gallery. Your recording syncs over Wi-Fi in a few minutes.',
+    'Share it from there to YouTube as Unlisted, or to Google Drive or Dropbox, and paste the link below. A link anyone with it can open is all we need.'
   ]
 };
+
+// Which applications may submit. The three between being told and being
+// paid; and Submitted again, so a tester asked for a correction can update
+// what they sent. Before Invited there is no key to have played with, and
+// after Paid the study is over for that person.
+export const submittableStatuses = ['invited', 'joined', 'testing', 'submitted'];
+

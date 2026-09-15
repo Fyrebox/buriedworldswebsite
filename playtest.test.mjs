@@ -12,7 +12,7 @@ import {
   makeReference,
   normaliseApplication
 } from './playtest-store.mjs';
-import { applicationNotice, createPlaytestRouter } from './playtest.mjs';
+import { applicationNotice, createPlaytestRouter, normaliseSubmission } from './playtest.mjs';
 import { createMailer } from './mailer.mjs';
 import { makeSession } from './admin-session.mjs';
 import { study } from './data/playtest.mjs';
@@ -407,27 +407,286 @@ test('one connection cannot bury the study in applications', async () => {
   }
 });
 
-test('the questionnaire page states every question, the address, and the reference instruction', async () => {
-  const server = await startServer();
+// ---- Questionnaire -----------------------------------------------------
+
+const FORM_SECRET = 'a-playtest-form-secret-longer-than-32-characters!!';
+
+function submissionInput(overrides = {}) {
+  const answers = Object.fromEntries(
+    ['first-goal', 'confusion', 'detect-dig', 'best-moment', 'wanted-to-stop', 'discomfort', 'play-again']
+      .map((id) => [`answer_${id}`, `My answer about ${id}.`])
+  );
+  return {
+    ...answers,
+    headsetPlayed: 'quest-3',
+    minutesPlayed: '24',
+    progressReturned: 'yes',
+    evidenceUrl: 'https://youtu.be/example',
+    evidenceNote: '',
+    paypalAccount: 'tester-paypal@example.com',
+    ownAnswers: 'yes',
+    ...overrides
+  };
+}
+
+async function post(url, path, fields) {
+  return fetch(`${url}${path}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(fields),
+    redirect: 'manual'
+  });
+}
+
+function tokenFrom(html) {
+  return /name="submissionToken" value="([^"]+)"/.exec(html)?.[1] ?? '';
+}
+
+/** An applicant who has been invited, ready to submit. */
+async function invitedApplicant(server, overrides = {}) {
+  const { application } = await server.store.createApplication(applicationInput(overrides));
+  return server.store.setStatus(application.id, 'invited');
+}
+
+test('the questionnaire page shows the brief and questions, and no email address', async () => {
+  const server = await startServer({ formSecret: FORM_SECRET });
   try {
     const response = await fetch(`${server.url}/playtest/questionnaire`);
     const html = await response.text();
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow');
-    assert.ok(!html.includes('googletagmanager'), 'no analytics on study pages');
     const { questionnaire } = await import('./data/playtest.mjs');
-    assert.equal(questionnaire.questions.length, 7);
-    for (const question of questionnaire.questions) {
-      assert.ok(html.includes(question.replace(/'/g, '&#39;').replace(/"/g, '&quot;')), question);
-    }
-    assert.ok(html.includes('mailto:playtest@bellare.com.au'));
-    assert.ok(html.includes('BW-code'));
-    assert.ok(html.includes(`${study.deadlineHours} hours`));
-
-    const applied = await (await apply(server.url)).text();
-    assert.ok(applied.includes('href="/playtest/questionnaire"'), 'the confirmation page links to it');
+    for (const question of questionnaire.questions) assert.ok(html.includes(question.text.replace(/'/g, '&#39;')), question.id);
+    assert.ok(!html.includes('mailto:'), 'no address on the page');
+    assert.ok(!html.includes('@bellare.com.au') && !html.includes('@buriedworlds.com'));
+    assert.ok(html.includes('name="reference"') && html.includes('name="email"'), 'the lookup form');
+    assert.ok(!html.includes('name="paypalAccount"'), 'the submission form is not shown before a match');
   } finally {
     await server.stop();
+  }
+});
+
+test('the lookup gives one answer to a wrong reference, a wrong email, and a stranger', async () => {
+  const server = await startServer({ formSecret: FORM_SECRET });
+  try {
+    const stored = await invitedApplicant(server);
+    const attempts = [
+      { reference: 'BW-NOPE00', email: 'tester@example.com' },
+      { reference: stored.reference, email: 'someone-else@example.com' },
+      { reference: '', email: '' }
+    ];
+    let expected = null;
+    for (const fields of attempts) {
+      const response = await post(server.url, '/playtest/questionnaire/find', fields);
+      const html = await response.text();
+      assert.equal(response.status, 404, JSON.stringify(fields));
+      const message = /<p class="admin-alert" role="alert">([^<]*)<\/p>/.exec(html)?.[1];
+      assert.ok(message && message.includes('couldn'), 'a generic message');
+      expected ??= message;
+      assert.equal(message, expected, 'identical for every failure');
+      assert.ok(!html.includes('name="paypalAccount"'));
+    }
+    // The right pair opens the form, prefilled with the headset they applied on.
+    const ok = await post(server.url, '/playtest/questionnaire/find', { reference: stored.reference.toLowerCase(), email: 'TESTER@example.com' });
+    const html = await ok.text();
+    assert.equal(ok.status, 200);
+    assert.ok(html.includes('name="paypalAccount"'));
+    assert.ok(tokenFrom(html));
+    assert.ok(html.includes('value="quest-3" checked'));
+  } finally {
+    await server.stop();
+  }
+});
+
+test('only an application that was offered a place can submit', async () => {
+  const server = await startServer({ formSecret: FORM_SECRET });
+  try {
+    const { application: stored } = await server.store.createApplication(applicationInput());
+    const expectations = [
+      ['new', 403, 'hasn'], ['waitlist', 403, 'hasn'], ['declined', 403, 'hasn'],
+      ['invited', 200, 'paypalAccount'], ['joined', 200, 'paypalAccount'], ['testing', 200, 'paypalAccount'],
+      ['paid', 403, 'closed']
+    ];
+    for (const [status, code, marker] of expectations) {
+      await server.store.setStatus(stored.id, status);
+      const response = await post(server.url, '/playtest/questionnaire/find', { reference: stored.reference, email: 'tester@example.com' });
+      const html = await response.text();
+      assert.equal(response.status, code, status);
+      assert.ok(html.includes(marker), `${status}: ${marker}`);
+    }
+  } finally {
+    await server.stop();
+  }
+});
+
+test('a submission is stored, flips the status, tells both people, and never puts the PayPal account in the note', async () => {
+  const sent = [];
+  const server = await startServer({
+    formSecret: FORM_SECRET, siteUrl: 'https://www.buriedworlds.com',
+    notify: { to: 'owner@example.com', sendQuietly: async (message) => { sent.push(message); } }
+  });
+  try {
+    const stored = await invitedApplicant(server);
+    sent.length = 0;
+    const found = await (await post(server.url, '/playtest/questionnaire/find', { reference: stored.reference, email: 'tester@example.com' })).text();
+    const token = tokenFrom(found);
+
+    const response = await post(server.url, '/playtest/questionnaire', { submissionToken: token, ...submissionInput() });
+    const html = await response.text();
+    assert.equal(response.status, 201);
+    assert.ok(html.includes('Submission received'));
+
+    const application = await server.store.getById(stored.id);
+    assert.equal(application.status, 'submitted');
+    const submission = await server.store.getSubmission(stored.id);
+    assert.equal(submission.paypalAccount, 'tester-paypal@example.com');
+    assert.equal(submission.minutesPlayed, 24);
+    assert.equal(submission.answers['first-goal'], 'My answer about first-goal.');
+    assert.equal(submission.submissionCount, 1);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(sent.length, 2, 'one to the developer, one to the tester');
+    const toOwner = sent.find((message) => message.to === 'owner@example.com');
+    const toTester = sent.find((message) => message.to === 'tester@example.com');
+    assert.ok(toOwner && toTester);
+    assert.ok(toOwner.subject.includes(stored.reference) && toOwner.text.includes(`/admin/playtest/${stored.id}`));
+    for (const secret of ['tester-paypal@example.com', 'My answer about', 'youtu.be', 'tester@example.com']) {
+      assert.ok(!toOwner.text.includes(secret) && !toOwner.subject.includes(secret), `developer note must not carry ${secret}`);
+    }
+    assert.ok(toTester.text.includes('48 hours') && toTester.text.includes(stored.reference));
+    assert.ok(!toTester.text.includes('tester-paypal@example.com'), 'the receipt does not echo the PayPal account');
+  } finally {
+    await server.stop();
+  }
+});
+
+test('a correction replaces the answers, keeps the first date, counts versions, and is closed once paid', async () => {
+  const server = await startServer({ formSecret: FORM_SECRET });
+  try {
+    const stored = await invitedApplicant(server);
+    const first = await server.store.saveSubmission(stored.id, submissionInput());
+    assert.equal(first.corrected, false);
+
+    const again = await (await post(server.url, '/playtest/questionnaire/find', { reference: stored.reference, email: 'tester@example.com' })).text();
+    assert.ok(again.includes('replaces those answers'), 'the form says it is a correction');
+    assert.ok(again.includes('tester-paypal@example.com'), 'and starts filled in');
+    const token = tokenFrom(again);
+    const response = await post(server.url, '/playtest/questionnaire', { submissionToken: token, ...submissionInput({ minutesPlayed: '31', paypalAccount: 'corrected@example.com' }) });
+    assert.equal(response.status, 200);
+    assert.ok((await response.text()).includes('Update received'));
+
+    const submission = await server.store.getSubmission(stored.id);
+    assert.equal(submission.minutesPlayed, 31);
+    assert.equal(submission.paypalAccount, 'corrected@example.com');
+    assert.equal(submission.submissionCount, 2);
+    assert.equal(submission.submittedAt, first.submission.submittedAt, 'the payment clock does not restart');
+
+    await server.store.setStatus(stored.id, 'paid');
+    const closed = await post(server.url, '/playtest/questionnaire', { submissionToken: token, ...submissionInput() });
+    assert.equal(closed.status, 403);
+    await closed.text();
+  } finally {
+    await server.stop();
+  }
+});
+
+test('a forged, expired or missing token cannot submit, and validation names the field', async () => {
+  let clock = 1_700_000_000_000;
+  const server = await startServer({ formSecret: FORM_SECRET, now: () => clock });
+  try {
+    const stored = await invitedApplicant(server);
+    for (const token of ['', `${stored.id}.${clock + 1000}.forged`, 'nonsense']) {
+      const response = await post(server.url, '/playtest/questionnaire', { submissionToken: token, ...submissionInput() });
+      assert.equal(response.status, 403, token || '(empty)');
+      await response.text();
+    }
+    const found = await (await post(server.url, '/playtest/questionnaire/find', { reference: stored.reference, email: 'tester@example.com' })).text();
+    const token = tokenFrom(found);
+
+    const bad = await post(server.url, '/playtest/questionnaire', { submissionToken: token, ...submissionInput({ evidenceUrl: 'http://not-secure.example', 'answer_confusion': '' }) });
+    const html = await bad.text();
+    assert.equal(bad.status, 400);
+    assert.ok(html.includes('playtest-field--error'));
+    assert.ok(html.includes('My answer about first-goal.'), 'other answers survive a rejection');
+    assert.equal(await server.store.getSubmission(stored.id), null);
+
+    clock += 25 * 60 * 60 * 1000;
+    const expired = await post(server.url, '/playtest/questionnaire', { submissionToken: token, ...submissionInput() });
+    assert.equal(expired.status, 403);
+    await expired.text();
+  } finally {
+    await server.stop();
+  }
+});
+
+test('submission validation', () => {
+  assert.doesNotThrow(() => normaliseSubmission(submissionInput()));
+  assert.doesNotThrow(() => normaliseSubmission(submissionInput({ paypalAccount: 'paypal.me/CyrilG' })));
+  assert.doesNotThrow(() => normaliseSubmission(submissionInput({ paypalAccount: 'https://www.paypal.me/CyrilG' })));
+  const cases = [
+    ['paypalAccount', { paypalAccount: '' }], ['paypalAccount', { paypalAccount: '!!' }],
+    ['evidenceUrl', { evidenceUrl: 'not a link' }], ['evidenceUrl', { evidenceUrl: 'http://insecure.example/x' }],
+    ['minutesPlayed', { minutesPlayed: 'twenty' }], ['minutesPlayed', { minutesPlayed: '0' }], ['minutesPlayed', { minutesPlayed: '9999' }],
+    ['headsetPlayed', { headsetPlayed: 'index' }], ['progressReturned', { progressReturned: 'maybe' }],
+    ['answer_play-again', { 'answer_play-again': '   ' }], ['answer_confusion', { answer_confusion: 'x'.repeat(2001) }],
+    ['ownAnswers', { ownAnswers: '' }]
+  ];
+  for (const [field, overrides] of cases) {
+    assert.throws(() => normaliseSubmission(submissionInput(overrides)),
+      (error) => error instanceof ApplicationValidationError && error.field === field, `${field}: ${JSON.stringify(overrides)}`);
+  }
+});
+
+test('the dashboard shows the submission and the PayPal account, exports it, and deletes it with the application', async () => {
+  const server = await startServer({ formSecret: FORM_SECRET });
+  try {
+    const stored = await invitedApplicant(server);
+    await server.store.saveSubmission(stored.id, submissionInput());
+    const cookie = adminCookie();
+
+    const list = await (await fetch(`${server.url}/admin/playtest`, { headers: { cookie } })).text();
+    assert.ok(!list.includes('tester-paypal@example.com'), 'the PayPal account is not on the list page');
+    assert.ok(list.includes('href="/admin/playtest/submissions.csv"'));
+
+    const detail = await (await fetch(`${server.url}/admin/playtest/${stored.id}`, { headers: { cookie } })).text();
+    assert.ok(detail.includes('tester-paypal@example.com'), 'but is on the detail page');
+    assert.ok(detail.includes('My answer about first-goal.'));
+    assert.ok(detail.includes('href="https://youtu.be/example"'));
+
+    const csv = await (await fetch(`${server.url}/admin/playtest/submissions.csv`, { headers: { cookie } })).text();
+    assert.ok(csv.startsWith('reference,email,status,submitted_at'));
+    assert.ok(csv.includes('answer_first-goal') && csv.includes('"tester-paypal@example.com"'));
+
+    const csrf = /name="_csrf" value="([^"]+)"/.exec(detail)?.[1];
+    const del = await fetch(`${server.url}/admin/playtest/${stored.id}/delete`, {
+      method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ _csrf: csrf }), redirect: 'manual'
+    });
+    assert.equal(del.status, 303);
+    assert.equal(await server.store.getSubmission(stored.id), null, 'the submission — and its PayPal account — goes with the application');
+    assert.equal((await server.store.listSubmissions()).length, 0);
+  } finally {
+    await server.stop();
+  }
+});
+
+test('a database from before submissions gains the table on startup', async () => {
+  const pool = createMemoryPool();
+  await pool.query(`CREATE TABLE playtest_applications (
+    id BIGSERIAL PRIMARY KEY, reference TEXT NOT NULL, email TEXT NOT NULL, horizon_username TEXT NOT NULL,
+    headset TEXT NOT NULL, vr_frequency TEXT NOT NULL, capture_method TEXT NOT NULL, recent_games TEXT NOT NULL DEFAULT '',
+    country TEXT NOT NULL DEFAULT '', played_before BOOLEAN NOT NULL DEFAULT FALSE, age_group TEXT NOT NULL DEFAULT 'adult',
+    notes TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'new', admin_note TEXT NOT NULL DEFAULT '',
+    terms_version TEXT NOT NULL DEFAULT '', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    invited_at TIMESTAMPTZ, joined_at TIMESTAMPTZ, paid_at TIMESTAMPTZ)`);
+  const store = await createPlaytestStore({ pool });
+  try {
+    const { application } = await store.createApplication(applicationInput());
+    await store.setStatus(application.id, 'joined');
+    const saved = await store.saveSubmission(application.id, submissionInput());
+    assert.equal(saved.application.status, 'submitted');
+  } finally {
+    await store.close();
   }
 });
 

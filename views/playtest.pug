@@ -201,7 +201,9 @@ block content
               span.playtest-form__aside No account is created. You can ask for this to be deleted at any time.
 
         p.legal__meta(style="margin-top:48px")
-          | Study terms version #{study.termsVersion}. Questions before applying go to
-          |  #[a(href=`mailto:${study.contactEmail}`)= study.contactEmail].
+          | Study terms version #{study.termsVersion}. Questions before applying are welcome on
+          |  #[a(href=links.discord target="_blank" rel="noopener noreferrer") Discord], where the
+          |  developer is most days. The brief and the questions are on the
+          |  #[a(href="/playtest/questionnaire") questionnaire page].
 
   +footer(links)

@@ -25,10 +25,10 @@ import {
   study,
   vrFrequencies
 } from './data/playtest.mjs';
-import { ApplicationValidationError, LIMITS } from './playtest-store.mjs';
+import { ApplicationValidationError, canSubmit, LIMITS } from './playtest-store.mjs';
 import { csrfToken, readSession, safeEqual, signature } from './admin-session.mjs';
 
-export { createPlaytestStore, normaliseApplication } from './playtest-store.mjs';
+export { createPlaytestStore, normaliseApplication, normaliseSubmission } from './playtest-store.mjs';
 
 const MAX_FORM_BYTES = 16 * 1024;
 
@@ -37,6 +37,11 @@ const MAX_FORM_BYTES = 16 * 1024;
 // three seconds is not a person reading a page of payment conditions.
 const FORM_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 const FORM_MIN_AGE_MS = 3000;
+
+// A matched reference and email earn a token that authorises one application's
+// submission for a day — long enough to write seven answers and go back for
+// the link, short enough that a leaked one is not a standing key.
+const SUBMISSION_TOKEN_AGE_MS = 24 * 60 * 60 * 1000;
 
 const STATUS_LABELS = Object.fromEntries(statuses.map((status) => [status.id, status.label]));
 const HEADSET_LABELS = Object.fromEntries(headsets.map((headset) => [headset.id, headset.label]));
@@ -98,6 +103,44 @@ export function applicationNotice(application, { siteUrl }) {
   };
 }
 
+/** To the developer: a submission arrived. No answers, no PayPal, no address. */
+export function submissionNotice(application, submission, { siteUrl, corrected }) {
+  const headset = HEADSET_LABELS[submission.headsetPlayed] ?? submission.headsetPlayed;
+  return {
+    subject: `${corrected ? 'Updated' : 'New'} playtest submission ${application.reference} — ${headset}, ${submission.minutesPlayed} min`,
+    text: [
+      corrected ? `A tester has updated their submission.` : `A playtest submission has arrived. The 48-hour payment window starts now.`,
+      ``,
+      `Reference:  ${application.reference}`,
+      `Headset:    ${headset}`,
+      `Played:     about ${submission.minutesPlayed} minutes`,
+      `Progress:   ${submission.progressReturned === 'yes' ? 'returned after relaunch' : submission.progressReturned === 'no' ? 'DID NOT return after relaunch' : 'unsure whether it returned'}`,
+      `Evidence:   link provided`,
+      ``,
+      `Open it:    ${siteUrl}/admin/playtest/${application.id}`,
+      ``,
+      `Answers and the PayPal account are on the dashboard, not in this note.`
+    ].join('\n')
+  };
+}
+
+/** To the tester: we have it, and what happens next. */
+export function submissionReceipt(application, { corrected, siteUrl }) {
+  return {
+    subject: `Buried Worlds VR playtest ${application.reference} — ${corrected ? 'update' : 'submission'} received`,
+    text: [
+      corrected
+        ? `Thanks — your updated submission for ${application.reference} has replaced the earlier one.`
+        : `Thanks — your submission for ${application.reference} has arrived.`,
+      ``,
+      `Payment of ${study.fee} is sent by ${study.payoutMethod} within ${study.paymentWindowHours} hours to the account you gave. It does not depend on whether you liked the game, found bugs, or finished anything.`,
+      `If something is missing, you will hear from this address within three days with exactly what, and you can update your submission at ${siteUrl}/playtest/questionnaire using the same reference and email.`,
+      ``,
+      `This is the only kind of email the study sends. Nothing else will ever be sent to this address.`
+    ].join('\n')
+  };
+}
+
 export function createPlaytestRouter({
   store,
   siteUrl = '',
@@ -143,6 +186,80 @@ export function createPlaytestRouter({
     return '';
   }
 
+  function issueSubmissionToken(applicationId) {
+    const expiresAt = String(now() + SUBMISSION_TOKEN_AGE_MS);
+    return `${applicationId}.${expiresAt}.${signature(formSecret, `submission:${applicationId}:${expiresAt}`)}`;
+  }
+
+  /** The application id the token authorises, or null. */
+  function readSubmissionToken(token) {
+    if (!formTokensEnabled) return null;
+    const [idRaw, expiresRaw, received] = String(token ?? '').split('.');
+    const id = Number(idRaw);
+    const expiresAt = Number(expiresRaw);
+    if (!Number.isSafeInteger(id) || !Number.isSafeInteger(expiresAt) || !received) return null;
+    if (expiresAt <= now()) return null;
+    if (!safeEqual(received, signature(formSecret, `submission:${idRaw}:${expiresRaw}`))) return null;
+    return id;
+  }
+
+  function submissionValues(body = {}) {
+    const values = {
+      headsetPlayed: String(body.headsetPlayed ?? ''),
+      minutesPlayed: String(body.minutesPlayed ?? '').slice(0, 4),
+      progressReturned: String(body.progressReturned ?? ''),
+      evidenceUrl: String(body.evidenceUrl ?? '').slice(0, LIMITS.evidenceUrl),
+      evidenceNote: String(body.evidenceNote ?? '').slice(0, LIMITS.evidenceNote),
+      paypalAccount: String(body.paypalAccount ?? '').slice(0, LIMITS.paypalAccount),
+      ownAnswers: Boolean(body.ownAnswers),
+      answers: {}
+    };
+    for (const question of questionnaire.questions) {
+      values.answers[question.id] = String(body[`answer_${question.id}`] ?? '').slice(0, LIMITS.answer);
+    }
+    return values;
+  }
+
+  /** A stored submission, reshaped as form values so a correction starts filled in. */
+  function valuesFromSubmission(submission) {
+    if (!submission) return null;
+    return {
+      headsetPlayed: submission.headsetPlayed,
+      minutesPlayed: String(submission.minutesPlayed),
+      progressReturned: submission.progressReturned,
+      evidenceUrl: submission.evidenceUrl,
+      evidenceNote: submission.evidenceNote,
+      paypalAccount: submission.paypalAccount,
+      ownAnswers: false,
+      answers: { ...submission.answers }
+    };
+  }
+
+  function renderQuestionnaire(req, res, {
+    status = 200, lookup = { reference: '', email: '' }, lookupError = '',
+    application = null, submissionToken = '', values = null, existing = null, error = '', errorField = ''
+  } = {}) {
+    return res.status(status).render('playtest-questionnaire', {
+      pageTitle: 'Playtest questionnaire — Buried Worlds VR',
+      pageDescription: `The ${questionnaire.questions.length} questions a Buried Worlds VR playtester answers after their session, submitted on this page.`,
+      pagePath: '/playtest/questionnaire',
+      noIndex: true,
+      disableAnalytics: true,
+      study,
+      questionnaire,
+      headsets,
+      formToken: issueFormToken(),
+      lookup,
+      lookupError,
+      application,
+      submissionToken,
+      values: values ?? submissionValues(),
+      existing,
+      error,
+      errorField
+    });
+  }
+
   function renderForm(req, res, { status = 200, values = formValues(), error = '', errorField = '' } = {}) {
     return res.status(status).render('playtest', {
       pageTitle: `Paid playtest — ${study.fee} for ${study.totalMinutes} minutes — Buried Worlds VR`,
@@ -175,18 +292,113 @@ export function createPlaytestRouter({
 
   router.get('/playtest', (req, res) => renderForm(req, res));
 
-  // The brief a selected tester is sent to. Public, so it can be read before
-  // applying — the fewer surprises after a place is offered, the better — but
-  // noindex like the rest of the study.
-  router.get('/playtest/questionnaire', (req, res) => res.render('playtest-questionnaire', {
-    pageTitle: 'Playtest questionnaire — Buried Worlds VR',
-    pageDescription: `The ${questionnaire.questions.length} questions a Buried Worlds VR playtester answers after their session, and how to send them.`,
-    pagePath: '/playtest/questionnaire',
-    noIndex: true,
-    disableAnalytics: true,
-    study,
-    questionnaire
-  }));
+  // The brief a selected tester follows, and the form they submit on. Public,
+  // so it can be read before applying — the fewer surprises after a place is
+  // offered, the better — but noindex like the rest of the study. The form
+  // itself appears only once a reference and its email have been matched.
+  router.get('/playtest/questionnaire', (req, res) => renderQuestionnaire(req, res));
+
+  // Twenty tries an hour is plenty for a tester who has mistyped, and far too
+  // few to guess a reference or an email.
+  const perLookup = createRateLimiter({ max: 20, windowMs: 60 * 60 * 1000, now });
+  const perSubmission = createRateLimiter({ max: 10, windowMs: 60 * 60 * 1000, now });
+
+  router.post(
+    '/playtest/questionnaire/find',
+    express.urlencoded({ extended: false, limit: MAX_FORM_BYTES }),
+    async (req, res) => {
+      res.set('Cache-Control', 'no-store');
+      const lookup = {
+        reference: String(req.body.reference ?? '').trim().toUpperCase().slice(0, 12),
+        email: String(req.body.email ?? '').trim().slice(0, LIMITS.email)
+      };
+      if (!formTokensEnabled) {
+        return renderQuestionnaire(req, res, { status: 503, lookup, lookupError: 'Submissions are not open right now. Please try again later.' });
+      }
+      if (!perLookup.take(req.ip ?? 'unknown')) {
+        return renderQuestionnaire(req, res, { status: 429, lookup, lookupError: 'Too many attempts from this connection. Please try again in an hour.' });
+      }
+      const application = await store.findForSubmission(lookup.reference, lookup.email);
+      // One message for every failure. Whether the reference exists is not
+      // something a stranger should learn by trying.
+      if (!application) {
+        return renderQuestionnaire(req, res, { status: 404, lookup, lookupError: 'We couldn\u2019t match that reference and email address. Check both against the confirmation you were shown when you applied.' });
+      }
+      if (!canSubmit(application)) {
+        const message = application.status === 'paid'
+          ? 'This application has been paid and is closed. Thank you for taking part.'
+          : 'This application hasn\u2019t been offered a place yet, so there is nothing to submit. You will be emailed if it is.';
+        return renderQuestionnaire(req, res, { status: 403, lookup, lookupError: message });
+      }
+      const existing = await store.getSubmission(application.id);
+      return renderQuestionnaire(req, res, {
+        application,
+        submissionToken: issueSubmissionToken(application.id),
+        values: valuesFromSubmission(existing) ?? { ...submissionValues(), headsetPlayed: application.headset },
+        existing
+      });
+    }
+  );
+
+  router.post(
+    '/playtest/questionnaire',
+    express.urlencoded({ extended: false, limit: MAX_FORM_BYTES }),
+    async (req, res) => {
+      res.set('Cache-Control', 'no-store');
+      const applicationId = readSubmissionToken(req.body.submissionToken);
+      if (applicationId === null) {
+        return renderQuestionnaire(req, res, {
+          status: 403,
+          lookupError: 'Your session on this page had expired before it was sent. Find your application again below — nothing you typed has been lost if you use the browser\u2019s back button first.'
+        });
+      }
+      if (!perSubmission.take(req.ip ?? 'unknown')) {
+        return renderQuestionnaire(req, res, { status: 429, lookupError: 'Too many submissions from this connection. Please try again later.' });
+      }
+      const application = await store.getById(applicationId);
+      if (!canSubmit(application)) {
+        return renderQuestionnaire(req, res, { status: 403, lookupError: 'This application is no longer open for a submission.' });
+      }
+      const values = submissionValues(req.body);
+      const existing = await store.getSubmission(application.id);
+      let result;
+      try {
+        result = await store.saveSubmission(application.id, req.body);
+      } catch (error) {
+        if (error instanceof ApplicationValidationError) {
+          return renderQuestionnaire(req, res, {
+            status: 400, application, submissionToken: issueSubmissionToken(application.id),
+            values, existing, error: error.message, errorField: error.field
+          });
+        }
+        onError(error);
+        return renderQuestionnaire(req, res, {
+          status: 503, application, submissionToken: issueSubmissionToken(application.id),
+          values, existing, error: 'Your submission could not be saved just now. Nothing was lost — please send it again in a minute.'
+        });
+      }
+
+      if (notify) {
+        const corrected = result.corrected;
+        if (notify.to) {
+          const notice = submissionNotice(result.application, result.submission, { siteUrl, corrected });
+          Promise.resolve(notify.sendQuietly({ to: notify.to, ...notice })).catch(onError);
+        }
+        const receipt = submissionReceipt(result.application, { corrected, siteUrl });
+        Promise.resolve(notify.sendQuietly({ to: result.application.email, ...receipt })).catch(onError);
+      }
+
+      return res.status(result.corrected ? 200 : 201).render('playtest-submitted', {
+        pageTitle: 'Submission received — Buried Worlds VR',
+        pagePath: '/playtest/questionnaire',
+        noIndex: true,
+        disableAnalytics: true,
+        study,
+        reference: result.application.reference,
+        corrected: result.corrected
+      });
+    }
+  );
 
   router.post(
     '/playtest',
@@ -258,8 +470,7 @@ export function createPlaytestRouter({
           status: 503,
           values,
           error:
-            'Your application could not be saved just now. Nothing was lost — please send it again in a minute, ' +
-            `or email ${study.contactEmail}.`
+            'Your application could not be saved just now. Nothing was lost — please send it again in a minute.'
         });
       }
 
@@ -362,15 +573,33 @@ export function createPlaytestRouter({
     });
   });
 
+  router.get('/admin/playtest/submissions.csv', async (req, res) => {
+    const columns = ['reference', 'email', 'status', 'submitted_at', 'updated_at', 'submission_count', 'headset_played',
+      'minutes_played', 'progress_returned', 'evidence_url', 'evidence_note', 'paypal_account',
+      ...questionnaire.questions.map((question) => `answer_${question.id}`)];
+    const rows = (await store.listSubmissions()).map((entry) => [
+      entry.reference, entry.email, entry.status, entry.submittedAt, entry.updatedAt, entry.submissionCount,
+      entry.headsetPlayed, entry.minutesPlayed, entry.progressReturned, entry.evidenceUrl, entry.evidenceNote,
+      entry.paypalAccount, ...questionnaire.questions.map((question) => entry.answers[question.id] ?? '')
+    ]);
+    const csv = [columns.join(','), ...rows.map((row) => row.map(csvValue).join(','))].join('\n');
+    res.set('Content-Type', 'text/csv; charset=utf-8');
+    res.set('Content-Disposition', 'attachment; filename="playtest-submissions.csv"');
+    return res.send(`${csv}\n`);
+  });
+
   router.get('/admin/playtest/:id', async (req, res) => {
     const application = await store.getById(Number(req.params.id));
     if (!application) return res.status(404).send('Not found');
+    const submission = await store.getSubmission(application.id);
     return res.render('admin-playtest-detail', {
       pageTitle: `${application.reference} — Buried Worlds VR`,
       pagePath: req.path,
       noIndex: true,
       disableAnalytics: true,
       application: decorate(application),
+      submission: submission && { ...submission, headsetLabel: HEADSET_LABELS[submission.headsetPlayed] ?? submission.headsetPlayed },
+      questionnaire,
       statuses,
       study,
       notice: req.query.saved === '1' ? 'Application updated.' : ''

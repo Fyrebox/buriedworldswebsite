@@ -22,7 +22,7 @@ block content
           .playtest-reference
             span.playtest-reference__label Your reference
             span.playtest-reference__code= reference
-            span.playtest-reference__note Worth keeping. It is how to ask about your application, or to have it deleted, without sending your details again.
+            span.playtest-reference__note Worth keeping. You will need it, with the email address you gave, to submit your session — and it is how to ask about your application without sending your details again.
 
         if duplicate
           p.admin-alert(role="status").
@@ -40,7 +40,7 @@ block content
           li
             | After that, the key and your #{study.deadlineHours} hours. The brief and the
             |  questions are already written — #[a(href="/playtest/questionnaire") you can read them now].
-          li Payment lands within #{study.paymentWindowHours} hours of your submission arriving.
+          li You submit your answers, a link to a clip or screenshots, and your #{study.payoutMethod} account on the questionnaire page — nothing is sent by email. Payment lands within #{study.paymentWindowHours} hours of it arriving.
         p.
           Please do not install, record or buy anything yet. Nothing you do before a
           place is offered and accepted is paid, and nothing is expected of you in the
@@ -52,9 +52,9 @@ block content
 
         h2.legal__h Changing your mind
         p
-          | Write to #[a(href=`mailto:${study.contactEmail}`)= study.contactEmail] quoting
-          |  your reference and the application will be withdrawn and deleted. No reason
-          |  is needed, and it costs you nothing.
+          | Ask through the #[a(href="/privacy") privacy page], quoting your reference, and
+          |  the application will be withdrawn and deleted. No reason is needed, and it
+          |  costs you nothing.
 
         p.legal__meta(style="margin-top:40px")
           | Study terms version #{study.termsVersion}.

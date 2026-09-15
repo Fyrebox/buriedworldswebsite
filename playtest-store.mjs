@@ -10,7 +10,7 @@ import crypto from 'node:crypto';
 
 import pg from 'pg';
 
-import { ageGroups, captureMethods, headsets, statuses, study, vrFrequencies } from './data/playtest.mjs';
+import { ageGroups, captureMethods, headsets, questionnaire, statuses, study, submittableStatuses, vrFrequencies } from './data/playtest.mjs';
 
 const { Pool } = pg;
 
@@ -19,6 +19,8 @@ const FREQUENCY_IDS = new Set(vrFrequencies.map((frequency) => frequency.id));
 const CAPTURE_IDS = new Set(captureMethods.map((method) => method.id));
 const AGE_IDS = new Set(ageGroups.map((group) => group.id));
 const STATUS_IDS = new Set(statuses.map((status) => status.id));
+const PROGRESS_IDS = new Set(questionnaire.progressOptions.map((option) => option.id));
+const SUBMITTABLE = new Set(submittableStatuses);
 
 export const LIMITS = {
   email: 254,
@@ -26,7 +28,12 @@ export const LIMITS = {
   recentGames: 200,
   country: 60,
   notes: 1000,
-  adminNote: 2000
+  adminNote: 2000,
+  answer: 2000,
+  paypalAccount: 254,
+  evidenceUrl: 2048,
+  evidenceNote: 500,
+  minutesMax: 600
 };
 
 export class ApplicationValidationError extends Error {
@@ -140,8 +147,84 @@ export function normaliseApplication(input = {}) {
   };
 }
 
+// A PayPal account is an email address or a PayPal.Me name. Either is accepted
+// as typed; the payment is made by a person reading the dashboard, not by code,
+// so the check only needs to rule out the obviously empty or absurd.
+function normalisePaypal(value) {
+  const raw = cleanText(value, 'paypalAccount', 'PayPal account', LIMITS.paypalAccount);
+  const looksLikeEmail = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(raw);
+  const looksLikeHandle = /^(?:https?:\/\/)?(?:www\.)?paypal\.me\/[A-Za-z0-9._-]{2,}$/i.test(raw) || /^@?[A-Za-z0-9._-]{3,}$/.test(raw);
+  if (!looksLikeEmail && !looksLikeHandle) {
+    throw new ApplicationValidationError('Enter the email address of your PayPal account, or your PayPal.Me name', 'paypalAccount');
+  }
+  return raw;
+}
+
+function normaliseEvidenceUrl(value) {
+  const raw = cleanText(value, 'evidenceUrl', 'A link to your clip or screenshots', LIMITS.evidenceUrl);
+  let url;
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new ApplicationValidationError('That link does not look complete — it should start with https://', 'evidenceUrl');
+  }
+  if (url.protocol !== 'https:') {
+    throw new ApplicationValidationError('The link needs to start with https://', 'evidenceUrl');
+  }
+  return url.toString();
+}
+
+/**
+ * Validate one questionnaire submission. Every question needs an answer — a
+ * short one is fine, an empty one is a form that was not filled in — and the
+ * evidence link is required because it is the one thing that shows the
+ * session happened.
+ */
+export function normaliseSubmission(input = {}) {
+  const answers = {};
+  for (const question of questionnaire.questions) {
+    answers[question.id] = cleanText(input[`answer_${question.id}`], `answer_${question.id}`, 'This answer', LIMITS.answer);
+  }
+  const minutes = Number.parseInt(String(input.minutesPlayed ?? '').trim(), 10);
+  if (!Number.isInteger(minutes) || minutes < 1 || minutes > LIMITS.minutesMax) {
+    throw new ApplicationValidationError('Roughly how many minutes you played, as a number', 'minutesPlayed');
+  }
+  return {
+    answers,
+    headsetPlayed: pickOption(input.headsetPlayed, HEADSET_IDS, 'headsetPlayed', 'The headset you played on'),
+    minutesPlayed: minutes,
+    progressReturned: pickOption(input.progressReturned, PROGRESS_IDS, 'progressReturned', 'Whether your progress came back'),
+    evidenceUrl: normaliseEvidenceUrl(input.evidenceUrl),
+    evidenceNote: cleanText(input.evidenceNote, 'evidenceNote', 'Note about your clip', LIMITS.evidenceNote, { required: false }),
+    paypalAccount: normalisePaypal(input.paypalAccount),
+    ownAnswers: requireTick(input.ownAnswers, 'ownAnswers', 'Please confirm these are your own answers from your own session')
+  };
+}
+
+export function canSubmit(application) {
+  return Boolean(application) && SUBMITTABLE.has(application.status);
+}
+
 function iso(value) {
   return value instanceof Date ? value.toISOString() : value;
+}
+
+function rowToSubmission(row) {
+  if (!row) return null;
+  return {
+    id: Number(row.id),
+    applicationId: Number(row.application_id),
+    answers: typeof row.answers === 'string' ? JSON.parse(row.answers) : (row.answers ?? {}),
+    headsetPlayed: row.headset_played,
+    minutesPlayed: Number(row.minutes_played),
+    progressReturned: row.progress_returned,
+    evidenceUrl: row.evidence_url,
+    evidenceNote: row.evidence_note,
+    paypalAccount: row.paypal_account,
+    submissionCount: Number(row.submission_count),
+    submittedAt: iso(row.submitted_at),
+    updatedAt: iso(row.updated_at)
+  };
 }
 
 function rowToApplication(row) {
@@ -240,6 +323,32 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
     }
   }
 
+  // One submission per application, created when the tester submits and
+  // replaced if they correct it. Answers are JSON keyed by question id. Held
+  // separately from the application so the PayPal account — the one payment
+  // detail the site stores — lives in exactly one column of one table.
+  const submissionsExist = await pool.query(`
+    SELECT 1 FROM information_schema.tables WHERE table_name = 'playtest_submissions'
+  `);
+  if (submissionsExist.rows.length === 0) await pool.query(`
+    CREATE TABLE playtest_submissions (
+      id BIGSERIAL PRIMARY KEY,
+      application_id BIGINT NOT NULL REFERENCES playtest_applications(id),
+      answers TEXT NOT NULL DEFAULT '{}',
+      headset_played TEXT NOT NULL,
+      minutes_played INTEGER NOT NULL,
+      progress_returned TEXT NOT NULL,
+      evidence_url TEXT NOT NULL,
+      evidence_note TEXT NOT NULL DEFAULT '',
+      paypal_account TEXT NOT NULL,
+      submission_count INTEGER NOT NULL DEFAULT 1,
+      submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE UNIQUE INDEX playtest_submissions_application
+      ON playtest_submissions (application_id);
+  `);
+
   async function getByReference(reference) {
     const result = await pool.query(
       'SELECT * FROM playtest_applications WHERE reference = $1',
@@ -321,8 +430,78 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
   }
 
   async function deleteApplication(id) {
+    // The submission holds the payment detail; it goes first, and always.
+    await pool.query('DELETE FROM playtest_submissions WHERE application_id = $1', [id]);
     const result = await pool.query('DELETE FROM playtest_applications WHERE id = $1', [id]);
     return result.rowCount > 0;
+  }
+
+  /**
+   * The application a tester is trying to submit for, or null. Both halves
+   * must match: the reference is a six-character code somebody might share,
+   * and the email is the one thing only its owner is likely to know.
+   */
+  async function findForSubmission(reference, email) {
+    const application = await getByReference(String(reference ?? '').trim());
+    if (!application) return null;
+    const given = String(email ?? '').trim().toLowerCase();
+    if (!given || given !== application.email.toLowerCase()) return null;
+    return application;
+  }
+
+  async function getSubmission(applicationId) {
+    const result = await pool.query(
+      'SELECT * FROM playtest_submissions WHERE application_id = $1',
+      [applicationId]
+    );
+    return rowToSubmission(result.rows[0]);
+  }
+
+  /**
+   * Store or replace the tester's submission and move the application to
+   * Submitted. The first submission date is kept across corrections — it is
+   * the date the payment clock started — and a Paid application is closed.
+   */
+  async function saveSubmission(applicationId, input) {
+    const application = await getById(applicationId);
+    if (!canSubmit(application)) {
+      throw new ApplicationValidationError('This application is not open for a submission', 'status');
+    }
+    const submission = normaliseSubmission(input);
+    const existing = await getSubmission(applicationId);
+    const values = [
+      JSON.stringify(submission.answers), submission.headsetPlayed, submission.minutesPlayed,
+      submission.progressReturned, submission.evidenceUrl, submission.evidenceNote, submission.paypalAccount
+    ];
+    let saved;
+    if (existing) {
+      saved = await pool.query(`
+        UPDATE playtest_submissions SET
+          answers = $1, headset_played = $2, minutes_played = $3, progress_returned = $4,
+          evidence_url = $5, evidence_note = $6, paypal_account = $7,
+          submission_count = submission_count + 1, updated_at = NOW()
+        WHERE application_id = $8
+        RETURNING *
+      `, [...values, applicationId]);
+    } else {
+      saved = await pool.query(`
+        INSERT INTO playtest_submissions
+          (answers, headset_played, minutes_played, progress_returned, evidence_url, evidence_note, paypal_account, application_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *
+      `, [...values, applicationId]);
+    }
+    const updated = application.status === 'submitted' ? application : await setStatus(applicationId, 'submitted');
+    return { submission: rowToSubmission(saved.rows[0]), application: updated, corrected: Boolean(existing) };
+  }
+
+  async function listSubmissions() {
+    const result = await pool.query(`
+      SELECT s.*, a.reference, a.email, a.status
+      FROM playtest_submissions s JOIN playtest_applications a ON a.id = s.application_id
+      ORDER BY s.submitted_at DESC
+    `);
+    return result.rows.map((row) => ({ ...rowToSubmission(row), reference: row.reference, email: row.email, status: row.status }));
   }
 
   async function listApplications() {
@@ -351,6 +530,10 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
     listApplications,
     setStatus,
     deleteApplication,
+    findForSubmission,
+    getSubmission,
+    saveSubmission,
+    listSubmissions,
     summarise,
     close() { return pool.end(); }
   };

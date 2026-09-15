@@ -72,6 +72,41 @@ block content
           dt Paid
           dd= application.paidAt ? application.paidAt.slice(0, 10) : 'not yet'
 
+    .admin-panel(style="margin-bottom:24px")
+      h2 Submission
+      if submission
+        p(style="margin:0 0 14px;color:var(--ink-soft);font-size:13px").
+          Submitted #{submission.submittedAt.slice(0, 10)}#{submission.submissionCount > 1 ? `, updated ${submission.updatedAt.slice(0, 10)} (${submission.submissionCount} versions)` : ''}.
+          The #{study.paymentWindowHours}-hour payment window runs from the first submission.
+        dl.playtest-terms
+          .playtest-terms__row
+            dt PayPal account
+            dd
+              code= submission.paypalAccount
+              |  — pay #{study.fee} here, then set the status below to Paid.
+          .playtest-terms__row
+            dt Played on
+            dd #{submission.headsetLabel}, about #{submission.minutesPlayed} minutes
+          .playtest-terms__row
+            dt Progress returned
+            dd= submission.progressReturned === 'yes' ? 'Yes' : submission.progressReturned === 'no' ? 'No — something was missing or reset' : 'Not sure'
+          .playtest-terms__row
+            dt Clip or screenshots
+            dd
+              a(href=submission.evidenceUrl target="_blank" rel="noopener noreferrer")= submission.evidenceUrl
+              if submission.evidenceNote
+                br
+                span= submission.evidenceNote
+        h3(style="margin:22px 0 6px;font:600 13px var(--font-display);letter-spacing:.06em;text-transform:uppercase") Answers
+        dl.playtest-terms
+          each question in questionnaire.questions
+            .playtest-terms__row
+              dt= question.text
+              dd(style="white-space:pre-wrap")= submission.answers[question.id] || '—'
+      else
+        p(style="margin:0;color:var(--ink-soft);font-size:13px").
+          Nothing submitted yet. A tester submits on /playtest/questionnaire with their reference and email; the status moves to Submitted on its own when they do.
+
     form.admin-form(action=`/admin/playtest/${application.id}/status` method="post")
       input(type="hidden" name="_csrf" value=csrf)
       .admin-field.admin-field--wide

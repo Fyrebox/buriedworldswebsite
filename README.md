@@ -265,6 +265,33 @@ hour per address. A second application from an address already on file returns
 the original reference and changes nothing — it is nearly always a double-click,
 and a re-application must never overwrite a screening decision.
 
+### Submitting a session
+
+Testers submit on `/playtest/questionnaire`: seven answers, headset and minutes, whether
+progress returned, a link to a short clip or screenshots, and the PayPal account the
+US$10 goes to. Nothing is emailed by the tester and no address is published.
+
+The form appears only after a **reference and its email** are matched — the reference is
+six characters somebody might paste in a chat; the email is the thing only its owner
+knows. Every failure gets the same message, so nobody can learn which references exist
+by trying, and lookups are limited to 20 an hour per address. A match issues a signed
+token good for 24 hours, and the submission carries that rather than a session.
+
+Only applications at **Invited, Joined, Testing or Submitted** can submit — nothing
+before a key was sent, nothing after Paid. Submitting moves the status to Submitted on
+its own, so the 48-hour payment window starts from a timestamp nobody had to set. A
+tester asked for a correction resubmits with the same pair; the answers are replaced,
+the first date is kept, and `submission_count` goes up.
+
+Two emails go out through SES: a note to the developer (reference, headset, minutes,
+whether progress returned, dashboard link — **no answers, no PayPal, no address**) and a
+receipt to the tester. The PayPal account is shown only on the dashboard detail page and
+the submissions CSV, and is deleted with the application.
+
+Evidence is a **link**, not an upload: an unlisted YouTube video or a Drive/Dropbox share.
+The page explains how to get a clip off a Quest via the Meta Horizon app. Direct upload
+to R2 is the phase-two option if links prove to be where testers stall.
+
 **`/privacy` § *The paid playtest* covers all of this** and commits to specific
 retention: unsuccessful applications deleted 30 days after the round closes,
 recordings and contact details 90 days after final payment. The dashboard's

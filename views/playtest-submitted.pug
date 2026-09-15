@@ -1,0 +1,33 @@
+extends layout
+
+include partials/footer
+
+block content
+  main#content.legal.playtest(data-screen-label="Playtest submission received")
+    .wrap.legal__inner
+      a.legal__home(href="/") ← Buried Worlds VR
+
+      .section-head
+        .ornament
+          span.rule
+          span.diamond
+          span.rule
+        h1.h2= corrected ? 'Update received' : 'Submission received'
+        p.serif-italic Thank you. That is everything the study asks of you.
+
+      .legal__body
+        .playtest-reference
+          span.playtest-reference__label Reference
+          span.playtest-reference__code= reference
+        p.
+          A confirmation is on its way to the email address you applied with.
+          Payment of #{study.fee} is sent by #{study.payoutMethod} within
+          #{study.paymentWindowHours} hours to the account you gave — whether or not
+          you liked the game, found anything, or finished anything.
+        p.
+          If something is missing from what you sent, you will be emailed exactly
+          what within three days, and you can come back to the questionnaire page
+          with the same reference and email to update it. Otherwise, there is
+          nothing more to do.
+
+  +footer(links)

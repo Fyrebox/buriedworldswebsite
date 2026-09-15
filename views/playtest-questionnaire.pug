@@ -1,9 +1,17 @@
-//- The brief and the questionnaire a selected tester follows. One page, so the
-//- link in the invitation is the whole instruction set; nothing is in an email
-//- that is not also here.
+//- The brief a selected tester follows, and the form they submit on.
+//-
+//- Two steps on one page. The brief and the questions are always visible, so
+//- anyone can read what they would be agreeing to. The form itself appears
+//- only after a reference and its email have been matched — a reference is
+//- six characters somebody might paste in a chat; the email is the thing only
+//- its owner is likely to know.
 extends layout
 
 include partials/footer
+
+mixin fieldError(name)
+  if errorField === name && error
+    p.admin-alert(role="alert")= error
 
 block content
   main#content.legal.playtest(data-screen-label="Playtest questionnaire")
@@ -19,44 +27,138 @@ block content
         p.serif-italic About #{study.playMinutes} minutes of play, then #{questionnaire.questions.length} questions. Honest and specific beats polite every time.
 
       .legal__body
-        p.
-          This is the whole brief. If you have been offered a place and accepted
-          it, everything you need is on this page; if you are reading before
-          applying, this is what you would be agreeing to.
+        unless application
+          p.
+            This is the whole brief. If you have been offered a place, everything you
+            need is on this page — read it, play, then find your application at the
+            bottom and submit. If you are reading before applying, this is what you
+            would be agreeing to.
 
-        h2.legal__h Before you start
-        ol.legal__list
-          each step in questionnaire.before
-            li= step
+          h2.legal__h Before you start
+          ol.legal__list
+            each step in questionnaire.before
+              li= step
 
-        h2.legal__h The questions
-        p.
-          Answer in your own words, as long or short as you like. There are no
-          right answers and nothing is scored — a sentence that says "I had no
-          idea what the pickaxe was for" is worth more to us than a paragraph of
-          praise.
-        ol.legal__list.playtest-questions
-          each question in questionnaire.questions
-            li= question
+          h2.legal__h The questions
+          p.
+            Answer in your own words, as long or short as you like. There are no
+            right answers and nothing is scored — a sentence that says "I had no
+            idea what the pickaxe was for" is worth more to us than a paragraph of
+            praise.
+          ol.legal__list.playtest-questions
+            each question in questionnaire.questions
+              li= question.text
 
-        h2.legal__h Two or three details
-        ul.legal__list
-          each detail in questionnaire.details
-            li= detail
+          h2.legal__h Getting a clip or screenshots off your Quest
+          ol.legal__list
+            each step in questionnaire.evidenceHelp
+              li= step
+          p.
+            Two or three minutes, or a handful of screenshots, is enough. It shows the
+            session happened; it does not need to show all of it.
 
-        h2.legal__h Sending it
-        p
-          | Email your answers, your recording or screenshots, and the details above to
-          |  #[a(href=`mailto:${study.contactEmail}`)= study.contactEmail]
-          |  with your reference — the BW-code you were shown when you applied — in the
-          |  subject line. A large recording can be a link to a private upload rather than
-          |  an attachment.
-        p.
-          You have #{study.deadlineHours} hours from receiving access. If that stops
-          being realistic, say so before it runs out — an extension is a message, not
-          a problem. Payment of #{study.fee} is sent by #{study.payoutMethod} within
-          #{study.paymentWindowHours} hours of your submission arriving, and it does not
-          depend on liking the game, finding bugs, or finishing anything.
+          h2.legal__h Submitting
+          p.
+            Everything is submitted here, on this page: your answers, the link, and the
+            #{study.payoutMethod} account the #{study.fee} goes to. You have
+            #{study.deadlineHours} hours from receiving access. Payment is sent within
+            #{study.paymentWindowHours} hours of your submission arriving, and it does not
+            depend on liking the game, finding bugs, or finishing anything. If something
+            is missing you will be emailed exactly what, and you can come back here and
+            update your submission with the same reference and email.
+
+          h2.legal__h Find your application
+          if lookupError
+            p.admin-alert(role="alert")= lookupError
+          form.playtest-form(action="/playtest/questionnaire/find" method="post" novalidate)
+            input(type="hidden" name="formToken" value=formToken)
+            .playtest-field
+              label(for="reference") Your reference
+              input#reference(type="text" name="reference" value=lookup.reference maxlength="12" required autocomplete="off" spellcheck="false" placeholder="BW-XXXXXX" style="text-transform:uppercase")
+              small The BW-code shown when you applied. It was also in the subject of any email about your application.
+            .playtest-field
+              label(for="lookup-email") The email address you applied with
+              input#lookup-email(type="email" name="email" value=lookup.email maxlength="254" required autocomplete="email" inputmode="email" spellcheck="false")
+            .playtest-form__actions
+              button.btn.btn--primary(type="submit") Find my application
+              span.playtest-form__aside Both must match. Nothing is shown to anyone who has only one of them.
+
+        else
+          p.admin-alert.admin-alert--success(role="status")
+            | Application #{application.reference} found.
+            if existing
+              |  You submitted on #{existing.submittedAt.slice(0, 10)}; sending this form again replaces those answers.
+            else
+              |  Everything below is submitted together.
+
+          if error && !errorField
+            p.admin-alert(role="alert")= error
+          else if error
+            p.admin-alert(role="alert") Something needs fixing below — it is marked.
+
+          form.playtest-form(action="/playtest/questionnaire" method="post" novalidate)
+            input(type="hidden" name="submissionToken" value=submissionToken)
+
+            h2.legal__h The questions
+            each question in questionnaire.questions
+              .playtest-field(class=(errorField === `answer_${question.id}` ? 'playtest-field--error' : ''))
+                label(for=`answer-${question.id}`)= question.text
+                textarea.playtest-textarea(id=`answer-${question.id}` name=`answer_${question.id}` rows="4" maxlength="2000" required)= values.answers[question.id]
+                +fieldError(`answer_${question.id}`)
+
+            h2.legal__h Your session
+            .playtest-field(class=(errorField === 'headsetPlayed' ? 'playtest-field--error' : ''))
+              fieldset.playtest-fieldset
+                legend Which headset did you play on?
+                each headset in headsets
+                  label.playtest-choice
+                    input(type="radio" name="headsetPlayed" value=headset.id checked=(values.headsetPlayed === headset.id) required)
+                    span= headset.label
+              +fieldError('headsetPlayed')
+            .playtest-field(class=(errorField === 'minutesPlayed' ? 'playtest-field--error' : ''))
+              label(for="minutesPlayed") Roughly how many minutes did you play?
+              input#minutesPlayed(type="number" name="minutesPlayed" value=values.minutesPlayed min="1" max="600" step="1" required inputmode="numeric" style="max-width:10em")
+              +fieldError('minutesPlayed')
+            .playtest-field(class=(errorField === 'progressReturned' ? 'playtest-field--error' : ''))
+              fieldset.playtest-fieldset
+                legend When you quit and came back in, was your progress there?
+                each option in questionnaire.progressOptions
+                  label.playtest-choice
+                    input(type="radio" name="progressReturned" value=option.id checked=(values.progressReturned === option.id) required)
+                    span= option.label
+              +fieldError('progressReturned')
+
+            h2.legal__h Your clip or screenshots
+            .playtest-field(class=(errorField === 'evidenceUrl' ? 'playtest-field--error' : ''))
+              label(for="evidenceUrl") A link to your clip or screenshots
+              input#evidenceUrl(type="url" name="evidenceUrl" value=values.evidenceUrl maxlength="2048" required inputmode="url" spellcheck="false" placeholder="https://")
+              small An unlisted YouTube video, or a Google Drive or Dropbox link that anyone with it can open. Two or three minutes, or a handful of screenshots, is enough.
+              +fieldError('evidenceUrl')
+            .playtest-field(class=(errorField === 'evidenceNote' ? 'playtest-field--error' : ''))
+              label(for="evidenceNote") Anything we should know about it? (optional)
+              input#evidenceNote(type="text" name="evidenceNote" value=values.evidenceNote maxlength="500" autocomplete="off")
+              small For example: "the recording cut out after ten minutes, screenshots cover the rest".
+              +fieldError('evidenceNote')
+
+            h2.legal__h Where to send the #{study.fee}
+            .playtest-field(class=(errorField === 'paypalAccount' ? 'playtest-field--error' : ''))
+              label(for="paypalAccount") Your #{study.payoutMethod} account
+              input#paypalAccount(type="text" name="paypalAccount" value=values.paypalAccount maxlength="254" required autocomplete="off" spellcheck="false")
+              small.
+                The email address on the #{study.payoutMethod} account, or its PayPal.Me name.
+                If you are under 18, this is your parent or guardian's account. It is stored
+                with your application, seen only on the private dashboard, and deleted with it.
+              +fieldError('paypalAccount')
+
+            .playtest-field.playtest-field--consent
+              label.playtest-choice(class=(errorField === 'ownAnswers' ? 'playtest-choice--error' : ''))
+                input(type="checkbox" name="ownAnswers" value="yes" checked=values.ownAnswers required)
+                span These are my own answers, from my own session
+              +fieldError('ownAnswers')
+
+            .playtest-form__actions
+              button.btn.btn--primary(type="submit")= existing ? 'Update my submission' : 'Submit my session'
+              span.playtest-form__aside You will get one email confirming it arrived.
 
         p.legal__meta(style="margin-top:40px")
           | Study terms version #{study.termsVersion}. The full payment conditions are on the
