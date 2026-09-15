@@ -65,7 +65,10 @@ html(lang="en")
     link(rel="preconnect" href="https://fonts.googleapis.com")
     link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous")
     link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@400;500;600&display=swap")
-    link(rel="stylesheet" href="/css/styles.css")
+    //- The version is a hash of the stylesheet's bytes, set at startup, so the
+    //- year-long cache on /css/* is busted by a CSS change and by nothing else.
+    //- Templates rendered without it (tests) fall back to the bare path.
+    link(rel="stylesheet" href=assetVersion ? `/css/styles.css?v=${assetVersion}` : '/css/styles.css')
 
     //- Escaping "<" keeps a stray closing tag in any future copy from ending
     //- the script element early. The payload is ours, but the cost is one call.

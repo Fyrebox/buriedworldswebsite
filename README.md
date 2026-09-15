@@ -254,6 +254,29 @@ recordings and contact details 90 days after final payment. The dashboard's
 delete button is what keeps those promises — a retention promise that needs a
 database console to honour is one that quietly does not get honoured.
 
+## Static assets
+
+Everything under `public/` is served with `Cache-Control: public, max-age=31536000,
+immutable` (`assets.mjs`). Before this, `express.static` sent no lifetime and Cloudflare
+applied its four-hour default, so every returning visitor re-fetched the 647 KB hero
+loop. A year-long cache is safe on one condition, and it is a convention rather than a
+mechanism:
+
+**A changed asset gets a changed URL.**
+
+- The stylesheet handles this itself: the layout links `/css/styles.css?v=<hash>`, where
+  the hash is computed from the file's bytes at startup. Edit the CSS, deploy, and the
+  URL changes; deploy without touching it, and the cache stands.
+- Images, video and fonts do not. **Replace one under the same filename and anyone who
+  has visited before is served the old bytes for a year.** New poster: `hero-poster-2.webp`,
+  then point `data/content.mjs` at it. Never overwrite `hero-poster.jpg` in place.
+- The exceptions are the files that change in place by design and are fetched by robots
+  rather than browsers: `sitemap.xml`, `robots.txt` and the press kit zip get an hour.
+
+Cloudflare respects the origin's `Cache-Control` as long as the zone's Browser Cache TTL
+is left at *Respect Existing Headers* (the default). If a static asset ever comes back
+with `max-age=14400`, that setting has been changed.
+
 ## Design fidelity
 
 Colors, typography, spacing, radii, and hover states are transcribed from
@@ -400,9 +423,9 @@ cd public/press && zip -q -r buried-worlds-press-kit.zip screenshots art KIT-REA
 The page reads the zip's size off disk at request time, so it cannot end up quoting
 a stale figure.
 
-**`express.static` runs with `redirect: false`.** `public/press/` is a directory and
-`/press` is a route; with the default on, static answers `/press` with a 301 to
-`/press/` before the route is reached and the page is unreachable.
+**Static serving runs with `redirect: false`** (see `assets.mjs`). `public/press/` is a
+directory and `/press` is a route; with the default on, static answers `/press` with a
+301 to `/press/` before the route is reached and the page is unreachable.
 
 **Gap:** there is no Hoxne screenshot, because the final trailer cut contains no
 Hoxne footage — the shot list planned it and it did not survive. Hoxne is the

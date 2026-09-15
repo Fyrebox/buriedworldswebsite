@@ -24,6 +24,7 @@ import {
   screenshots,
   art
 } from './data/press.mjs';
+import { assetVersion, createStaticMiddleware, stylesheetPath } from './assets.mjs';
 import { createDestinationsRouter } from './destinations.mjs';
 import { createGuidesRouter } from './guides.mjs';
 import { createFeedbackRouter } from './feedback.mjs';
@@ -149,12 +150,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Static assets (CSS, client JS, future key art).
-// redirect:false because public/press/ is a directory AND /press is a route.
-// Left on, static answers /press with a 301 to /press/ before the route is ever
-// reached, and the press kit page becomes unreachable. Files beneath it still
-// serve normally; only the directory redirect is given up, which nothing wants.
-app.use(express.static(path.join(__dirname, 'public'), { redirect: false }));
+// Static assets, cached for a year and marked immutable (assets.mjs). The
+// stylesheet's URL carries a hash of its contents so a CSS deploy still
+// reaches returning visitors; every other asset is content-addressed by
+// filename, which README § Static assets explains.
+const publicDir = path.join(__dirname, 'public');
+app.locals.assetVersion = assetVersion(stylesheetPath(publicDir));
+app.use(createStaticMiddleware(publicDir));
 
 // Home — the landing page.
 app.get('/', (req, res) => {
