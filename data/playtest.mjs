@@ -129,10 +129,6 @@ export const conditions = [
     outcome: `Paid ${study.fee}.`
   },
   {
-    situation: 'You disliked the game, found no bugs, or could not work out how to play it',
-    outcome: 'Paid in full. Getting stuck is the finding, not a failed test.'
-  },
-  {
     situation: 'Your recording failed',
     outcome: 'Screenshots and specific notes are accepted instead. No unpaid replay.'
   },
@@ -166,7 +162,7 @@ export const privacyNotes = [
 export const questionnaire = {
   before: [
     'Start a new game in an empty save slot. Do not look up the controls, watch a video or ask anyone — working out what the game teaches badly is the whole point, and getting stuck is a result, not a failure.',
-    `Play for about ${study.playMinutes} minutes. Breaks do not count; if a crash, a blocker or motion discomfort stops you, stop, and tell us what happened. You are paid in full either way.`,
+    `Play for about ${study.playMinutes} minutes. Breaks do not count.`,
     'Capture something that shows you played: a clip of two or three minutes, or a handful of screenshots. It does not need to cover the whole session — it is there to show the session happened.',
     'Then quit to the hub and come back into the same save once, so we learn whether your progress returns.'
   ],
