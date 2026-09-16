@@ -115,7 +115,7 @@ export function submissionNotice(application, submission, { siteUrl, corrected }
       `Headset:    ${headset}`,
       `Played:     about ${submission.minutesPlayed} minutes`,
       `Progress:   ${submission.progressReturned === 'yes' ? 'returned after relaunch' : submission.progressReturned === 'no' ? 'DID NOT return after relaunch' : 'unsure whether it returned'}`,
-      `Evidence:   link provided`,
+      `Evidence:   marketplace screenshot linked${submission.clipUrl ? ', plus a clip' : ''}`,
       ``,
       `Open it:    ${siteUrl}/admin/playtest/${application.id}`,
       ``,
@@ -161,9 +161,9 @@ export function statusEmails(application, { siteUrl, key = '' }) {
         `The brief and the questions are here:`,
         `${siteUrl}/playtest/questionnaire`,
         ``,
-        `You have ${study.deadlineLabel} from this email. Play about ${study.playMinutes} minutes without looking anything up, capture a short clip or a few screenshots, then submit on that page with your reference (${ref}) and this email address. Payment of ${study.fee} follows by ${study.payoutMethod} within ${study.paymentWindowHours} hours — whether or not you liked it, found anything, or finished anything.`,
+        `You have ${study.deadlineLabel} from this email. Play about ${study.playMinutes} minutes, get at least ${study.minLoot} of finds in the game's own money, and take a screenshot of the marketplace showing it. Then submit on that page with your reference (${ref}) and this email address. Payment of ${study.fee} follows by ${study.payoutMethod} within ${study.paymentWindowHours} hours — whether or not you liked it.`,
         ``,
-        `If ${study.deadlineLabel} stops being realistic, say so before it runs out and you'll get more.`
+        `Stuck, or not sure what to do? Message the developer on Discord and he'll walk you through it. Asking does not affect payment. If ${study.deadlineLabel} stops being realistic, say so before it runs out and you'll get more.`
       ].join('\n')
     },
     declined: {
@@ -257,6 +257,7 @@ export function createPlaytestRouter({
       minutesPlayed: String(body.minutesPlayed ?? '').slice(0, 4),
       progressReturned: String(body.progressReturned ?? ''),
       evidenceUrl: String(body.evidenceUrl ?? '').slice(0, LIMITS.evidenceUrl),
+      clipUrl: String(body.clipUrl ?? '').slice(0, LIMITS.evidenceUrl),
       evidenceNote: String(body.evidenceNote ?? '').slice(0, LIMITS.evidenceNote),
       paypalAccount: String(body.paypalAccount ?? '').slice(0, LIMITS.paypalAccount),
       ownAnswers: Boolean(body.ownAnswers),
@@ -276,6 +277,7 @@ export function createPlaytestRouter({
       minutesPlayed: String(submission.minutesPlayed),
       progressReturned: submission.progressReturned,
       evidenceUrl: submission.evidenceUrl,
+      clipUrl: submission.clipUrl,
       evidenceNote: submission.evidenceNote,
       paypalAccount: submission.paypalAccount,
       ownAnswers: false,
@@ -631,11 +633,11 @@ export function createPlaytestRouter({
 
   router.get('/admin/playtest/submissions.csv', async (req, res) => {
     const columns = ['reference', 'email', 'status', 'submitted_at', 'updated_at', 'submission_count', 'headset_played',
-      'minutes_played', 'progress_returned', 'evidence_url', 'evidence_note', 'paypal_account',
+      'minutes_played', 'progress_returned', 'evidence_url', 'clip_url', 'evidence_note', 'paypal_account',
       ...questionnaire.questions.map((question) => `answer_${question.id}`)];
     const rows = (await store.listSubmissions()).map((entry) => [
       entry.reference, entry.email, entry.status, entry.submittedAt, entry.updatedAt, entry.submissionCount,
-      entry.headsetPlayed, entry.minutesPlayed, entry.progressReturned, entry.evidenceUrl, entry.evidenceNote,
+      entry.headsetPlayed, entry.minutesPlayed, entry.progressReturned, entry.evidenceUrl, entry.clipUrl, entry.evidenceNote,
       entry.paypalAccount, ...questionnaire.questions.map((question) => entry.answers[question.id] ?? '')
     ]);
     const csv = [columns.join(','), ...rows.map((row) => row.map(csvValue).join(','))].join('\n');

@@ -421,7 +421,8 @@ function submissionInput(overrides = {}) {
     headsetPlayed: 'quest-3',
     minutesPlayed: '24',
     progressReturned: 'yes',
-    evidenceUrl: 'https://youtu.be/example',
+    evidenceUrl: 'https://drive.google.com/example-screenshot',
+    clipUrl: '',
     evidenceNote: '',
     paypalAccount: 'tester-paypal@example.com',
     ownAnswers: 'yes',
@@ -550,7 +551,7 @@ test('a submission is stored, flips the status, tells both people, and never put
     const toTester = sent.find((message) => message.to === 'tester@example.com');
     assert.ok(toOwner && toTester);
     assert.ok(toOwner.subject.includes(stored.reference) && toOwner.text.includes(`/admin/playtest/${stored.id}`));
-    for (const secret of ['tester-paypal@example.com', 'My answer about', 'youtu.be', 'tester@example.com']) {
+    for (const secret of ['tester-paypal@example.com', 'My answer about', 'drive.google.com', 'tester@example.com']) {
       assert.ok(!toOwner.text.includes(secret) && !toOwner.subject.includes(secret), `developer note must not carry ${secret}`);
     }
     assert.ok(toTester.text.includes('48 hours') && toTester.text.includes(stored.reference));
@@ -623,9 +624,12 @@ test('submission validation', () => {
   assert.doesNotThrow(() => normaliseSubmission(submissionInput()));
   assert.doesNotThrow(() => normaliseSubmission(submissionInput({ paypalAccount: 'paypal.me/CyrilG' })));
   assert.doesNotThrow(() => normaliseSubmission(submissionInput({ paypalAccount: 'https://www.paypal.me/CyrilG' })));
+  assert.equal(normaliseSubmission(submissionInput()).clipUrl, '', 'the clip is optional');
+  assert.equal(normaliseSubmission(submissionInput({ clipUrl: 'https://youtu.be/x' })).clipUrl, 'https://youtu.be/x');
   const cases = [
     ['paypalAccount', { paypalAccount: '' }], ['paypalAccount', { paypalAccount: '!!' }],
     ['evidenceUrl', { evidenceUrl: 'not a link' }], ['evidenceUrl', { evidenceUrl: 'http://insecure.example/x' }],
+    ['clipUrl', { clipUrl: 'http://insecure.example/clip' }],
     ['minutesPlayed', { minutesPlayed: 'twenty' }], ['minutesPlayed', { minutesPlayed: '0' }], ['minutesPlayed', { minutesPlayed: '9999' }],
     ['headsetPlayed', { headsetPlayed: 'index' }], ['progressReturned', { progressReturned: 'maybe' }],
     ['answer_play-again', { 'answer_play-again': '   ' }], ['answer_confusion', { answer_confusion: 'x'.repeat(2001) }],
@@ -651,7 +655,7 @@ test('the dashboard shows the submission and the PayPal account, exports it, and
     const detail = await (await fetch(`${server.url}/admin/playtest/${stored.id}`, { headers: { cookie } })).text();
     assert.ok(detail.includes('tester-paypal@example.com'), 'but is on the detail page');
     assert.ok(detail.includes('My answer about first-goal.'));
-    assert.ok(detail.includes('href="https://youtu.be/example"'));
+    assert.ok(detail.includes('href="https://drive.google.com/example-screenshot"'));
 
     const csv = await (await fetch(`${server.url}/admin/playtest/submissions.csv`, { headers: { cookie } })).text();
     assert.ok(csv.startsWith('reference,email,status,submitted_at'));
@@ -668,6 +672,35 @@ test('the dashboard shows the submission and the PayPal account, exports it, and
   } finally {
     await server.stop();
   }
+});
+
+test('a submissions table from before the optional clip gains the column', async () => {
+  const pool = createMemoryPool();
+  // Both tables as they first shipped: applications with age_group, submissions without clip_url.
+  await pool.query(`CREATE TABLE playtest_applications (
+    id BIGSERIAL PRIMARY KEY, reference TEXT NOT NULL, email TEXT NOT NULL, horizon_username TEXT NOT NULL,
+    headset TEXT NOT NULL, vr_frequency TEXT NOT NULL, capture_method TEXT NOT NULL, recent_games TEXT NOT NULL DEFAULT '',
+    country TEXT NOT NULL DEFAULT '', played_before BOOLEAN NOT NULL DEFAULT FALSE, age_group TEXT NOT NULL DEFAULT 'adult',
+    notes TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'new', admin_note TEXT NOT NULL DEFAULT '',
+    terms_version TEXT NOT NULL DEFAULT '', created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    invited_at TIMESTAMPTZ, joined_at TIMESTAMPTZ, paid_at TIMESTAMPTZ)`);
+  await pool.query(`CREATE TABLE playtest_submissions (
+    id BIGSERIAL PRIMARY KEY, application_id BIGINT NOT NULL REFERENCES playtest_applications(id),
+    answers TEXT NOT NULL DEFAULT '{}', headset_played TEXT NOT NULL, minutes_played INTEGER NOT NULL,
+    progress_returned TEXT NOT NULL, evidence_url TEXT NOT NULL, evidence_note TEXT NOT NULL DEFAULT '',
+    paypal_account TEXT NOT NULL, submission_count INTEGER NOT NULL DEFAULT 1,
+    submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`);
+  await pool.query(`CREATE UNIQUE INDEX playtest_submissions_application ON playtest_submissions (application_id)`);
+  const store = await createPlaytestStore({ pool });
+  const { application } = await store.createApplication(applicationInput());
+  await store.setStatus(application.id, 'invited');
+  await pool.query(`INSERT INTO playtest_submissions (application_id, headset_played, minutes_played, progress_returned, evidence_url, paypal_account)
+    VALUES ($1, 'quest-2', 20, 'yes', 'https://example.com/old', 'old@example.com')`, [application.id]);
+  const old = await store.getSubmission(application.id);
+  assert.equal(old.clipUrl, '', 'earlier rows have no clip');
+  const saved = await store.saveSubmission(application.id, submissionInput({ clipUrl: 'https://youtu.be/new' }));
+  assert.equal(saved.submission.clipUrl, 'https://youtu.be/new');
+  await store.close();
 });
 
 test('a database from before submissions gains the table on startup', async () => {

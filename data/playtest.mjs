@@ -11,7 +11,7 @@
 // change the only way to know which one that was is the version on their row.
 
 export const study = {
-  termsVersion: '2026-09-15b',
+  termsVersion: '2026-09-16',
   fee: 'US$10',
   feeAmount: '10',
   feeCurrency: 'USD',
@@ -25,6 +25,10 @@ export const study = {
   paymentWindowHours: 48,
   places: 5,
   payoutMethod: 'PayPal',
+  // The bar for payment: this much in the game's own money, shown on a
+  // marketplace screenshot. In-game dollars, not real ones — the copy says so
+  // every time, because the fee happens to be the same number.
+  minLoot: '$10',
   // 13 is the floor for three separate reasons: Meta requires it for a Quest
   // account, the game is rated IARC 13+, and the privacy policy promises not
   // to collect anything from anyone younger. Under 18 needs a parent or
@@ -108,7 +112,11 @@ export const promises = [
   },
   {
     label: 'Feedback',
-    body: 'A short questionnaire on this site, plus a link to a short clip or a few screenshots from your session — enough to show you played, not a record of all of it. No webcam, no room footage.'
+    body: `A short questionnaire on this site, plus a screenshot of the marketplace showing at least ${study.minLoot} of finds in the game's own money. A clip is welcome but optional. No webcam, no room footage.`
+  },
+  {
+    label: 'Stuck?',
+    body: 'Message the developer on Discord and he will walk you through it. Asking costs you nothing and does not affect payment.'
   },
   {
     label: 'Eligibility',
@@ -125,12 +133,16 @@ export const promises = [
 // to be argued with — each have a stated answer.
 export const conditions = [
   {
-    situation: 'You complete the session and submit the questionnaire with a clip or screenshots',
-    outcome: `Paid ${study.fee}.`
+    situation: `You play about ${study.playMinutes} minutes, your marketplace shows at least ${study.minLoot} of finds (the game's money), and you answer every question from your own session`,
+    outcome: `Paid ${study.fee} — whether or not you liked the game.`
   },
   {
-    situation: 'Your recording failed',
-    outcome: 'Screenshots and specific notes are accepted instead. No unpaid replay.'
+    situation: `Your marketplace shows less than ${study.minLoot}`,
+    outcome: 'Not paid yet. Ask on Discord — the developer will walk you through it — then keep playing and submit once you are over.'
+  },
+  {
+    situation: 'You are not sure what to do, or something seems broken',
+    outcome: 'Ask on Discord before your week runs out. A walk-through does not affect payment.'
   },
   {
     situation: 'Something is missing from your submission',
@@ -163,7 +175,8 @@ export const questionnaire = {
   before: [
     'Start a new game in an empty save slot. Do not look up the controls, watch a video or ask anyone — working out what the game teaches badly is the whole point, and getting stuck is a result, not a failure.',
     `Play for about ${study.playMinutes} minutes. Breaks do not count.`,
-    'Capture something that shows you played: a clip of two or three minutes, or a handful of screenshots. It does not need to cover the whole session — it is there to show the session happened.',
+    `Before you finish, open the marketplace and take a screenshot showing the value of what you have found — at least ${study.minLoot} in the game's own money. That screenshot is the proof of play. A short clip is welcome but optional.`,
+    'If you are stuck at any point, message the developer on Discord. He will walk you through it, and it does not affect your payment.',
     'Then quit to the hub and come back into the same save once, so we learn whether your progress returns.'
   ],
   // Stable ids: answers are stored against these, so reordering or rewording a
@@ -182,11 +195,11 @@ export const questionnaire = {
     { id: 'no', label: 'No, something was missing or reset' },
     { id: 'unsure', label: 'Not sure' }
   ],
-  // How to get a clip or screenshots off a Quest, because most people never have.
+  // How to get a screenshot off a Quest, because most people never have.
   evidenceHelp: [
-    'On the headset, press the Meta button, open Camera, and choose Record or Take photo. The controller shortcut is Meta button + trigger.',
-    'Open the Meta Horizon app on your phone → Gallery. Your recording syncs over Wi-Fi in a few minutes.',
-    'Share it from there to YouTube as Unlisted, or to Google Drive or Dropbox, and paste the link below. A link anyone with it can open is all we need.'
+    'With the marketplace open, press the Meta button, open Camera, and choose Take photo. The controller shortcut is Meta button + trigger.',
+    'Open the Meta Horizon app on your phone → Gallery. The screenshot syncs over Wi-Fi in a minute or two.',
+    'Share it from there to Google Drive, Dropbox, or any image host, and paste the link on this page. A link anyone with it can open is all we need. A clip goes the same way — YouTube as Unlisted works well — if you want to add one.'
   ]
 };
 

@@ -104,12 +104,18 @@ block content
             dt Progress returned
             dd= submission.progressReturned === 'yes' ? 'Yes' : submission.progressReturned === 'no' ? 'No — something was missing or reset' : 'Not sure'
           .playtest-terms__row
-            dt Clip or screenshots
+            dt Marketplace screenshot
             dd
               a(href=submission.evidenceUrl target="_blank" rel="noopener noreferrer")= submission.evidenceUrl
+              |  — check it shows at least #{study.minLoot} of finds before paying.
               if submission.evidenceNote
                 br
                 span= submission.evidenceNote
+          if submission.clipUrl
+            .playtest-terms__row
+              dt Clip
+              dd
+                a(href=submission.clipUrl target="_blank" rel="noopener noreferrer")= submission.clipUrl
         h3(style="margin:22px 0 6px;font:600 13px var(--font-display);letter-spacing:.06em;text-transform:uppercase") Answers
         dl.playtest-terms
           each question in questionnaire.questions

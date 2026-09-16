@@ -160,16 +160,17 @@ function normalisePaypal(value) {
   return raw;
 }
 
-function normaliseEvidenceUrl(value) {
-  const raw = cleanText(value, 'evidenceUrl', 'A link to your clip or screenshots', LIMITS.evidenceUrl);
+function normaliseHttpsUrl(value, field, label, { required = true } = {}) {
+  const raw = cleanText(value, field, label, LIMITS.evidenceUrl, { required });
+  if (!raw) return '';
   let url;
   try {
     url = new URL(raw);
   } catch {
-    throw new ApplicationValidationError('That link does not look complete — it should start with https://', 'evidenceUrl');
+    throw new ApplicationValidationError('That link does not look complete — it should start with https://', field);
   }
   if (url.protocol !== 'https:') {
-    throw new ApplicationValidationError('The link needs to start with https://', 'evidenceUrl');
+    throw new ApplicationValidationError('The link needs to start with https://', field);
   }
   return url.toString();
 }
@@ -194,8 +195,9 @@ export function normaliseSubmission(input = {}) {
     headsetPlayed: pickOption(input.headsetPlayed, HEADSET_IDS, 'headsetPlayed', 'The headset you played on'),
     minutesPlayed: minutes,
     progressReturned: pickOption(input.progressReturned, PROGRESS_IDS, 'progressReturned', 'Whether your progress came back'),
-    evidenceUrl: normaliseEvidenceUrl(input.evidenceUrl),
-    evidenceNote: cleanText(input.evidenceNote, 'evidenceNote', 'Note about your clip', LIMITS.evidenceNote, { required: false }),
+    evidenceUrl: normaliseHttpsUrl(input.evidenceUrl, 'evidenceUrl', 'A link to your marketplace screenshot'),
+    clipUrl: normaliseHttpsUrl(input.clipUrl, 'clipUrl', 'A link to your clip', { required: false }),
+    evidenceNote: cleanText(input.evidenceNote, 'evidenceNote', 'Note about your screenshot', LIMITS.evidenceNote, { required: false }),
     paypalAccount: normalisePaypal(input.paypalAccount),
     ownAnswers: requireTick(input.ownAnswers, 'ownAnswers', 'Please confirm these are your own answers from your own session')
   };
@@ -219,6 +221,7 @@ function rowToSubmission(row) {
     minutesPlayed: Number(row.minutes_played),
     progressReturned: row.progress_returned,
     evidenceUrl: row.evidence_url,
+    clipUrl: row.clip_url ?? '',
     evidenceNote: row.evidence_note,
     paypalAccount: row.paypal_account,
     submissionCount: Number(row.submission_count),
@@ -311,17 +314,19 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
   // an adult, because that is what the form required at the time. A fresh
   // table already has every column, so this loop is a no-op for it.
   const added = [
-    ['age_group', `TEXT NOT NULL DEFAULT 'adult'`]
+    ['playtest_applications', 'age_group', `TEXT NOT NULL DEFAULT 'adult'`]
   ];
-  for (const [column, definition] of added) {
-    const present = await pool.query(`
-      SELECT 1 FROM information_schema.columns
-      WHERE table_name = 'playtest_applications' AND column_name = $1
-    `, [column]);
-    if (present.rows.length === 0) {
-      await pool.query(`ALTER TABLE playtest_applications ADD COLUMN ${column} ${definition}`);
+  async function migrate(rows) {
+    for (const [table, column, definition] of rows) {
+      const present = await pool.query(`
+        SELECT 1 FROM information_schema.columns WHERE table_name = $1 AND column_name = $2
+      `, [table, column]);
+      if (present.rows.length === 0) {
+        await pool.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+      }
     }
   }
+  await migrate(added);
 
   // One submission per application, created when the tester submits and
   // replaced if they correct it. Answers are JSON keyed by question id. Held
@@ -339,6 +344,7 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
       minutes_played INTEGER NOT NULL,
       progress_returned TEXT NOT NULL,
       evidence_url TEXT NOT NULL,
+      clip_url TEXT NOT NULL DEFAULT '',
       evidence_note TEXT NOT NULL DEFAULT '',
       paypal_account TEXT NOT NULL,
       submission_count INTEGER NOT NULL DEFAULT 1,
@@ -348,6 +354,9 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
     CREATE UNIQUE INDEX playtest_submissions_application
       ON playtest_submissions (application_id);
   `);
+  // The clip became optional after the table first shipped; the required
+  // evidence is now the marketplace screenshot in evidence_url.
+  await migrate([['playtest_submissions', 'clip_url', `TEXT NOT NULL DEFAULT ''`]]);
 
   // Redeemable store keys from the Meta developer dashboard, pasted in by the
   // developer and handed out one per invited applicant. A key with assigned_at
@@ -491,23 +500,23 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
     const existing = await getSubmission(applicationId);
     const values = [
       JSON.stringify(submission.answers), submission.headsetPlayed, submission.minutesPlayed,
-      submission.progressReturned, submission.evidenceUrl, submission.evidenceNote, submission.paypalAccount
+      submission.progressReturned, submission.evidenceUrl, submission.clipUrl, submission.evidenceNote, submission.paypalAccount
     ];
     let saved;
     if (existing) {
       saved = await pool.query(`
         UPDATE playtest_submissions SET
           answers = $1, headset_played = $2, minutes_played = $3, progress_returned = $4,
-          evidence_url = $5, evidence_note = $6, paypal_account = $7,
+          evidence_url = $5, clip_url = $6, evidence_note = $7, paypal_account = $8,
           submission_count = submission_count + 1, updated_at = NOW()
-        WHERE application_id = $8
+        WHERE application_id = $9
         RETURNING *
       `, [...values, applicationId]);
     } else {
       saved = await pool.query(`
         INSERT INTO playtest_submissions
-          (answers, headset_played, minutes_played, progress_returned, evidence_url, evidence_note, paypal_account, application_id)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          (answers, headset_played, minutes_played, progress_returned, evidence_url, clip_url, evidence_note, paypal_account, application_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING *
       `, [...values, applicationId]);
     }

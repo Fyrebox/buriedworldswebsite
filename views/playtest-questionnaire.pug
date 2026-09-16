@@ -49,23 +49,31 @@ block content
             each question in questionnaire.questions
               li= question.text
 
-          h2.legal__h Getting a clip or screenshots off your Quest
+          h2.legal__h The marketplace screenshot
+          p.
+            The proof of play is one screenshot: the marketplace, showing at least
+            #{study.minLoot} of finds in the game's own money. Twenty minutes is plenty to
+            get there — and if it isn't, that is exactly what Discord is for.
           ol.legal__list
             each step in questionnaire.evidenceHelp
               li= step
-          p.
-            Two or three minutes, or a handful of screenshots, is enough. It shows the
-            session happened; it does not need to show all of it.
+
+          h2.legal__h If you get stuck
+          p
+            | Message the developer on
+            |  #[a(href=links.discord target="_blank" rel="noopener noreferrer") Discord]. He will
+            |  walk you through whatever has you stuck — that is useful to him, it costs you
+            |  nothing, and it does not affect your payment.
 
           h2.legal__h Submitting
           p.
-            Everything is submitted here, on this page: your answers, the link, and the
-            #{study.payoutMethod} account the #{study.fee} goes to. You have
+            Everything is submitted here, on this page: your answers, the screenshot link,
+            and the #{study.payoutMethod} account the #{study.fee} goes to. You have
             #{study.deadlineLabel} from receiving access. Payment is sent within
             #{study.paymentWindowHours} hours of your submission arriving, and it does not
-            depend on liking the game, finding bugs, or finishing anything. If something
-            is missing you will be emailed exactly what, and you can come back here and
-            update your submission with the same reference and email.
+            depend on whether you liked the game. If something is missing you will be
+            emailed exactly what, and you can come back here and update your submission
+            with the same reference and email.
 
           h2.legal__h Find your application
           if lookupError
@@ -128,16 +136,20 @@ block content
                     span= option.label
               +fieldError('progressReturned')
 
-            h2.legal__h Your clip or screenshots
+            h2.legal__h Your marketplace screenshot
             .playtest-field(class=(errorField === 'evidenceUrl' ? 'playtest-field--error' : ''))
-              label(for="evidenceUrl") A link to your clip or screenshots
+              label(for="evidenceUrl") A link to the screenshot
               input#evidenceUrl(type="url" name="evidenceUrl" value=values.evidenceUrl maxlength="2048" required inputmode="url" spellcheck="false" placeholder="https://")
-              small An unlisted YouTube video, or a Google Drive or Dropbox link that anyone with it can open. Two or three minutes, or a handful of screenshots, is enough.
+              small The marketplace showing at least #{study.minLoot} of finds in the game's money. A Google Drive, Dropbox or image-host link that anyone with it can open.
               +fieldError('evidenceUrl')
+            .playtest-field(class=(errorField === 'clipUrl' ? 'playtest-field--error' : ''))
+              label(for="clipUrl") A clip of your session (optional)
+              input#clipUrl(type="url" name="clipUrl" value=values.clipUrl maxlength="2048" inputmode="url" spellcheck="false" placeholder="https://")
+              small Welcome but not required — an unlisted YouTube link works well.
+              +fieldError('clipUrl')
             .playtest-field(class=(errorField === 'evidenceNote' ? 'playtest-field--error' : ''))
-              label(for="evidenceNote") Anything we should know about it? (optional)
+              label(for="evidenceNote") Anything we should know? (optional)
               input#evidenceNote(type="text" name="evidenceNote" value=values.evidenceNote maxlength="500" autocomplete="off")
-              small For example: "the recording cut out after ten minutes, screenshots cover the rest".
               +fieldError('evidenceNote')
 
             h2.legal__h Where to send the #{study.fee}
