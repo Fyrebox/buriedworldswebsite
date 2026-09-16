@@ -141,10 +141,6 @@ export const conditions = [
     outcome: 'You will be emailed exactly what, within three days, and can update your submission for a week.'
   },
   {
-    situation: 'The study is cancelled after you accepted a place',
-    outcome: `Paid ${study.fee} if you had started, half if you had not.`
-  },
-  {
     situation: 'A submission is copied, fabricated, or claimed twice',
     outcome: 'Not paid, with the specific reason given and a week to dispute it.'
   }
