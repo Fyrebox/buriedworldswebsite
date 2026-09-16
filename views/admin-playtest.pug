@@ -59,6 +59,17 @@ block content
             |  ·
         |  — hold Quest 2 places open longest; it is the weakest hardware and the likeliest source of comfort and performance findings.
 
+    details.admin-panel(style="margin-bottom:30px")
+      summary(style="cursor:pointer;font:600 1.25rem var(--font-display);text-transform:uppercase") The recruitment post
+      p(style="margin:12px 0;color:var(--ink-soft);font-size:13px").
+        Generated from the live terms, so it always matches the page. Text post under
+        r/playtesters' Paid Playtest flair — recheck the rules the day you post. Swap the
+        apply link for a /go/ campaign link to count arrivals.
+      p(style="margin:0 0 6px;font:600 12px var(--font-display);letter-spacing:.06em;text-transform:uppercase;color:var(--bronze-link)") Title
+      pre(style="white-space:pre-wrap;font:14px/1.5 var(--font-body);background:var(--paper);padding:12px 14px;border-radius:8px;margin:0 0 14px")= post.title
+      p(style="margin:0 0 6px;font:600 12px var(--font-display);letter-spacing:.06em;text-transform:uppercase;color:var(--bronze-link)") Body (Markdown)
+      pre(style="white-space:pre-wrap;font:14px/1.5 var(--font-body);background:var(--paper);padding:12px 14px;border-radius:8px;margin:0")= post.body
+
     if applications.length
       .admin-table-wrap
         table.admin-table

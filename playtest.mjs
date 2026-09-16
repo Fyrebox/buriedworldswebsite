@@ -21,6 +21,7 @@ import {
   privacyNotes,
   promises,
   questionnaire,
+  recruitmentPost,
   statuses,
   study,
   vrFrequencies
@@ -627,6 +628,7 @@ export function createPlaytestRouter({
       study,
       applicationsOpen,
       mailConfigured: Boolean(notify),
+      post: recruitmentPost({ siteUrl }),
       notice
     });
   });

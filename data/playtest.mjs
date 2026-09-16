@@ -209,3 +209,31 @@ export const questionnaire = {
 // after Paid the study is over for that person.
 export const submittableStatuses = ['invited', 'joined', 'testing', 'submitted'];
 
+
+// The recruitment post, generated from the terms above so it cannot say one
+// thing while the page says another. Shown on the dashboard to copy from.
+// r/playtesters wants a text post under its Paid Playtest flair with the cash
+// amount stated; recheck the subreddit's rules the day you post.
+export function recruitmentPost({ siteUrl, applyUrl = `${siteUrl}/playtest` }) {
+  return {
+    title: `[Paid] ${study.fee} for a ${study.totalMinutes}-minute Buried Worlds VR playtest — Meta Quest owners, ${study.minAge}+`,
+    body: [
+      `I'm the developer of Buried Worlds VR, a Quest treasure-hunting game — metal detecting, digging, panning for gold across five real places where real treasure was found.`,
+      ``,
+      `I'm looking for ${study.places} Quest players to test the opening and tell me where it loses them.`,
+      ``,
+      `- **Pay:** ${study.fee} via ${study.payoutMethod}, sent within ${study.paymentWindowHours} hours of your submission.`,
+      `- **Time:** about ${study.playMinutes} minutes playing plus a ${study.questionnaireMinutes}-minute questionnaire, any time within ${study.deadlineLabel}.`,
+      `- **Hardware:** Quest 2, 3, 3S or Pro.`,
+      `- **Access:** a free key, emailed to you after selection. Yours to keep.`,
+      `- **What earns the fee:** play about ${study.playMinutes} minutes, get at least ${study.minLoot} of finds in the game's own money, screenshot the marketplace, and answer seven short questions on the site. Stuck? Message me on Discord and I'll walk you through it — that doesn't affect payment.`,
+      `- **Eligibility:** ${study.minAge}+ (under 18 with a parent or guardian's agreement, and the payment goes to their ${study.payoutMethod}), new to Buried Worlds VR, and a ${study.payoutMethod} account the money can reach.`,
+      ``,
+      `Honest criticism is what I'm paying for. Payment doesn't depend on liking the game, and you're not asked to leave a store review.`,
+      ``,
+      `Apply here: ${applyUrl}`,
+      ``,
+      `Applying doesn't guarantee a place — I pick for a spread of headsets and VR experience, and you'll hear either way. Please keep email addresses out of the comments.`
+    ].join('\n')
+  };
+}

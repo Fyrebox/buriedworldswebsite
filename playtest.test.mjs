@@ -876,6 +876,24 @@ test('the keys form needs the admin token, and the list page shows the count', a
   }
 });
 
+test('the recruitment post is generated from the live terms and shown on the dashboard', async () => {
+  const { recruitmentPost } = await import('./data/playtest.mjs');
+  const post = recruitmentPost({ siteUrl: 'https://www.buriedworlds.com' });
+  assert.ok(post.title.includes(study.fee) && post.title.includes(`${study.minAge}+`));
+  for (const fact of [study.fee, study.minLoot, study.deadlineLabel, 'https://www.buriedworlds.com/playtest', 'Discord', 'parent or guardian', `${study.paymentWindowHours} hours`]) {
+    assert.ok(post.body.includes(fact), fact);
+  }
+  assert.ok(!post.body.includes('72 hours') && !post.body.includes('18+'));
+  const server = await startServer();
+  try {
+    const html = await (await fetch(`${server.url}/admin/playtest`, { headers: { cookie: adminCookie() } })).text();
+    assert.ok(html.includes('The recruitment post'));
+    assert.ok(html.includes(post.title.replace(/—/g, '—')));
+  } finally {
+    await server.stop();
+  }
+});
+
 // ---- Notification ------------------------------------------------------
 
 test('the developer is told once per new application, and never given the applicant\u2019s details', async () => {
