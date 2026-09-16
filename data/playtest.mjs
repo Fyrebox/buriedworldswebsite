@@ -133,10 +133,6 @@ export const conditions = [
     outcome: 'Paid in full. Getting stuck is the finding, not a failed test.'
   },
   {
-    situation: 'A crash, a blocker or motion discomfort stops the session',
-    outcome: 'Stop. Send a short note about what happened with whatever evidence you have. Paid in full — nobody is asked to sit through discomfort twice.'
-  },
-  {
     situation: 'Your recording failed',
     outcome: 'Screenshots and specific notes are accepted instead. No unpaid replay.'
   },
