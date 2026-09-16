@@ -88,8 +88,10 @@ block content
                 td
                   a.admin-table__name(href=`/admin/playtest/${application.id}`)= application.reference
                   code= application.email
-                  if application.playedBefore || application.ageGroup === 'minor'
+                  if application.playedBefore || application.ageGroup === 'minor' || application.emailTrouble
                     br
+                  if application.emailTrouble
+                    span.admin-alert(style="display:inline-block;padding:3px 8px;font-size:11px") Email bounced
                   if application.ageGroup === 'minor'
                     span.admin-status Under 18 · guardian
                   if application.playedBefore

@@ -894,6 +894,69 @@ test('the recruitment post is generated from the live terms and shown on the das
   }
 });
 
+test('emails to applicants are recorded with their SES message id, events land on them, and the page shows the timeline', async () => {
+  let counter = 0;
+  const server = await startServer({
+    siteUrl: 'https://www.buriedworlds.com',
+    notify: { to: 'owner@example.com', sendQuietly: async () => ({ MessageId: `ses-${++counter}` }) }
+  });
+  try {
+    await server.store.addKeys('KEY01-AAAAA-AAAAA-AAAAA-AAAAA');
+    const { application } = await server.store.createApplication(applicationInput());
+    const cookie = adminCookie();
+    const csrf = await csrfFor(server, cookie, application.id);
+    await adminPost(server, cookie, `/admin/playtest/${application.id}/status`, { status: 'invited', adminNote: '', _csrf: csrf });
+    await new Promise((resolve) => setTimeout(resolve, 30));
+
+    const [invitation] = await server.store.emailsFor(application.id);
+    assert.ok(invitation, 'the invitation was recorded');
+    assert.equal(invitation.kind, 'invited');
+    assert.equal(invitation.recipient, 'tester@example.com');
+    assert.match(invitation.messageId, /^ses-\d+$/);
+    assert.equal(invitation.deliveredAt, null);
+
+    assert.equal(await server.store.recordEmailEvent('never-sent', { kind: 'delivery', at: '2026-09-16T01:00:00.000Z' }), false);
+    assert.equal(await server.store.recordEmailEvent(invitation.messageId, { kind: 'delivery', at: '2026-09-16T01:00:00.000Z' }), true);
+    await server.store.recordEmailEvent(invitation.messageId, { kind: 'click', at: '2026-09-16T01:30:00.000Z', detail: 'https://www.buriedworlds.com/playtest/questionnaire' });
+    await server.store.recordEmailEvent(invitation.messageId, { kind: 'click', at: '2026-09-16T01:31:00.000Z' });
+    await server.store.recordEmailEvent(invitation.messageId, { kind: 'delivery', at: '2026-09-16T09:00:00.000Z' });
+
+    const [after] = await server.store.emailsFor(application.id);
+    assert.equal(after.deliveredAt, '2026-09-16T01:00:00.000Z', 'the first delivery time is kept');
+    assert.equal(after.firstClickAt, '2026-09-16T01:30:00.000Z');
+    assert.equal(after.clickCount, 2);
+
+    const detail = await (await fetch(`${server.url}/admin/playtest/${application.id}`, { headers: { cookie } })).text();
+    assert.ok(detail.includes('Emails sent to them'));
+    assert.ok(detail.includes('Invitation'));
+    assert.ok(detail.includes('2026-09-16 01:00'));
+    assert.ok(detail.includes('×2'));
+
+    // A bounce shows on the list page.
+    await server.store.recordEmailEvent(invitation.messageId, { kind: 'bounce', at: '2026-09-16T02:00:00.000Z', detail: 'Permanent · General' });
+    const list = await (await fetch(`${server.url}/admin/playtest`, { headers: { cookie } })).text();
+    assert.ok(list.includes('Email bounced'));
+
+    // And the records go with the application.
+    await server.store.deleteApplication(application.id);
+    assert.deepEqual(await server.store.emailsFor(application.id), []);
+  } finally {
+    await server.stop();
+  }
+});
+
+test('the SES mailer sends under the configuration set with a text and an HTML part', async () => {
+  const commands = [];
+  const mailer = createMailer({
+    sesRegion: 'us-west-2', mailFrom: 'cyril@bellare.com.au', configurationSet: 'buriedworlds',
+    sesClient: { send: async (command) => { commands.push(command.input); return { MessageId: 'x' }; } }
+  });
+  await mailer.send({ to: 'a@example.com', subject: 'S', text: 'Body https://example.com/x' });
+  assert.equal(commands[0].ConfigurationSetName, 'buriedworlds');
+  assert.equal(commands[0].Content.Simple.Body.Text.Data, 'Body https://example.com/x');
+  assert.ok(commands[0].Content.Simple.Body.Html.Data.includes('<a href="https://example.com/x">'));
+});
+
 // ---- Notification ------------------------------------------------------
 
 test('the developer is told once per new application, and never given the applicant\u2019s details', async () => {
@@ -997,11 +1060,12 @@ test('SES sends a plain-text message from the verified identity, and wins over S
   const result = await mailer.send({ to: 'cyril@bellare.com.au', subject: 'Hello', text: 'Body' });
   assert.equal(result.MessageId, 'test-id');
   assert.equal(commands.length, 1);
-  assert.deepEqual(commands[0], {
-    FromEmailAddress: 'cyril@bellare.com.au',
-    Destination: { ToAddresses: ['cyril@bellare.com.au'] },
-    Content: { Simple: { Subject: { Data: 'Hello', Charset: 'UTF-8' }, Body: { Text: { Data: 'Body', Charset: 'UTF-8' } } } }
-  });
+  assert.equal(commands[0].FromEmailAddress, 'cyril@bellare.com.au');
+  assert.deepEqual(commands[0].Destination, { ToAddresses: ['cyril@bellare.com.au'] });
+  assert.equal(commands[0].ConfigurationSetName, undefined, 'no set unless configured');
+  assert.deepEqual(commands[0].Content.Simple.Subject, { Data: 'Hello', Charset: 'UTF-8' });
+  assert.deepEqual(commands[0].Content.Simple.Body.Text, { Data: 'Body', Charset: 'UTF-8' });
+  assert.ok(commands[0].Content.Simple.Body.Html.Data.includes('<p>Body</p>'));
 
   // sendQuietly swallows a refusal and reports it.
   const errors = [];

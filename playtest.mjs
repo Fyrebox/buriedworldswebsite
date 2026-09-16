@@ -235,6 +235,21 @@ export function createPlaytestRouter({
     return '';
   }
 
+  // Every email to an applicant goes through here, so its SES message id is
+  // recorded and the delivery events SNS pushes later can be matched to it.
+  // Fire and forget, as everywhere: a refused send is logged, never surfaced
+  // to the person whose action triggered it.
+  function sendToApplicant(application, kind, message) {
+    if (!notify) return;
+    Promise.resolve(notify.sendQuietly({ to: application.email, ...message }))
+      .then((result) => {
+        const messageId = result && result.MessageId;
+        if (messageId) return store.recordEmail({ applicationId: application.id, kind, recipient: application.email, messageId });
+        return null;
+      })
+      .catch(onError);
+  }
+
   function issueSubmissionToken(applicationId) {
     const expiresAt = String(now() + SUBMISSION_TOKEN_AGE_MS);
     return `${applicationId}.${expiresAt}.${signature(formSecret, `submission:${applicationId}:${expiresAt}`)}`;
@@ -435,8 +450,7 @@ export function createPlaytestRouter({
           const notice = submissionNotice(result.application, result.submission, { siteUrl, corrected });
           Promise.resolve(notify.sendQuietly({ to: notify.to, ...notice })).catch(onError);
         }
-        const receipt = submissionReceipt(result.application, { corrected, siteUrl });
-        Promise.resolve(notify.sendQuietly({ to: result.application.email, ...receipt })).catch(onError);
+        sendToApplicant(result.application, corrected ? 'receipt-update' : 'receipt', submissionReceipt(result.application, { corrected, siteUrl }));
       }
 
       return res.status(result.corrected ? 200 : 201).render('playtest-submitted', {
@@ -609,7 +623,7 @@ export function createPlaytestRouter({
       store.listApplications(),
       store.summarise()
     ]);
-    const keys = await store.keySummary();
+    const [keys, troubled] = await Promise.all([store.keySummary(), store.troubledApplicationIds()]);
     let notice = req.query.saved === '1' ? 'Application updated.' : '';
     if (req.query.keys !== undefined) {
       notice = `${Number(req.query.keys) || 0} key${Number(req.query.keys) === 1 ? '' : 's'} added`
@@ -620,7 +634,7 @@ export function createPlaytestRouter({
       pagePath: '/admin/playtest',
       noIndex: true,
       disableAnalytics: true,
-      applications: applications.map(decorate),
+      applications: applications.map((application) => ({ ...decorate(application), emailTrouble: troubled.has(application.id) })),
       summary,
       keys,
       statuses,
@@ -651,8 +665,8 @@ export function createPlaytestRouter({
   router.get('/admin/playtest/:id', async (req, res) => {
     const application = await store.getById(Number(req.params.id));
     if (!application) return res.status(404).send('Not found');
-    const [submission, held, keys] = await Promise.all([
-      store.getSubmission(application.id), store.keyFor(application.id), store.keySummary()
+    const [submission, held, keys, emails] = await Promise.all([
+      store.getSubmission(application.id), store.keyFor(application.id), store.keySummary(), store.emailsFor(application.id)
     ]);
     const sentLabels = {
       invited: 'Application updated. The invitation, with their key, has been emailed to them.',
@@ -672,6 +686,8 @@ export function createPlaytestRouter({
       submission: submission && { ...submission, headsetLabel: HEADSET_LABELS[submission.headsetPlayed] ?? submission.headsetPlayed },
       held,
       keys,
+      emails,
+      emailKinds: { invited: 'Invitation', declined: 'Not this round', paid: 'Payment sent', receipt: 'Submission receipt', 'receipt-update': 'Update receipt' },
       previews: statusEmails(application, { siteUrl, key: held ? held.key : '(the next unused key)' }),
       mailConfigured: Boolean(notify),
       questionnaire,
@@ -708,8 +724,7 @@ export function createPlaytestRouter({
     let sent = '';
     if (changed && ['invited', 'declined', 'paid'].includes(nextStatus)) {
       if (notify) {
-        const email = statusEmails(updated, { siteUrl, key })[nextStatus];
-        Promise.resolve(notify.sendQuietly({ to: updated.email, ...email })).catch(onError);
+        sendToApplicant(updated, nextStatus, statusEmails(updated, { siteUrl, key })[nextStatus]);
         sent = nextStatus;
       } else {
         sent = 'unconfigured';

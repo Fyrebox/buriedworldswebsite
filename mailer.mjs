@@ -43,24 +43,44 @@ function withQuiet(mailer, onError) {
 }
 
 /**
+ * A plain-text email as simple HTML: escaped, paragraphs kept, links made
+ * clickable. SES tracks clicks only on HTML links, and delivery events are the
+ * point of the configuration set — so every message carries both parts, and
+ * a text-only client sees exactly the text.
+ */
+export function textToHtml(text) {
+  const escaped = String(text)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const linked = escaped.replace(/https?:\/\/[^\s<]+/g, (url) => {
+    const clean = url.replace(/[.,;:)]+$/, '');
+    const tail = url.slice(clean.length);
+    return `<a href="${clean}">${clean}</a>${tail}`;
+  });
+  const paragraphs = linked.split(/\n{2,}/).map((block) => `<p>${block.replace(/\n/g, '<br>')}</p>`).join('\n');
+  return `<!doctype html><html><body style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1f211f;max-width:640px">${paragraphs}</body></html>`;
+}
+
+/**
  * @param {object} options
- * @param {string} [options.sesRegion]   e.g. ap-southeast-2. Selects SES.
- * @param {string} [options.mailFrom]    The From address; must be a verified SES identity.
- * @param {object} [options.sesClient]   Injection point for tests: anything with send(command).
- * @param {string} [options.smtpUrl]     smtps://user:pass@host:port. Selects SMTP.
- * @param {string} [options.smtpFrom]    Defaults to the SMTP URL's user.
+ * @param {string} [options.sesRegion]        e.g. us-west-2. Selects SES.
+ * @param {string} [options.mailFrom]         The From address; must be a verified SES identity.
+ * @param {string} [options.configurationSet] SES configuration set, so delivery events come back.
+ * @param {object} [options.sesClient]        Injection point for tests: anything with send(command).
+ * @param {string} [options.smtpUrl]          smtps://user:pass@host:port. Selects SMTP.
+ * @param {string} [options.smtpFrom]         Defaults to the SMTP URL's user.
  */
 export function createMailer({
   sesRegion = '',
   mailFrom = '',
   sesClient = null,
+  configurationSet = '',
   smtpUrl = '',
   smtpFrom = '',
   onError = (error) => console.error('[mail]', error)
 } = {}) {
   if (sesRegion || sesClient) {
     if (!mailFrom) throw new Error('MAIL_FROM is required with SES_REGION');
-    return withQuiet(createSesMailer({ region: sesRegion, from: mailFrom, client: sesClient }), onError);
+    return withQuiet(createSesMailer({ region: sesRegion, from: mailFrom, client: sesClient, configurationSet }), onError);
   }
   if (smtpUrl) {
     const from = smtpFrom || fromUrlUser(smtpUrl);
@@ -70,7 +90,7 @@ export function createMailer({
   return null;
 }
 
-function createSesMailer({ region, from, client }) {
+function createSesMailer({ region, from, client, configurationSet }) {
   // Loaded lazily so a deployment on SMTP never pays for the AWS SDK, and the
   // tests can hand in a stub client without touching the network.
   let clientPromise = client
@@ -87,10 +107,14 @@ function createSesMailer({ region, from, client }) {
       return ses.send(SendEmailCommand({
         FromEmailAddress: from,
         Destination: { ToAddresses: [to] },
+        ...(configurationSet ? { ConfigurationSetName: configurationSet } : {}),
         Content: {
           Simple: {
             Subject: { Data: subject, Charset: 'UTF-8' },
-            Body: { Text: { Data: text, Charset: 'UTF-8' } }
+            Body: {
+              Text: { Data: text, Charset: 'UTF-8' },
+              Html: { Data: textToHtml(text), Charset: 'UTF-8' }
+            }
           }
         }
       }));

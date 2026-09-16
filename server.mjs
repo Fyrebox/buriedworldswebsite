@@ -31,6 +31,7 @@ import { createFeedbackRouter } from './feedback.mjs';
 import { createErrorHandler, notFoundHandler } from './errors.mjs';
 import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
 import { createMailer } from './mailer.mjs';
+import { createSesEventsRouter } from './ses-events.mjs';
 import { createPlaytestRouter, createPlaytestStore } from './playtest.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -259,6 +260,9 @@ app.use(
 const playtestMailer = createMailer({
   sesRegion: process.env.SES_REGION ?? '',
   mailFrom: process.env.MAIL_FROM ?? '',
+  // Sending under a configuration set is what makes SES report each email's
+  // fate to the SNS topic below. Unset, mail still goes; nothing comes back.
+  configurationSet: process.env.SES_CONFIGURATION_SET ?? '',
   smtpUrl: process.env.SMTP_URL ?? '',
   smtpFrom: process.env.SMTP_FROM ?? ''
 });
@@ -277,6 +281,13 @@ app.use(createPlaytestRouter({
   formSecret: process.env.PLAYTEST_FORM_SECRET ?? process.env.ADMIN_SESSION_SECRET ?? '',
   adminPassword: process.env.ADMIN_PASSWORD ?? '',
   sessionSecret: process.env.ADMIN_SESSION_SECRET ?? ''
+}));
+
+// Delivery events for the study's email, pushed here by SNS. Signature-checked
+// against Amazon's certificate and matched only to message ids the site sent.
+app.use(createSesEventsRouter({
+  topicArn: process.env.SES_EVENTS_TOPIC_ARN ?? '',
+  onEvent: (messageId, event) => playtestStore.recordEmailEvent(messageId, event)
 }));
 
 // First-party campaign redirects and the private management dashboard. This is

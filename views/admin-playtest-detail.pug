@@ -146,6 +146,50 @@ block content
         a.btn.btn--secondary(href="/admin/playtest") Back
 
     .admin-panel(style="margin-top:32px")
+      h2 Emails sent to them
+      if emails.length
+        p(style="margin:0 0 12px;color:var(--ink-soft);font-size:13px").
+          What Amazon reported about each one. "Delivered" means their mail server accepted it;
+          a click on the brief link is the surest sign it was read. Times are UTC.
+        .admin-table-wrap
+          table.admin-table
+            thead
+              tr
+                th Email
+                th Sent
+                th Delivered
+                th Link clicked
+                th Trouble
+            tbody
+              each mail in emails
+                tr
+                  td= emailKinds[mail.kind] || mail.kind
+                  td= mail.sentAt.slice(0, 16).replace('T', ' ')
+                  td
+                    if mail.deliveredAt
+                      span.admin-status.admin-status--live= mail.deliveredAt.slice(0, 16).replace('T', ' ')
+                    else if mail.bouncedAt || mail.rejectedAt
+                      span —
+                    else
+                      span.admin-status not yet
+                  td
+                    if mail.firstClickAt
+                      span.admin-status.admin-status--live #{mail.firstClickAt.slice(0, 16).replace('T', ' ')}#{mail.clickCount > 1 ? ` ×${mail.clickCount}` : ''}
+                    else
+                      span —
+                  td
+                    if mail.bouncedAt
+                      span.admin-alert(style="display:inline-block;padding:3px 8px;font-size:11px") Bounced #{mail.bounceDetail ? '— ' + mail.bounceDetail : ''}
+                    else if mail.rejectedAt
+                      span.admin-alert(style="display:inline-block;padding:3px 8px;font-size:11px") Rejected #{mail.rejectDetail ? '— ' + mail.rejectDetail : ''}
+                    else if mail.complainedAt
+                      span.admin-alert(style="display:inline-block;padding:3px 8px;font-size:11px") Marked as spam
+                    else
+                      span —
+      else
+        p(style="margin:0;color:var(--ink-soft);font-size:13px") Nothing sent to this applicant yet.
+
+    .admin-panel(style="margin-top:32px")
       h2 What they receive
       p(style="margin:0 0 14px;color:var(--ink-soft);font-size:13px")
         | Sent to #[code= application.email] when the status changes to each of these. Nothing else is ever sent.

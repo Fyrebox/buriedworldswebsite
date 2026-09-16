@@ -230,6 +230,27 @@ function rowToSubmission(row) {
   };
 }
 
+function rowToEmail(row) {
+  if (!row) return null;
+  return {
+    id: Number(row.id),
+    applicationId: row.application_id === null ? null : Number(row.application_id),
+    kind: row.kind,
+    recipient: row.recipient,
+    messageId: row.message_id,
+    sentAt: iso(row.sent_at),
+    deliveredAt: iso(row.delivered_at),
+    bouncedAt: iso(row.bounced_at),
+    bounceDetail: row.bounce_detail,
+    complainedAt: iso(row.complained_at),
+    rejectedAt: iso(row.rejected_at),
+    rejectDetail: row.reject_detail,
+    firstClickAt: iso(row.first_click_at),
+    clickCount: Number(row.click_count),
+    lastEventAt: iso(row.last_event_at)
+  };
+}
+
 function rowToApplication(row) {
   if (!row) return null;
   return {
@@ -376,6 +397,35 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
     CREATE UNIQUE INDEX playtest_keys_key ON playtest_keys (key);
   `);
 
+  // Every email the study sends to an applicant, with what SES reported back
+  // about it. One row per message; the columns are the first time each thing
+  // happened. Nothing here is the email's text — that is regenerated from the
+  // terms — only its fate.
+  const emailsExist = await pool.query(`
+    SELECT 1 FROM information_schema.tables WHERE table_name = 'playtest_emails'
+  `);
+  if (emailsExist.rows.length === 0) await pool.query(`
+    CREATE TABLE playtest_emails (
+      id BIGSERIAL PRIMARY KEY,
+      application_id BIGINT REFERENCES playtest_applications(id),
+      kind TEXT NOT NULL,
+      recipient TEXT NOT NULL,
+      message_id TEXT NOT NULL,
+      sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      delivered_at TIMESTAMPTZ,
+      bounced_at TIMESTAMPTZ,
+      bounce_detail TEXT NOT NULL DEFAULT '',
+      complained_at TIMESTAMPTZ,
+      rejected_at TIMESTAMPTZ,
+      reject_detail TEXT NOT NULL DEFAULT '',
+      first_click_at TIMESTAMPTZ,
+      click_count INTEGER NOT NULL DEFAULT 0,
+      last_event_at TIMESTAMPTZ
+    );
+    CREATE UNIQUE INDEX playtest_emails_message ON playtest_emails (message_id);
+    CREATE INDEX playtest_emails_application ON playtest_emails (application_id);
+  `);
+
   async function getByReference(reference) {
     const result = await pool.query(
       'SELECT * FROM playtest_applications WHERE reference = $1',
@@ -458,8 +508,10 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
 
   async function deleteApplication(id) {
     // The submission holds the payment detail; it goes first, and always. A
-    // key that went to this applicant stays on record as spent, unlinked.
+    // key that went to this applicant stays on record as spent, unlinked. The
+    // email records carry the address, so they go too.
     await pool.query('DELETE FROM playtest_submissions WHERE application_id = $1', [id]);
+    await pool.query('DELETE FROM playtest_emails WHERE application_id = $1', [id]);
     await pool.query('UPDATE playtest_keys SET application_id = NULL WHERE application_id = $1', [id]);
     const result = await pool.query('DELETE FROM playtest_applications WHERE id = $1', [id]);
     return result.rowCount > 0;
@@ -593,6 +645,56 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
     }
   }
 
+  /** Note that an email went out, so its events can be matched when they arrive. */
+  async function recordEmail({ applicationId = null, kind, recipient, messageId }) {
+    if (!messageId) return null;
+    const result = await pool.query(`
+      INSERT INTO playtest_emails (application_id, kind, recipient, message_id)
+      VALUES ($1, $2, $3, $4) RETURNING *
+    `, [applicationId, kind, recipient, messageId]);
+    return rowToEmail(result.rows[0]);
+  }
+
+  /**
+   * Apply one SES event. Each timestamp column records the first time its
+   * event happened; clicks are counted. Returns false for a message id the
+   * site never sent, which is how the endpoint knows to ignore it.
+   */
+  async function recordEmailEvent(messageId, { kind, at, detail = '' }) {
+    const columns = {
+      delivery: 'delivered_at = COALESCE(delivered_at, $2)',
+      bounce: 'bounced_at = COALESCE(bounced_at, $2), bounce_detail = CASE WHEN bounce_detail = \'\' THEN $3 ELSE bounce_detail END',
+      complaint: 'complained_at = COALESCE(complained_at, $2)',
+      reject: 'rejected_at = COALESCE(rejected_at, $2), reject_detail = CASE WHEN reject_detail = \'\' THEN $3 ELSE reject_detail END',
+      click: 'first_click_at = COALESCE(first_click_at, $2), click_count = click_count + 1',
+      send: 'sent_at = sent_at'
+    };
+    const assignment = columns[kind];
+    if (!assignment) return false;
+    const params = assignment.includes('$3') ? [messageId, at, String(detail ?? '')] : [messageId, at];
+    const result = await pool.query(`
+      UPDATE playtest_emails SET ${assignment}, last_event_at = $2 WHERE message_id = $1
+    `, params);
+    return result.rowCount > 0;
+  }
+
+  async function emailsFor(applicationId) {
+    const result = await pool.query(
+      'SELECT * FROM playtest_emails WHERE application_id = $1 ORDER BY sent_at ASC, id ASC',
+      [applicationId]
+    );
+    return result.rows.map(rowToEmail);
+  }
+
+  /** Application ids with any bounced, rejected or complained email — for the list page. */
+  async function troubledApplicationIds() {
+    const result = await pool.query(`
+      SELECT DISTINCT application_id FROM playtest_emails
+      WHERE application_id IS NOT NULL AND (bounced_at IS NOT NULL OR rejected_at IS NOT NULL OR complained_at IS NOT NULL)
+    `);
+    return new Set(result.rows.map((row) => Number(row.application_id)));
+  }
+
   async function listSubmissions() {
     const result = await pool.query(`
       SELECT s.*, a.reference, a.email, a.status
@@ -635,6 +737,10 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
     assignKey,
     getSubmission,
     saveSubmission,
+    recordEmail,
+    recordEmailEvent,
+    emailsFor,
+    troubledApplicationIds,
     listSubmissions,
     summarise,
     close() { return pool.end(); }

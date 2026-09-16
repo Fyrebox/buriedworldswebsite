@@ -213,6 +213,29 @@ is spent for good — deleting the application unlinks it but keeps it counted, 
 never be offered twice. Keys unlock the **store build**; if a later wave needs an
 unreleased fix, that is a release-channel invite from the Meta dashboard again.
 
+### Knowing whether an email arrived
+
+Every email to an applicant is sent under the SES configuration set `buriedworlds`, which
+reports each message's fate — send, delivery, bounce, complaint, click, reject — to the
+SNS topic `buriedworlds-ses-events`, which pushes it to `POST /api/ses-events`
+(`ses-events.mjs`). The site records the SES message id when it sends, and matches
+events only to ids it sent; anything else is acknowledged and dropped. Opens are not
+requested from SES and would be ignored if they arrived — Apple Mail pre-loads every
+tracking pixel, so an "opened" column would be confidently wrong.
+
+Each SNS message is checked before it is believed: the topic must be
+`SES_EVENTS_TOPIC_ARN`, the signing certificate must come from `sns.<region>.amazonaws.com`,
+and the signature must verify over SNS's canonical string. A forged POST cannot mark an
+invitation delivered or bounced. The endpoint confirms its own subscription the same way.
+
+Emails now carry an HTML part beside the text (`textToHtml` in `mailer.mjs`) because SES
+tracks clicks only on HTML links; a click on the brief link in an invitation is the surest
+sign it was read. The applicant's page shows the timeline; the list page marks a bounce.
+`/privacy` § *The paid playtest* discloses the tracked links and that opens are not tracked.
+
+Plumbing lives in `us-west-2` alongside BatchPilot's (`batchpilot` set, its own topic
+and SQS queue); the two are separate so neither sees the other's recipients.
+
 ### Verifying a tester really has a Quest
 
 There is no way to look up a Meta account from an email address or a username.
