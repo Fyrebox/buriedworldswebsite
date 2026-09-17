@@ -322,6 +322,30 @@ app.get('/discord', (req, res) => {
 app.use(notFoundHandler);
 app.use(createErrorHandler());
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Buried Worlds site running at http://localhost:${PORT}`);
 });
+
+// Railway replaces a deployment by sending the old container SIGTERM. Without
+// a handler Node dies by the signal, its parent reports a failure, and Railway
+// emails that the deployment "crashed" — about the one that was meant to stop.
+// So: finish in-flight requests, close the database pools, exit 0. If anything
+// hangs, ten seconds is long enough; after that, exit anyway rather than let
+// the platform kill the process and call it a crash after all.
+let shuttingDown = false;
+function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`${signal} received, shutting down`);
+  const deadline = setTimeout(() => process.exit(0), 10_000);
+  deadline.unref();
+  server.close(async () => {
+    try {
+      await Promise.allSettled([trackingStore.close(), playtestStore.close()]);
+    } finally {
+      process.exit(0);
+    }
+  });
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

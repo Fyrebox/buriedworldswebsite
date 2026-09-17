@@ -49,6 +49,14 @@ here**, since the policy commits to being updated before a change ships, not aft
 
 ## Run
 
+Node 22 (`engines`, `.node-version`). On Railway the start command is `node server.mjs`
+(`railway.json`), not `npm start`: with npm in the process tree, the SIGTERM Railway sends
+to an old container at rollover made npm exit non-zero and Railway email that the
+deployment had "crashed" — about the one that was meant to stop. `server.mjs` handles
+SIGTERM itself now: it finishes in-flight requests, closes both Postgres pools and exits 0,
+with a ten-second ceiling so a hung pool can never turn a clean stop into a kill.
+
+
 ```bash
 npm install
 npm start        # http://localhost:3000
