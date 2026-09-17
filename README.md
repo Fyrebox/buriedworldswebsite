@@ -94,8 +94,10 @@ public/css/styles.css   Token-based stylesheet (values transcribed from the hand
 | `/discord` | 302 vanity redirect to the Discord invite |
 | `/playtest` | Paid playtest recruitment page and application form |
 | `/go/:slug` | Track a campaign click and 302 to its current destination |
+| `/admin` | Admin home — both dashboards, and what needs attention. Linked from the footer |
 | `/admin/links` | Private campaign-link dashboard |
 | `/admin/playtest` | Private playtest application dashboard |
+| `/admin/playtest/emails` | Every email sent to an applicant, with delivered / opened / clicked / trouble |
 | `POST /api/feedback` | In-game feedback intake from the VR build |
 | `GET /api/feedback` | Read the feedback log back (token-gated) |
 
@@ -219,9 +221,10 @@ Every email to an applicant is sent under the SES configuration set `buriedworld
 reports each message's fate — send, delivery, bounce, complaint, click, reject — to the
 SNS topic `buriedworlds-ses-events`, which pushes it to `POST /api/ses-events`
 (`ses-events.mjs`). The site records the SES message id when it sends, and matches
-events only to ids it sent; anything else is acknowledged and dropped. Opens are not
-requested from SES and would be ignored if they arrived — Apple Mail pre-loads every
-tracking pixel, so an "opened" column would be confidently wrong.
+events only to ids it sent; anything else is acknowledged and dropped. Opens are
+recorded too, at the owner's request, and labelled unreliable everywhere they appear:
+Apple Mail pre-loads every tracking pixel and Gmail often blocks it, so "opened" is
+wrong in both directions and nothing an applicant is owed depends on it.
 
 Each SNS message is checked before it is believed: the topic must be
 `SES_EVENTS_TOPIC_ARN`, the signing certificate must come from `sns.<region>.amazonaws.com`,
@@ -231,7 +234,8 @@ invitation delivered or bounced. The endpoint confirms its own subscription the 
 Emails now carry an HTML part beside the text (`textToHtml` in `mailer.mjs`) because SES
 tracks clicks only on HTML links; a click on the brief link in an invitation is the surest
 sign it was read. The applicant's page shows the timeline; the list page marks a bounce.
-`/privacy` § *The paid playtest* discloses the tracked links and that opens are not tracked.
+`/privacy` § *The paid playtest* discloses the pixel and the tracked links, and says
+the open signal is not relied on.
 
 Plumbing lives in `us-west-2` alongside BatchPilot's (`batchpilot` set, its own topic
 and SQS queue); the two are separate so neither sees the other's recipients.

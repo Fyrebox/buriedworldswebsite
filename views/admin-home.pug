@@ -1,0 +1,59 @@
+extends layout
+
+include partials/admin-nav
+
+block content
+  +adminNav()
+  main#content.admin-shell
+    .admin-heading
+      div
+        span.admin-kicker Private dashboard
+        h1 Admin
+        p Everything private on the site, and whether any of it needs you.
+
+    if attention.length
+      .admin-panel(style="margin-bottom:30px")
+        h2 Needs attention
+        ul.legal__list(style="margin:0")
+          each item in attention
+            li
+              a(href=item.href)
+                if item.count
+                  strong= item.count
+                  |  
+                = item.label
+    else
+      p.admin-alert.admin-alert--success(role="status") Nothing needs you right now.
+
+    .admin-metrics(style="grid-template-columns:repeat(2,1fr)")
+      .admin-panel
+        h2 Playtest
+        .admin-metrics(style="grid-template-columns:repeat(3,1fr);margin-bottom:18px")
+          .admin-metric
+            span.admin-metric__value= playtest.summary.total
+            span.admin-metric__label Applications
+          .admin-metric
+            span.admin-metric__value= (playtest.summary.byStatus.invited || 0) + (playtest.summary.byStatus.joined || 0) + (playtest.summary.byStatus.testing || 0)
+            span.admin-metric__label Invited · playing
+          .admin-metric
+            span.admin-metric__value= playtest.keys.unused
+            span.admin-metric__label Keys unused
+        .admin-table__actions
+          a.btn.btn--primary(href="/admin/playtest") Applications
+          a.btn.btn--secondary(href="/admin/playtest/emails") Emails
+          a.btn.btn--secondary(href="/admin/playtest#keys") Paste keys
+      .admin-panel
+        h2 Campaign links
+        .admin-metrics(style="grid-template-columns:repeat(3,1fr);margin-bottom:18px")
+          .admin-metric
+            span.admin-metric__value= links.active
+            span.admin-metric__label Active links
+          .admin-metric
+            span.admin-metric__value= links.total
+            span.admin-metric__label Links in all
+          .admin-metric
+            span.admin-metric__value= links.clicks7d
+            span.admin-metric__label Human clicks · 7 days
+        .admin-table__actions
+          a.btn.btn--primary(href="/admin/links") All links
+          a.btn.btn--secondary(href="/admin/links/new") New link

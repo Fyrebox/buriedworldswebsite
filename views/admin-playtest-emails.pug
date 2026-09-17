@@ -1,0 +1,78 @@
+extends layout
+
+include partials/admin-nav
+
+mixin stamp(value)
+  if value
+    span.admin-status.admin-status--live= value.slice(0, 16).replace('T', ' ')
+  else
+    span —
+
+block content
+  +adminNav()
+  main#content.admin-shell
+    .admin-heading
+      div
+        span.admin-kicker Private dashboard
+        h1 Playtest emails
+        p Every email the site has sent to an applicant, newest first, with what Amazon reported about it. Times are UTC.
+
+    .admin-panel(style="margin-bottom:24px")
+      h2 Reading the columns
+      ul.legal__list(style="margin:0;font-size:13px")
+        li #[strong Delivered] — their mail server accepted it. The reliable one.
+        li #[strong Opened] — the tracking pixel loaded. #[strong Unreliable both ways:] Apple Mail loads it for every message whether or not anyone reads it, and Gmail and Outlook often block images so real readers never register. Treat a blank as "unknown", not "unopened".
+        li #[strong Clicked] — a link in the email was followed. The surest sign it was read.
+        li #[strong Trouble] — bounced, rejected, or marked as spam. Reach them another way.
+      unless trackingConfigured
+        p.admin-alert(role="status" style="margin-top:14px") Delivery tracking is not configured on this deployment, so these columns will stay empty.
+
+    if emails.length
+      .admin-table-wrap
+        table.admin-table
+          thead
+            tr
+              th Applicant
+              th Email
+              th Sent
+              th Delivered
+              th Opened
+              th Clicked
+              th Trouble
+          tbody
+            each mail in emails
+              tr
+                td
+                  if mail.applicationId
+                    a.admin-table__name(href=`/admin/playtest/${mail.applicationId}`)= mail.reference
+                    code= mail.recipient
+                  else
+                    span.admin-table__name (no application)
+                    code= mail.recipient
+                td= emailKinds[mail.kind] || mail.kind
+                td= mail.sentAt.slice(0, 16).replace('T', ' ')
+                td
+                  +stamp(mail.deliveredAt)
+                td
+                  if mail.firstOpenAt
+                    span.admin-status(title="Unreliable: Apple Mail loads the pixel automatically") #{mail.firstOpenAt.slice(0, 16).replace('T', ' ')}#{mail.openCount > 1 ? ` ×${mail.openCount}` : ''}
+                  else
+                    span —
+                td
+                  if mail.firstClickAt
+                    span.admin-status.admin-status--live #{mail.firstClickAt.slice(0, 16).replace('T', ' ')}#{mail.clickCount > 1 ? ` ×${mail.clickCount}` : ''}
+                  else
+                    span —
+                td
+                  if mail.bouncedAt
+                    span.admin-alert(style="display:inline-block;padding:3px 8px;font-size:11px") Bounced #{mail.bounceDetail ? '— ' + mail.bounceDetail : ''}
+                  else if mail.rejectedAt
+                    span.admin-alert(style="display:inline-block;padding:3px 8px;font-size:11px") Rejected #{mail.rejectDetail ? '— ' + mail.rejectDetail : ''}
+                  else if mail.complainedAt
+                    span.admin-alert(style="display:inline-block;padding:3px 8px;font-size:11px") Marked as spam
+                  else
+                    span —
+    else
+      .admin-empty
+        h2 Nothing sent yet
+        p The first invitation, receipt or payment note will appear here with its delivery record.

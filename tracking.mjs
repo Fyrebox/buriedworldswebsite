@@ -153,7 +153,7 @@ export function createTrackingRouter({
   router.use('/admin', express.urlencoded({ extended: false, limit: MAX_FORM_BYTES }));
 
   router.get('/admin/login', (req, res) => {
-    if (readSession(req, sessionSecret, now)) return res.redirect('/admin/links');
+    if (readSession(req, sessionSecret, now)) return res.redirect('/admin');
     return res.render('admin-login', {
       pageTitle: 'Admin sign in — Buried Worlds VR',
       pagePath: '/admin/login',
@@ -199,7 +199,7 @@ export function createTrackingRouter({
     const localHost = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
     const secure = req.secure || !localHost ? '; Secure' : '';
     res.set('Set-Cookie', `${SESSION_COOKIE}=${makeSession(sessionSecret, expiresAt)}; Path=/admin; HttpOnly; SameSite=Strict; Max-Age=${SESSION_AGE_SECONDS}${secure}`);
-    return res.redirect(303, '/admin/links');
+    return res.redirect(303, '/admin');
   });
 
   router.use('/admin', (req, res, next) => {
@@ -221,8 +221,6 @@ export function createTrackingRouter({
     res.set('Set-Cookie', `${SESSION_COOKIE}=; Path=/admin; HttpOnly; SameSite=Strict; Max-Age=0`);
     return res.redirect(303, '/admin/login');
   });
-
-  router.get('/admin', (req, res) => res.redirect('/admin/links'));
 
   router.get('/admin/links', async (req, res) => {
     const links = await store.listLinks();

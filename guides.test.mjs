@@ -137,7 +137,7 @@ test('each guide page renders with its own head, breadcrumb, and enough copy to 
 test('every internal link on every guide page resolves', async () => {
   const server = await startServer();
   try {
-    const known = new Set(['/', '/press', '/privacy', '/terms', '/discord', '/playtest',
+    const known = new Set(['/', '/press', '/privacy', '/terms', '/discord', '/playtest', '/admin',
       ...pages.map((page) => `/${page.slug}`),
       ...destinations.map((destination) => `/destinations/${destination.slug}`)]);
     for (const page of pages) {

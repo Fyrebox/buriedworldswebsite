@@ -8,7 +8,9 @@
 // POST therefore cannot mark an invitation as delivered, or as bounced.
 //
 // Only SES message ids the site itself recorded when sending are ever matched;
-// an event for anything else is acknowledged and dropped.
+// an event for anything else is acknowledged and dropped. Opens are recorded
+// too, and labelled unreliable wherever they are shown: Apple Mail loads the
+// pixel for every message whether or not anyone reads it.
 
 import crypto from 'node:crypto';
 
@@ -75,6 +77,7 @@ export function summariseSesEvent(event) {
     };
     case 'Complaint': return { messageId, kind: 'complaint', at, detail: String(event.complaint?.complaintFeedbackType ?? '').slice(0, 100) };
     case 'Click': return { messageId, kind: 'click', at, detail: String(event.click?.link ?? '').slice(0, 300) };
+    case 'Open': return { messageId, kind: 'open', at: event.open?.timestamp ?? at, detail: String(event.open?.userAgent ?? '').slice(0, 120) };
     case 'Reject': return { messageId, kind: 'reject', at, detail: String(event.reject?.reason ?? '').slice(0, 300) };
     case 'RenderingFailure': return { messageId, kind: 'reject', at, detail: String(event.failure?.errorMessage ?? 'rendering failure').slice(0, 300) };
     default: return null;

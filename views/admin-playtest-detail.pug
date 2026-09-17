@@ -150,7 +150,8 @@ block content
       if emails.length
         p(style="margin:0 0 12px;color:var(--ink-soft);font-size:13px").
           What Amazon reported about each one. "Delivered" means their mail server accepted it;
-          a click on the brief link is the surest sign it was read. Times are UTC.
+          a click on the brief link is the surest sign it was read. "Opened" is unreliable both
+          ways — Apple Mail loads the pixel automatically, Gmail often blocks it. Times are UTC.
         .admin-table-wrap
           table.admin-table
             thead
@@ -158,6 +159,7 @@ block content
                 th Email
                 th Sent
                 th Delivered
+                th Opened
                 th Link clicked
                 th Trouble
             tbody
@@ -172,6 +174,11 @@ block content
                       span —
                     else
                       span.admin-status not yet
+                  td
+                    if mail.firstOpenAt
+                      span.admin-status(title="Unreliable: Apple Mail loads the pixel automatically") #{mail.firstOpenAt.slice(0, 16).replace('T', ' ')}#{mail.openCount > 1 ? ` ×${mail.openCount}` : ''}
+                    else
+                      span —
                   td
                     if mail.firstClickAt
                       span.admin-status.admin-status--live #{mail.firstClickAt.slice(0, 16).replace('T', ' ')}#{mail.clickCount > 1 ? ` ×${mail.clickCount}` : ''}

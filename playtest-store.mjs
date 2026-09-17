@@ -247,6 +247,8 @@ function rowToEmail(row) {
     rejectDetail: row.reject_detail,
     firstClickAt: iso(row.first_click_at),
     clickCount: Number(row.click_count),
+    firstOpenAt: iso(row.first_open_at),
+    openCount: Number(row.open_count ?? 0),
     lastEventAt: iso(row.last_event_at)
   };
 }
@@ -420,11 +422,16 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
       reject_detail TEXT NOT NULL DEFAULT '',
       first_click_at TIMESTAMPTZ,
       click_count INTEGER NOT NULL DEFAULT 0,
+      first_open_at TIMESTAMPTZ,
+      open_count INTEGER NOT NULL DEFAULT 0,
       last_event_at TIMESTAMPTZ
     );
     CREATE UNIQUE INDEX playtest_emails_message ON playtest_emails (message_id);
     CREATE INDEX playtest_emails_application ON playtest_emails (application_id);
   `);
+  // Opens were added after the table first shipped. Unreliable by nature —
+  // Apple Mail pre-loads the pixel — and the dashboard says so beside them.
+  await migrate([['playtest_emails', 'first_open_at', 'TIMESTAMPTZ'], ['playtest_emails', 'open_count', 'INTEGER NOT NULL DEFAULT 0']]);
 
   async function getByReference(reference) {
     const result = await pool.query(
@@ -667,6 +674,7 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
       complaint: 'complained_at = COALESCE(complained_at, $2)',
       reject: 'rejected_at = COALESCE(rejected_at, $2), reject_detail = CASE WHEN reject_detail = \'\' THEN $3 ELSE reject_detail END',
       click: 'first_click_at = COALESCE(first_click_at, $2), click_count = click_count + 1',
+      open: 'first_open_at = COALESCE(first_open_at, $2), open_count = open_count + 1',
       send: 'sent_at = sent_at'
     };
     const assignment = columns[kind];
@@ -684,6 +692,16 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
       [applicationId]
     );
     return result.rows.map(rowToEmail);
+  }
+
+  /** Every email ever sent to an applicant, newest first, with who it went to. */
+  async function listEmails() {
+    const result = await pool.query(`
+      SELECT e.*, a.reference, a.status AS application_status
+      FROM playtest_emails e LEFT JOIN playtest_applications a ON a.id = e.application_id
+      ORDER BY e.sent_at DESC, e.id DESC
+    `);
+    return result.rows.map((row) => ({ ...rowToEmail(row), reference: row.reference ?? '', applicationStatus: row.application_status ?? '' }));
   }
 
   /** Application ids with any bounced, rejected or complained email — for the list page. */
@@ -740,6 +758,7 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
     recordEmail,
     recordEmailEvent,
     emailsFor,
+    listEmails,
     troubledApplicationIds,
     listSubmissions,
     summarise,

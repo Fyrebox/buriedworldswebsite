@@ -30,6 +30,7 @@ import { createGuidesRouter } from './guides.mjs';
 import { createFeedbackRouter } from './feedback.mjs';
 import { createErrorHandler, notFoundHandler } from './errors.mjs';
 import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
+import { createAdminRouter } from './admin.mjs';
 import { createMailer } from './mailer.mjs';
 import { createSesEventsRouter } from './ses-events.mjs';
 import { createPlaytestRouter, createPlaytestStore } from './playtest.mjs';
@@ -270,10 +271,20 @@ const playtestNotify = playtestMailer && process.env.PLAYTEST_NOTIFY_TO
   ? { to: process.env.PLAYTEST_NOTIFY_TO, sendQuietly: (message) => playtestMailer.sendQuietly(message) }
   : null;
 
+// The admin home page, where the password lands you. Mounted before the two
+// dashboards it links to, so /admin is its own page rather than a redirect.
+app.use(createAdminRouter({
+  trackingStore,
+  playtestStore,
+  adminPassword: process.env.ADMIN_PASSWORD ?? '',
+  sessionSecret: process.env.ADMIN_SESSION_SECRET ?? ''
+}));
+
 app.use(createPlaytestRouter({
   store: playtestStore,
   siteUrl,
   notify: playtestNotify,
+  trackingConfigured: Boolean(process.env.SES_CONFIGURATION_SET && process.env.SES_EVENTS_TOPIC_ARN),
   // Recruitment opens and closes between waves. Anything but an explicit
   // "false" leaves the form open, so a missing variable never silently turns
   // away applicants a live recruitment post is still sending here.

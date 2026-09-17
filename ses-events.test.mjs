@@ -91,8 +91,9 @@ test('a notification is verified, reduced, and matched only to a message the sit
     assert.equal((await click.json()).matched, true);
     assert.equal(server.events.at(-1).kind, 'click');
 
-    const open = await server.post(notification({ eventType: 'Open', mail: { messageId: 'known-3' }, open: { timestamp: '2026-09-16T02:00:00.000Z' } }));
-    assert.deepEqual(await open.json(), { ok: true, ignored: 'Open' }, 'opens are not recorded');
+    const open = await server.post(notification({ eventType: 'Open', mail: { messageId: 'known-3' }, open: { timestamp: '2026-09-16T02:00:00.000Z', userAgent: 'Mozilla/5.0 (iPhone)' } }));
+    assert.equal((await open.json()).matched, true);
+    assert.deepEqual(server.events.at(-1), { messageId: 'known-3', kind: 'open', at: '2026-09-16T02:00:00.000Z', detail: 'Mozilla/5.0 (iPhone)' });
   } finally {
     await server.stop();
   }

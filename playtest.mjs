@@ -49,6 +49,7 @@ const HEADSET_LABELS = Object.fromEntries(headsets.map((headset) => [headset.id,
 const FREQUENCY_LABELS = Object.fromEntries(vrFrequencies.map((entry) => [entry.id, entry.label]));
 const CAPTURE_LABELS = Object.fromEntries(captureMethods.map((entry) => [entry.id, entry.label]));
 const AGE_SHORT = { adult: '18 or over', minor: '13–17, with a guardian' };
+const EMAIL_KINDS = { invited: 'Invitation', declined: 'Not this round', paid: 'Payment sent', receipt: 'Submission receipt', 'receipt-update': 'Update receipt' };
 
 /** Everything the form posted, kept so a rejected submission re-renders filled in. */
 function formValues(body = {}) {
@@ -200,6 +201,9 @@ export function createPlaytestRouter({
   // { to, sendQuietly } — a mailer from mailer.mjs plus the recipient. Absent,
   // applications are stored and nobody is told; the dashboard still shows them.
   notify = null,
+  // Whether SES reports delivery events back (a configuration set is in use).
+  // Only changes what the emails page says about empty columns.
+  trackingConfigured = false,
   now = () => Date.now(),
   onError = (error) => console.error('[playtest]', error)
 }) {
@@ -647,6 +651,19 @@ export function createPlaytestRouter({
     });
   });
 
+  router.get('/admin/playtest/emails', async (req, res) => {
+    const emails = await store.listEmails();
+    return res.render('admin-playtest-emails', {
+      pageTitle: 'Playtest emails — Buried Worlds VR',
+      pagePath: '/admin/playtest/emails',
+      noIndex: true,
+      disableAnalytics: true,
+      emails,
+      emailKinds: EMAIL_KINDS,
+      trackingConfigured: Boolean(trackingConfigured)
+    });
+  });
+
   router.get('/admin/playtest/submissions.csv', async (req, res) => {
     const columns = ['reference', 'email', 'status', 'submitted_at', 'updated_at', 'submission_count', 'headset_played',
       'minutes_played', 'progress_returned', 'evidence_url', 'clip_url', 'evidence_note', 'paypal_account',
@@ -687,7 +704,7 @@ export function createPlaytestRouter({
       held,
       keys,
       emails,
-      emailKinds: { invited: 'Invitation', declined: 'Not this round', paid: 'Payment sent', receipt: 'Submission receipt', 'receipt-update': 'Update receipt' },
+      emailKinds: EMAIL_KINDS,
       previews: statusEmails(application, { siteUrl, key: held ? held.key : '(the next unused key)' }),
       mailConfigured: Boolean(notify),
       questionnaire,
