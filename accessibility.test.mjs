@@ -170,6 +170,13 @@ test('the Meta pixel is on the public pages when configured, and on no error pag
       const html = await (await fetch(`${withPixel.url}${route}`)).text();
       assert.ok(html.includes("fbq('init', '2470525756801203')"), route);
     }
+    const verify = await startServer({ metaDomainVerification: 'abc123XYZ' });
+    try {
+      const home = await (await fetch(`${verify.url}/`)).text();
+      assert.ok(home.includes('<meta name="facebook-domain-verification" content="abc123XYZ">'));
+    } finally {
+      await verify.stop();
+    }
     const missing = await (await fetch(`${withPixel.url}/no-such-page`)).text();
     assert.ok(!missing.includes('fbevents.js'), 'error pages carry no pixel');
   } finally {

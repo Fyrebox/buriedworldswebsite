@@ -65,6 +65,12 @@ html(lang="en")
       noscript
         img(height="1" width="1" style="display:none" alt="" src=`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`)
 
+    //- Meta domain verification, so ads can attribute conversions on iOS and
+    //- the pixel's events can be prioritised. The code comes from Business
+    //- Settings → Domains; it is public by nature and renders on every page.
+    if metaDomainVerification
+      meta(name="facebook-domain-verification" content=metaDomainVerification)
+
     title= title
     meta(name="description" content=description)
     link(rel="canonical" href=canonical)

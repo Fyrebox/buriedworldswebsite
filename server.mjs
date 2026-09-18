@@ -62,6 +62,7 @@ app.locals.links = links;
 app.locals.trailer = trailer;
 // Meta Pixel id, or nothing. See views/layout.pug for where it renders.
 app.locals.metaPixelId = (process.env.META_PIXEL_ID ?? '').replace(/\D/g, '');
+app.locals.metaDomainVerification = (process.env.META_DOMAIN_VERIFICATION ?? '').replace(/[^A-Za-z0-9]/g, '');
 
 // Campaign links are stored independently of the templates so their destination
 // can change without a deploy. PostgreSQL tables and indexes are created at
