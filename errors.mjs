@@ -11,7 +11,9 @@ function commonLocals(req, statusCode) {
     pagePath: req.path,
     noIndex: true,
     requestedPath: req.path.slice(0, 160),
-    retryUrl: req.method === 'GET' ? req.originalUrl : '/'
+    retryUrl: req.method === 'GET' ? req.originalUrl : '/',
+    // A visit that ended on an error page is not something to price an ad by.
+    metaPixel: false
   };
 }
 

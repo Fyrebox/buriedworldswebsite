@@ -14,6 +14,7 @@ import express from 'express';
 import { links, product, siteUrl, trailer, worlds, loopSteps, signalRows } from './data/content.mjs';
 import { createDestinationsRouter } from './destinations.mjs';
 import { createGuidesRouter } from './guides.mjs';
+import { notFoundHandler } from './errors.mjs';
 import { study } from './data/playtest.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -38,11 +39,11 @@ function contrast(a, b) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-async function startServer() {
+async function startServer(locals = {}) {
   const app = express();
   app.set('view engine', 'pug');
   app.set('views', path.join(root, 'views'));
-  Object.assign(app.locals, { siteUrl, product, links, trailer });
+  Object.assign(app.locals, { siteUrl, product, links, trailer }, locals);
   app.get('/', (req, res) => res.render('index', {
     heroVariant: 'poster', showLockedCard: true, loopSteps, worlds, signalRows, pagePath: '/',
     playtestOpen: req.query.closed === undefined, study
@@ -53,6 +54,7 @@ async function startServer() {
   }));
   app.use(createDestinationsRouter({ siteUrl, product }));
   app.use(createGuidesRouter({ siteUrl, product }));
+  app.use(notFoundHandler);
   const server = await new Promise((resolve) => {
     const listener = app.listen(0, '127.0.0.1', () => resolve(listener));
   });
@@ -151,6 +153,27 @@ test('the paid playtest is announced across the top of the homepage while it is 
     assert.ok(closed.includes('<a class="ea-card__link" href="https://discord.gg/'), 'the card falls back to the Discord');
   } finally {
     await server.stop();
+  }
+});
+
+test('the Meta pixel is on the public pages when configured, and on no error page', async () => {
+  const server = await startServer();
+  try {
+    const off = await (await fetch(`${server.url}/`)).text();
+    assert.ok(!off.includes('fbevents.js'), 'nothing without an id');
+  } finally {
+    await server.stop();
+  }
+  const withPixel = await startServer({ metaPixelId: '2470525756801203' });
+  try {
+    for (const route of ['/', '/destinations/ballarat', '/faq']) {
+      const html = await (await fetch(`${withPixel.url}${route}`)).text();
+      assert.ok(html.includes("fbq('init', '2470525756801203')"), route);
+    }
+    const missing = await (await fetch(`${withPixel.url}/no-such-page`)).text();
+    assert.ok(!missing.includes('fbevents.js'), 'error pages carry no pixel');
+  } finally {
+    await withPixel.stop();
   }
 });
 

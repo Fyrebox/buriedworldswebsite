@@ -54,12 +54,14 @@ async function startServer(options = {}) {
   app.locals.product = { name: 'Buried Worlds VR' };
   app.locals.links = { discord: 'https://discord.gg/example' };
   app.locals.trailer = {};
+  const { locals = {}, ...routerOptions } = options;
+  Object.assign(app.locals, locals);
   app.use(createPlaytestRouter({
     store,
     adminPassword: ADMIN_PASSWORD,
     sessionSecret: SESSION_SECRET,
     onError: () => {},
-    ...options
+    ...routerOptions
   }));
   const server = await new Promise((resolve) => {
     const listener = app.listen(0, '127.0.0.1', () => resolve(listener));
@@ -955,6 +957,45 @@ test('the SES mailer sends under the configuration set with a text and an HTML p
   assert.equal(commands[0].ConfigurationSetName, 'buriedworlds');
   assert.equal(commands[0].Content.Simple.Body.Text.Data, 'Body https://example.com/x');
   assert.ok(commands[0].Content.Simple.Body.Html.Data.includes('<a href="https://example.com/x">'));
+});
+
+// ---- Meta pixel --------------------------------------------------------
+
+test('the pixel renders on the study pages, fires Lead once per new application, and never sees a form field', async () => {
+  const server = await startServer();
+  try {
+    // Off entirely without an id.
+    const bare = await (await fetch(`${server.url}/playtest`)).text();
+    assert.ok(!bare.includes('fbevents.js') && !bare.includes('fbq('));
+
+    // With an id: PageView on the form page, Lead on a fresh application.
+    const pixel = await startServer({ locals: { metaPixelId: '2470525756801203' } });
+    try {
+      const form = await (await fetch(`${pixel.url}/playtest`)).text();
+      assert.ok(form.includes("fbq('init', '2470525756801203')") && form.includes("fbq('track', 'PageView')"));
+      assert.ok(form.includes('facebook.com/tr?id=2470525756801203&amp;ev=PageView&amp;noscript=1'), 'noscript fallback');
+      assert.ok(!form.includes("'Lead'"), 'no Lead before applying');
+
+      const first = await (await apply(pixel.url)).text();
+      assert.ok(first.includes("fbq('track', 'Lead'"), 'Lead on the confirmation');
+      for (const secret of ['tester@example.com', 'WarriorMama365', 'Canada']) {
+        assert.ok(!first.slice(first.indexOf("fbq('track', 'Lead'")).includes(secret), `Lead carries no ${secret}`);
+      }
+
+      const again = await (await apply(pixel.url)).text();
+      assert.ok(again.includes('already applied') && !again.includes("'Lead'"), 'a duplicate is not a second conversion');
+
+      const bot = await (await apply(pixel.url, applicationInput({ email: 'bot@example.com' }), { website: 'spam' })).text();
+      assert.ok(!bot.includes("'Lead'"), 'the honeypot does not convert');
+
+      const admin = await (await fetch(`${pixel.url}/admin/playtest`, { headers: { cookie: adminCookie() } })).text();
+      assert.ok(!admin.includes('fbevents.js'), 'never in the admin area');
+    } finally {
+      await pixel.stop();
+    }
+  } finally {
+    await server.stop();
+  }
 });
 
 // ---- Notification ------------------------------------------------------

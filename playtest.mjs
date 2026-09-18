@@ -315,6 +315,7 @@ export function createPlaytestRouter({
       pagePath: '/playtest/questionnaire',
       noIndex: true,
       disableAnalytics: true,
+      metaPixel: true,
       study,
       questionnaire,
       headsets,
@@ -339,6 +340,7 @@ export function createPlaytestRouter({
       pagePath: '/playtest',
       noIndex: true,
       disableAnalytics: true,
+      metaPixel: true,
       study,
       promises,
       conditions,
@@ -462,6 +464,7 @@ export function createPlaytestRouter({
         pagePath: '/playtest/questionnaire',
         noIndex: true,
         disableAnalytics: true,
+        metaPixel: true,
         study,
         reference: result.application.reference,
         corrected: result.corrected
@@ -490,6 +493,7 @@ export function createPlaytestRouter({
           pagePath: '/playtest',
           noIndex: true,
           disableAnalytics: true,
+          metaPixel: true,
           study,
           reference: '',
           duplicate: false
@@ -560,6 +564,7 @@ export function createPlaytestRouter({
         pagePath: '/playtest',
         noIndex: true,
         disableAnalytics: true,
+        metaPixel: true,
         study,
         reference: result.application.reference,
         duplicate: result.duplicate

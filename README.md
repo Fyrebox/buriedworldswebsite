@@ -387,6 +387,20 @@ and `trailer_open` events from an early click still land; the pageview is simply
 reported a second or two later. A visitor who leaves in under two seconds without
 touching anything is no longer counted — accepted, since such a visit tells us nothing.
 
+## Meta pixel
+
+`META_PIXEL_ID` renders the Meta (Facebook) pixel on every public page — `PageView` on
+load, and a `Lead` event on the playtest confirmation page, once per new application:
+never for a repeat submission, never for the honeypot, never in the admin area, never on
+an error page, and never with anything the applicant typed. Unset, nothing renders. That is
+what lets an ad on Facebook or Instagram be priced per application in Ads Manager.
+
+It is analytics, it sets a cookie, and it tells Meta a browser applied — so the study page's
+privacy note and `/privacy` say exactly that. The Conversions API is deliberately not used:
+it works by sending Meta a hash of the applicant's email, which the page promises not to do.
+Expect the pixel to undercount by a quarter to a third — ad blockers and iOS tracking refusal
+— against the dashboard's true number.
+
 ## Design fidelity
 
 Colors, typography, spacing, radii, and hover states are transcribed from

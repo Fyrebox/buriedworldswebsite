@@ -61,3 +61,10 @@ block content
           | Study terms version #{study.termsVersion}.
 
   +footer(links)
+
+  //- The conversion: one Lead per new application, never for a repeat
+  //- submission, never for the honeypot (no reference), and with nothing the
+  //- applicant typed — the event says an application happened, not whose.
+  if metaPixelId && metaPixel && reference && !duplicate
+    script.
+      if (typeof fbq === 'function') fbq('track', 'Lead', { content_name: 'playtest application' });

@@ -50,6 +50,21 @@ html(lang="en")
           else setTimeout(load, 2000);
         })();
 
+    //- Meta Pixel — so an ad that brought someone here can be told when they
+    //- apply, and priced per application. Renders only with META_PIXEL_ID set.
+    //- On by default wherever Analytics is; the study pages, which run no
+    //- Analytics, opt in with metaPixel:true because the application is the
+    //- conversion. Admin and error pages never carry it. It is never handed
+    //- anything a visitor typed — PageView here, Lead on the confirmation page.
+    - var showMetaPixel = metaPixelId && metaPixel !== false && (!disableAnalytics || metaPixel)
+    if showMetaPixel
+      script.
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '#{metaPixelId}');
+        fbq('track', 'PageView');
+      noscript
+        img(height="1" width="1" style="display:none" alt="" src=`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`)
+
     title= title
     meta(name="description" content=description)
     link(rel="canonical" href=canonical)

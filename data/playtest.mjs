@@ -161,8 +161,8 @@ export const privacyNotes = [
   `The PayPal account the payment goes to is asked for only when you submit your session, and only from testers who were offered a place. It is stored with your application and deleted with it.`,
   `Unsuccessful applications are deleted within 30 days of being declined. Answers, links and contact details are deleted 90 days after final payment. Findings are kept only with names and addresses removed.`,
   `If you are under 18, we store that a parent or guardian agreed rather than who they are, and we may ask them to confirm by email before a place is offered. Nothing is collected from anyone under ${study.minAge}.`,
-  `If you are offered a place, your key is emailed to you by this site. Nothing about you is sent to Meta by us; Meta learns of you only when you redeem the key, under Meta's own terms.`,
-  `This page carries no analytics and sets no cookies.`,
+  `If you are offered a place, your key is emailed to you by this site. None of your details are sent to Meta by us; beyond the pixel above, Meta learns of you only when you redeem the key, under Meta's own terms.`,
+  `This page loads the Meta pixel so we can tell whether an ad brought you here. It sets a cookie and tells Meta that a browser visited and, if you apply, that an application was made. It receives nothing you type — not your email, your username, or your answers.`,
   `You can ask to see, correct or delete your application at any time, before or after the study, through the privacy page. Quote the reference shown when you apply.`
 ];
 
