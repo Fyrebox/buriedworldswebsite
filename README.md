@@ -219,7 +219,7 @@ Then, on an application:
   the applicant: the key, how to redeem it in the Meta Horizon app, the brief link, and
   their week. With no keys left it refuses and changes nothing — a "you're in" with
   no key in it would be worse than silence.
-- **Declined** emails "not this round". **Paid** emails "payment sent".
+- **Declined** emails "not selected". **Paid** emails "payment sent".
 - Everything else only records. Saving a note without changing status sends nothing;
   walking an application back and re-inviting reuses the key it already holds.
 
@@ -345,7 +345,7 @@ The page explains how to get a clip off a Quest via the Meta Horizon app. Direct
 to R2 is the phase-two option if links prove to be where testers stall.
 
 **`/privacy` § *The paid playtest* covers all of this** and commits to specific
-retention: unsuccessful applications deleted 30 days after the round closes,
+retention: unsuccessful applications deleted within 30 days of being declined,
 recordings and contact details 90 days after final payment. The dashboard's
 delete button is what keeps those promises — a retention promise that needs a
 database console to honour is one that quietly does not get honoured.

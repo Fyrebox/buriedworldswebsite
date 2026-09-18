@@ -796,7 +796,7 @@ test('Invited takes the next key, emails it, and never hands the same applicatio
     // The detail page shows the key and the previews.
     const detail = await (await fetch(`${server.url}/admin/playtest/${application.id}`, { headers: { cookie } })).text();
     assert.ok(detail.includes('KEY01-AAAAA-AAAAA-AAAAA-AAAAA'));
-    assert.ok(detail.includes('not this round') && detail.includes('payment sent'), 'email previews');
+    assert.ok(detail.includes('not selected') && detail.includes('payment sent'), 'email previews');
   } finally {
     await server.stop();
   }
@@ -829,7 +829,7 @@ test('Declined and Paid email the applicant; Waitlist and Testing do not', async
     const { application } = await server.store.createApplication(applicationInput());
     const cookie = adminCookie();
     const csrf = await csrfFor(server, cookie, application.id);
-    for (const [status, expectMail, marker] of [['waitlist', false], ['testing', false], ['declined', true, 'not this round'], ['paid', true, 'payment sent']]) {
+    for (const [status, expectMail, marker] of [['waitlist', false], ['testing', false], ['declined', true, 'not selected'], ['paid', true, 'payment sent']]) {
       sent.length = 0;
       await adminPost(server, cookie, `/admin/playtest/${application.id}/status`, { status, adminNote: '', _csrf: csrf });
       await new Promise((resolve) => setTimeout(resolve, 20));

@@ -23,7 +23,6 @@ export const study = {
   // How the deadline reads in copy — "168 hours" reads like fine print.
   deadlineLabel: 'a week',
   paymentWindowHours: 48,
-  places: 5,
   payoutMethod: 'PayPal',
   // The bar for payment: this much in the game's own money, shown on a
   // marketplace screenshot. In-game dollars, not real ones — the copy says so
@@ -88,7 +87,7 @@ export const statuses = [
   { id: 'testing', label: 'Testing', hint: 'Playing, inside their week.' },
   { id: 'submitted', label: 'Submitted', hint: 'Questionnaire and evidence received.' },
   { id: 'paid', label: 'Paid', hint: 'Payment sent.' },
-  { id: 'declined', label: 'Declined', hint: 'Not selected, or withdrew.' }
+  { id: 'declined', label: 'Declined', hint: 'Not selected, or withdrew. Deleted within 30 days.' }
 ];
 
 // What the page promises before it asks for anything. Each is a commitment that
@@ -160,7 +159,7 @@ export const conditions = [
 export const privacyNotes = [
   `Your email address, Meta Horizon username, country and answers are stored so the study can be run. They are never sold, never used to advertise to you, and never added to a mailing list. The only email you will get from us is about your own application: a note when your submission arrives, and anything missing from it.`,
   `The PayPal account the payment goes to is asked for only when you submit your session, and only from testers who were offered a place. It is stored with your application and deleted with it.`,
-  `Unsuccessful applications are deleted 30 days after the study closes. Recordings and contact details are deleted 90 days after final payment. Findings are kept only with names and addresses removed.`,
+  `Unsuccessful applications are deleted within 30 days of being declined. Answers, links and contact details are deleted 90 days after final payment. Findings are kept only with names and addresses removed.`,
   `If you are under 18, we store that a parent or guardian agreed rather than who they are, and we may ask them to confirm by email before a place is offered. Nothing is collected from anyone under ${study.minAge}.`,
   `If you are offered a place, your key is emailed to you by this site. Nothing about you is sent to Meta by us; Meta learns of you only when you redeem the key, under Meta's own terms.`,
   `This page carries no analytics and sets no cookies.`,
@@ -220,7 +219,7 @@ export function recruitmentPost({ siteUrl, applyUrl = `${siteUrl}/playtest` }) {
     body: [
       `I'm the developer of Buried Worlds VR, a Quest treasure-hunting game — metal detecting, digging, panning for gold across five real places where real treasure was found.`,
       ``,
-      `I'm looking for ${study.places} Quest players to test the opening and tell me where it loses them.`,
+      `I'm looking for Quest players to test the opening and tell me where it loses them. This is ongoing — there is no fixed number of places.`,
       ``,
       `- **Pay:** ${study.fee} via ${study.payoutMethod}, sent within ${study.paymentWindowHours} hours of your submission.`,
       `- **Time:** about ${study.playMinutes} minutes playing plus a ${study.questionnaireMinutes}-minute questionnaire, any time within ${study.deadlineLabel}.`,

@@ -19,13 +19,12 @@ block content
           span.diamond
           span.rule
         h1.h2 Paid playtest
-        p.serif-italic #{study.fee} for #{study.totalMinutes} minutes. #{study.places} places. Honest criticism is the thing being paid for.
+        p.serif-italic #{study.fee} for #{study.totalMinutes} minutes. Honest criticism is the thing being paid for.
 
       .legal__body
         if !applicationsOpen
           p.admin-alert(role="status")
-            | Applications for this round have closed. The study runs in small waves —
-            |  if another opens it will be announced on
+            | Applications are closed for now. When they reopen it will be announced on
             |  #[a(href=links.discord target="_blank" rel="noopener noreferrer") Discord] first.
 
         p.
@@ -35,7 +34,7 @@ block content
           reached the point where the useful question is no longer whether it works
           but whether a stranger can work out what to do with it.
         p.
-          So: #{study.places} people, paid #{study.fee} each, to play the opening
+          So: Quest players, paid #{study.fee} each, to play the opening
           #{study.playMinutes} minutes without being told how, and then answer
           #{study.questionnaireMinutes} minutes of questions about where it lost them.
 
@@ -162,9 +161,8 @@ block content
                 input(type="checkbox" name="playedBefore" value="yes" checked=values.playedBefore)
                 span I have played Buried Worlds VR before
               small.
-                Tick it if so — it does not disqualify you, but this round needs
-                people seeing it for the first time, so you would be considered for a
-                later one.
+                Tick it if so — it does not disqualify you, but the study is about
+                first impressions, so people new to the game are picked first.
 
             .playtest-field
               label(for="notes") Anything else worth knowing? (optional)

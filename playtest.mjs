@@ -49,7 +49,7 @@ const HEADSET_LABELS = Object.fromEntries(headsets.map((headset) => [headset.id,
 const FREQUENCY_LABELS = Object.fromEntries(vrFrequencies.map((entry) => [entry.id, entry.label]));
 const CAPTURE_LABELS = Object.fromEntries(captureMethods.map((entry) => [entry.id, entry.label]));
 const AGE_SHORT = { adult: '18 or over', minor: '13–17, with a guardian' };
-const EMAIL_KINDS = { invited: 'Invitation', declined: 'Not this round', paid: 'Payment sent', receipt: 'Submission receipt', 'receipt-update': 'Update receipt' };
+const EMAIL_KINDS = { invited: 'Invitation', declined: 'Not selected', paid: 'Payment sent', receipt: 'Submission receipt', 'receipt-update': 'Update receipt' };
 
 /** Everything the form posted, kept so a rejected submission re-renders filled in. */
 function formValues(body = {}) {
@@ -169,13 +169,13 @@ export function statusEmails(application, { siteUrl, key = '' }) {
       ].join('\n')
     },
     declined: {
-      subject: `Buried Worlds VR playtest ${ref} — not this round`,
+      subject: `Buried Worlds VR playtest ${ref} — not selected`,
       text: [
-        `Thanks for applying to the Buried Worlds VR playtest. There isn't a place for you this round.`,
+        `Thanks for applying to the Buried Worlds VR playtest. You haven't been selected this time.`,
         ``,
-        `That's almost always about which headsets were already covered, not about you. If another round opens it will be announced on the Discord first, and you're welcome to apply again.`,
+        `That's almost always about which headsets were already covered at the time, not about you. The study is ongoing, so you're welcome to apply again later.`,
         ``,
-        `Your application will be deleted 30 days after this round closes, as the page said. Nothing else will be sent to this address.`
+        `Your application will be deleted within 30 days, as the page said. Nothing else will be sent to this address.`
       ].join('\n')
     },
     paid: {
@@ -334,7 +334,7 @@ export function createPlaytestRouter({
     return res.status(status).render('playtest', {
       pageTitle: `Paid playtest — ${study.fee} for ${study.totalMinutes} minutes — Buried Worlds VR`,
       pageDescription:
-        `Buried Worlds VR is paying ${study.fee} to ${study.places} Meta Quest players for a ` +
+        `Buried Worlds VR is paying ${study.fee} to Meta Quest players for a ` +
         `${study.totalMinutes}-minute playtest of the game's opening.`,
       pagePath: '/playtest',
       noIndex: true,
@@ -477,7 +477,7 @@ export function createPlaytestRouter({
       if (!applicationsOpen) {
         return renderForm(req, res, {
           status: 403,
-          error: 'Applications for this round have closed.'
+          error: 'Applications are closed for now.'
         });
       }
 
@@ -687,7 +687,7 @@ export function createPlaytestRouter({
     ]);
     const sentLabels = {
       invited: 'Application updated. The invitation, with their key, has been emailed to them.',
-      declined: 'Application updated. They have been emailed that there is no place this round.',
+      declined: 'Application updated. They have been emailed that they were not selected.',
       paid: 'Application updated. They have been emailed that payment was sent.',
       unconfigured: 'Application updated — but no email was sent: mail is not configured on this deployment. Tell them yourself.'
     };

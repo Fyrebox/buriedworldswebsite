@@ -141,7 +141,7 @@ test('the paid playtest is announced across the top of the homepage while it is 
     const strip = /<div class="playtest-strip"[\s\S]*?<\/div><\/div>/.exec(open)?.[0];
     assert.ok(strip, 'the strip renders');
     assert.ok(open.indexOf('playtest-strip') < open.indexOf('<header class="hero"'), 'above the hero');
-    assert.ok(strip.includes(study.fee) && strip.includes(`${study.places} places`));
+    assert.ok(strip.includes(study.fee) && !/\bplaces\b/.test(strip), 'no fixed number of places');
     assert.ok(strip.includes('<a class="playtest-strip__link" href="/playtest">Become a playtester'));
     assert.ok(open.includes('<a class="ea-card__link" href="/playtest">Become a playtester</a>'), 'and the Early Access card points at it too');
 
