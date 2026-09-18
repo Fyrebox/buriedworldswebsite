@@ -25,6 +25,7 @@ import {
   art
 } from './data/press.mjs';
 import { assetVersion, createStaticMiddleware, stylesheetPath } from './assets.mjs';
+import { study } from './data/playtest.mjs';
 import { createDestinationsRouter } from './destinations.mjs';
 import { createGuidesRouter } from './guides.mjs';
 import { createFeedbackRouter } from './feedback.mjs';
@@ -161,6 +162,11 @@ const publicDir = path.join(__dirname, 'public');
 app.locals.assetVersion = assetVersion(stylesheetPath(publicDir));
 app.use(createStaticMiddleware(publicDir));
 
+// Recruitment is open unless PLAYTEST_OPEN says otherwise — the same rule the
+// playtest router applies, so the strip on the homepage and the form behind it
+// can never disagree.
+const playtestOpen = (process.env.PLAYTEST_OPEN ?? 'true').toLowerCase() !== 'false';
+
 // Home — the landing page.
 app.get('/', (req, res) => {
   res.render('index', {
@@ -169,6 +175,8 @@ app.get('/', (req, res) => {
     loopSteps,
     worlds,
     signalRows,
+    playtestOpen,
+    study,
     pagePath: '/',
     // The hero poster is the largest paint on the homepage.
     preloadImage: trailer.poster,
@@ -288,7 +296,7 @@ app.use(createPlaytestRouter({
   // Recruitment opens and closes between waves. Anything but an explicit
   // "false" leaves the form open, so a missing variable never silently turns
   // away applicants a live recruitment post is still sending here.
-  applicationsOpen: (process.env.PLAYTEST_OPEN ?? 'true').toLowerCase() !== 'false',
+  applicationsOpen: playtestOpen,
   formSecret: process.env.PLAYTEST_FORM_SECRET ?? process.env.ADMIN_SESSION_SECRET ?? '',
   adminPassword: process.env.ADMIN_PASSWORD ?? '',
   sessionSecret: process.env.ADMIN_SESSION_SECRET ?? ''

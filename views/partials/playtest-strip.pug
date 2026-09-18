@@ -1,0 +1,11 @@
+//- The paid playtest, announced across the top of the page while applications
+//- are open. Above the hero on purpose: it is the one thing on the site with
+//- a deadline, and a visitor who is not ready to buy may be ready to be paid
+//- to try. When PLAYTEST_OPEN is false the strip is not rendered at all.
+mixin playtestStrip(study)
+  .playtest-strip(data-screen-label="Paid playtest strip")
+    .playtest-strip__inner
+      span.playtest-strip__text
+        strong Paid playtest:
+        |  #{study.fee} for about #{study.totalMinutes} minutes on your Quest, #{study.places} places.
+      a.playtest-strip__link(href="/playtest") Become a playtester →

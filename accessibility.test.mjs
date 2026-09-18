@@ -14,6 +14,7 @@ import express from 'express';
 import { links, product, siteUrl, trailer, worlds, loopSteps, signalRows } from './data/content.mjs';
 import { createDestinationsRouter } from './destinations.mjs';
 import { createGuidesRouter } from './guides.mjs';
+import { study } from './data/playtest.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const css = fs.readFileSync(path.join(root, 'public', 'css', 'styles.css'), 'utf8');
@@ -43,7 +44,8 @@ async function startServer() {
   app.set('views', path.join(root, 'views'));
   Object.assign(app.locals, { siteUrl, product, links, trailer });
   app.get('/', (req, res) => res.render('index', {
-    heroVariant: 'poster', showLockedCard: true, loopSteps, worlds, signalRows, pagePath: '/'
+    heroVariant: 'poster', showLockedCard: true, loopSteps, worlds, signalRows, pagePath: '/',
+    playtestOpen: req.query.closed === undefined, study
   }));
   app.get('/press', (req, res) => res.render('press', {
     pagePath: '/press', kitFile: 'kit.zip', kitSize: '1 MB', pressContact: 'press@example.com',
@@ -127,6 +129,26 @@ test('every public page has a main landmark the skip link can reach', async () =
       assert.ok(html.includes('<a class="skip" href="#content">Skip to content</a>'), `${route}: skip link`);
       assert.ok(html.indexOf('class="skip"') < html.indexOf('<main'), `${route}: skip link precedes main`);
     }
+  } finally {
+    await server.stop();
+  }
+});
+
+test('the paid playtest is announced across the top of the homepage while it is open, and vanishes when closed', async () => {
+  const server = await startServer();
+  try {
+    const open = await (await fetch(`${server.url}/`)).text();
+    const strip = /<div class="playtest-strip"[\s\S]*?<\/div><\/div>/.exec(open)?.[0];
+    assert.ok(strip, 'the strip renders');
+    assert.ok(open.indexOf('playtest-strip') < open.indexOf('<header class="hero"'), 'above the hero');
+    assert.ok(strip.includes(study.fee) && strip.includes(`${study.places} places`));
+    assert.ok(strip.includes('<a class="playtest-strip__link" href="/playtest">Become a playtester'));
+    assert.ok(open.includes('<a class="ea-card__link" href="/playtest">Become a playtester</a>'), 'and the Early Access card points at it too');
+
+    const closed = await (await fetch(`${server.url}/?closed=1`)).text();
+    assert.ok(!closed.includes('playtest-strip'));
+    assert.ok(!closed.includes('href="/playtest"'), 'no route to a closed form');
+    assert.ok(closed.includes('<a class="ea-card__link" href="https://discord.gg/'), 'the card falls back to the Discord');
   } finally {
     await server.stop();
   }

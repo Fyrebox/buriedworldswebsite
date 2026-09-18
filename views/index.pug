@@ -1,5 +1,6 @@
 extends layout
 
+include partials/playtest-strip
 include partials/hero
 include partials/trailer
 include partials/buybar
@@ -16,6 +17,8 @@ block content
   //- free Reddit game sits after it as a companion rather than as the first
   //- ask. Before launch the Reddit band was the primary call to action, which
   //- is the right shape for a page with nothing to sell and the wrong one now.
+  if playtestOpen
+    +playtestStrip(study)
   +hero(heroVariant, links, product, trailer)
   //- One landmark for the whole run of sections, so a screen reader has a
   //- "main" to jump to and the skip link in the layout has somewhere to land.

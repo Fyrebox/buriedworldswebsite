@@ -192,6 +192,11 @@ metadata or requiring a deploy.
 
 ## Playtest recruitment
 
+While `PLAYTEST_OPEN` is not `false`, the homepage announces the study in a strip above the
+hero ("Paid playtest: US$10 for about 25 minutes… Become a playtester →") and the Early
+Access card's link points at `/playtest`; closed, the strip is not rendered and the card
+points at the Discord again. The page itself stays `noindex` and off the sitemap.
+
 `/playtest` is the page a paid-playtest recruitment post links to: US$10 for 25
 minutes, five places, with the fee, the payment conditions and the privacy note
 all stated in full before the first form field. `data/playtest.mjs` holds every
