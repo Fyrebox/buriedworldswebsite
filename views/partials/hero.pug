@@ -17,9 +17,14 @@ mixin heroPoster(links, product, trailer)
       p.hero__tagline Sweep, dig, pan, and travel the world's great gold rushes. A gold-prospecting adventure in virtual reality.
       span.badge.badge--live Out now · Early Access
       //- CTAs sit above the key art so they stay above the fold on short screens.
+      //- The second button is the Discord, not a scroll to the loop section:
+      //- the person who built the game is in there most days, and a visitor who
+      //- is not ready to buy is worth more in the room than on the page.
       .hero__cta
         a.btn.btn--primary(href=links.metaQuestStoreCta + '?placement=hero' target="_blank" rel="noopener noreferrer" data-cta="hero") Get it on Meta Quest
-        a.btn.btn--secondary(href="#vr") See how it plays
+        a.btn.btn--secondary.btn--icon(href=links.discord target="_blank" rel="noopener noreferrer")
+          +discordIcon(18)
+          span Join the Discord
       //- The price carries its currency because Meta localises the real figure.
       p.hero__meta
         | #{product.price} on the #{product.store}
@@ -64,7 +69,9 @@ mixin heroSplit(links, product)
         span.badge.badge--live(style="padding:6px 16px;font-size:12.5px") Out now · Early Access
         .hero__cta(style="justify-content:flex-start;margin-top:0")
           a.btn.btn--primary(href=links.metaQuestStoreCta + '?placement=hero-split' target="_blank" rel="noopener noreferrer" data-cta="hero-split") Get it on Meta Quest
-          a.btn.btn--secondary(href="#vr") See how it plays
+          a.btn.btn--secondary.btn--icon(href=links.discord target="_blank" rel="noopener noreferrer")
+            +discordIcon(18)
+            span Join the Discord
       .hero-split__art
         span.img-note VR key art — portrait
 
