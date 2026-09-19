@@ -52,6 +52,10 @@ test('the footer links to the admin area from every page', async () => {
 test('signing in lands on the home page, which shows both sections and what needs attention', async () => {
   const server = await startServer();
   try {
+    const loginPage = await (await fetch(`${server.url}/admin/login`)).text();
+    assert.ok(loginPage.includes('<h1>Admin</h1>'), 'the login page says only that it is the admin area');
+    assert.ok(!loginPage.includes('Campaign links') && !loginPage.includes('short links'), 'and nothing about what is behind it');
+
     const anonymous = await fetch(`${server.url}/admin`, { redirect: 'manual' });
     assert.equal(anonymous.status, 303);
     assert.equal(anonymous.headers.get('location'), '/admin/login');
