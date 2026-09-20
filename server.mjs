@@ -34,6 +34,8 @@ import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
 import { createAdminRouter } from './admin.mjs';
 import { createBlogRouter } from './blog.mjs';
 import { createBlogAdminRouter } from './blog-admin.mjs';
+import { createMediaStore } from './media.mjs';
+import { createStudio, createOpenAiClient } from './blog-studio.mjs';
 import { createBlogStore } from './blog-store.mjs';
 import { createMailer } from './mailer.mjs';
 import { createSesEventsRouter } from './ses-events.mjs';
@@ -99,6 +101,22 @@ const playtestStore = await createPlaytestStore({
 // Blog posts. Markdown in, sanitised HTML out, and the checklist a post must
 // pass before it is published (blog-store.mjs).
 const blogStore = await createBlogStore({ databaseUrl: process.env.DATABASE_URL ?? '' });
+
+// Blog images in R2, and the AI studio. Each is optional: no R2 credentials
+// means images cannot be generated or served but writing still works; no
+// OpenAI key means the editor is manual. Both absent is the site as it was.
+const blogMedia = createMediaStore({
+  accountId: process.env.R2_ACCOUNT_ID ?? '',
+  bucket: process.env.R2_BUCKET ?? '',
+  accessKeyId: process.env.R2_ACCESS_KEY_ID ?? '',
+  secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? ''
+});
+const openaiClient = createOpenAiClient({ apiKey: process.env.OPENAI_API_KEY ?? '' });
+const blogStudio = openaiClient ? createStudio({
+  store: blogStore, openai: openaiClient, media: blogMedia,
+  textModel: process.env.OPENAI_TEXT_MODEL ?? 'gpt-5.6-luna',
+  imageModel: process.env.OPENAI_IMAGE_MODEL ?? 'gpt-image-2.5'
+}) : null;
 
 // Structured data for the landing page. Search and social crawlers read price,
 // platform and publisher from here rather than inferring them from the copy.
@@ -204,7 +222,8 @@ app.use(createBlogRouter({
   siteUrl,
   product,
   author: product.publisher,
-  previewSecret: process.env.ADMIN_SESSION_SECRET ?? ''
+  previewSecret: process.env.ADMIN_SESSION_SECRET ?? '',
+  media: blogMedia
 }));
 
 // The guide pages — each built to own one generic search the brand page never
@@ -316,7 +335,8 @@ app.use(createBlogAdminRouter({
   siteUrl,
   adminPassword: process.env.ADMIN_PASSWORD ?? '',
   sessionSecret: process.env.ADMIN_SESSION_SECRET ?? '',
-  previewSecret: process.env.ADMIN_SESSION_SECRET ?? ''
+  previewSecret: process.env.ADMIN_SESSION_SECRET ?? '',
+  studio: blogStudio
 }));
 
 app.use(createPlaytestRouter({

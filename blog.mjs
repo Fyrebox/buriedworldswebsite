@@ -115,7 +115,7 @@ ${items}
 `;
 }
 
-export function createBlogRouter({ store, siteUrl, product, author = 'Bellare Studios', previewSecret = '' }) {
+export function createBlogRouter({ store, siteUrl, product, author = 'Bellare Studios', previewSecret = '', media = null }) {
   if (!store || !siteUrl || !product) throw new Error('createBlogRouter requires store, siteUrl and product');
   const router = express.Router();
 
@@ -170,6 +170,24 @@ export function createBlogRouter({ store, siteUrl, product, author = 'Bellare St
       jsonLd: preview ? undefined : postJsonLd(post, { siteUrl, product, author })
     });
   });
+
+  // Blog images, streamed from R2 with the year-long immutable cache. The key
+  // is content-hashed, so caching forever is safe; Cloudflare's edge then
+  // holds it and R2 is read about once per image. A key must stay within blog/.
+  if (media) {
+    router.get('/media/:key(*)', async (req, res, next) => {
+      const key = String(req.params.key ?? '');
+      if (!/^blog\/[A-Za-z0-9._-]+$/.test(key)) return next();
+      try {
+        const object = await media.get(key);
+        res.set('Content-Type', object.contentType);
+        res.set('Cache-Control', 'public, max-age=31536000, immutable');
+        return res.send(object.body);
+      } catch {
+        return next();
+      }
+    });
+  }
 
   router.get('/sitemap.xml', async (req, res) => {
     res.set('Content-Type', 'application/xml; charset=utf-8');

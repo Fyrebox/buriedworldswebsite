@@ -96,6 +96,10 @@ public/css/styles.css   Token-based stylesheet (values transcribed from the hand
 | `/destinations/:slug` | One page per destination — ballarat, coloma, carcassonne, hoxne, bolonia |
 | `/vr-metal-detecting-game`, `/gold-panning-vr`, `/seated-vr`, `/hoxne-hoard` | Guide pages, each built to own one generic search |
 | `/how-to-play`, `/faq`, `/about`, `/updates` | Guide pages — structure, trust, and the changelog |
+| `/blog`, `/blog/:slug` | The blog index and posts |
+| `/blog/feed.xml` | RSS feed |
+| `/media/blog/:key` | Blog images, streamed from R2 |
+| `/admin/blog` | The blog editor |
 | `/press` | Press kit — fact sheet, descriptions, screenshots, art, trailer |
 | `/privacy` | Privacy policy, linked from the footer |
 | `/terms` | Terms of service, linked from the footer |
@@ -400,6 +404,48 @@ privacy note and `/privacy` say exactly that. The Conversions API is deliberatel
 it works by sending Meta a hash of the applicant's email, which the page promises not to do.
 Expect the pixel to undercount by a quarter to a third — ad blockers and iOS tracking refusal
 — against the dashboard's true number.
+
+## Blog
+
+An SEO blog with a public side, an editor, and an AI first-drafter.
+
+**Public** (`blog.mjs`): `/blog` lists published posts; `/blog/:slug` is the article
+with canonical, `og:type=article`, a share card at the hero's real size, `BlogPosting`
+JSON-LD carrying the word count, and a breadcrumb. `/blog/feed.xml` is the RSS feed. The
+sitemap is generated on request so it lists published posts alongside the fixed pages —
+there is no `public/sitemap.xml` any more. Drafts 404 publicly and are absent from the
+feed and sitemap; a signed, expiring preview link from the editor is the only way to see
+one.
+
+**Storage** (`blog-store.mjs`): the Markdown is the source of truth, rendered to
+sanitised HTML at save time. Word count comes from the rendered text. Publishing is
+**gated** on a checklist — title ≤ 65, description 120–160, ≥ 600 words, ≥ 2 headings, a
+hero with alt text, ≥ 1 internal link — not merely advised by it; `store.publish` refuses
+and names what is missing. The editor shows the same checklist, re-ticked live as you
+type.
+
+**Editor** (`blog-admin.mjs`, `/admin/blog`): list, a new-post button, and an editor with
+title, slug, meta description, Markdown body, hero image with alt text, preview, save,
+save-and-publish, unpublish and delete — all CSRF-guarded, behind the admin sign-in.
+
+**AI studio** (`blog-studio.mjs`): a brief becomes a full draft — title, description,
+body, image prompt, alt — via OpenAI's Responses API (`OPENAI_TEXT_MODEL`, default
+`gpt-5.6-luna`); the image prompt becomes a hero via the Images API
+(`OPENAI_IMAGE_MODEL`). The model is given the site's facts and hard house rules
+(Australian English, real places / invented people, no Kimberley, no invented figures)
+and **never publishes** — it writes a draft for you to revise. Generation runs in the
+background and records its state on the post, since a full draft outlasts a request.
+OpenAI receives only the brief and the site's own facts, never visitor data, so the
+privacy policy is unchanged.
+
+**Images** (`media.mjs`): stored in the Cloudflare R2 bucket `buriedworlds`, one 1600×900
+hero and one 1200×630 share card per source, WebP, under a content-hashed key, served
+from `/media/blog/:key` with the year-long immutable cache. Each part is optional: no
+OpenAI key means the editor is manual; no R2 keys means images can't be generated or
+served but writing still works.
+
+Variables: `OPENAI_API_KEY`, `OPENAI_TEXT_MODEL`, `OPENAI_IMAGE_MODEL`, `R2_ACCOUNT_ID`,
+`R2_BUCKET`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`.
 
 ## Design fidelity
 
