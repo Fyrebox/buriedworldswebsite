@@ -45,12 +45,12 @@ function memoryPool() {
   return new (newDb({ autoCreateForeignKeyIndices: true }).adapters.createPg()).Pool();
 }
 
-async function startServer() {
+async function startServer({ media } = {}) {
   const store = await createBlogStore({ pool: memoryPool() });
   const app = express();
   app.set('view engine', 'pug'); app.set('views', path.join(root, 'views'));
   Object.assign(app.locals, { siteUrl, product, links, trailer });
-  app.use(createBlogRouter({ store, siteUrl, product, author: 'Bellare Studios', previewSecret: SECRET }));
+  app.use(createBlogRouter({ store, siteUrl, product, author: 'Bellare Studios', previewSecret: SECRET, media }));
   app.use(notFoundHandler);
   const server = await new Promise((resolve) => { const l = app.listen(0, '127.0.0.1', () => resolve(l)); });
   return { store, url: `http://127.0.0.1:${server.address().port}`, stop: async () => { await new Promise((r) => server.close(r)); await store.close(); } };
@@ -211,6 +211,37 @@ test('the sitemap and feed list published posts only', async () => {
     assert.equal((await fetch(`${server.url}/blog/feed.xml`)).headers.get('content-type'), 'application/rss+xml; charset=utf-8');
     assert.ok(feed.includes(`<link>${siteUrl}/blog/${published.slug}</link>`));
     assert.ok(!feed.includes('A draft'));
+  } finally {
+    await server.stop();
+  }
+});
+
+test('the /media route streams an image from the store, and refuses keys outside blog/', async () => {
+  const served = [];
+  const media = { get: async (key) => { served.push(key); return { body: Buffer.from('IMG:' + key), contentType: 'image/webp' }; } };
+  const server = await startServer({ media });
+  try {
+    const ok = await fetch(`${server.url}/media/blog/abc123.webp`);
+    assert.equal(ok.status, 200);
+    assert.equal(ok.headers.get('content-type'), 'image/webp');
+    assert.equal(ok.headers.get('cache-control'), 'public, max-age=31536000, immutable');
+    assert.equal(await ok.text(), 'IMG:blog/abc123.webp');
+
+    const traversal = await fetch(`${server.url}/media/blog/../secret`);
+    await traversal.text();
+    assert.equal(traversal.status, 404, 'a key outside blog/ is refused');
+    assert.ok(!served.includes('blog/../secret'));
+  } finally {
+    await server.stop();
+  }
+});
+
+test('with no media store the /media route does not exist', async () => {
+  const server = await startServer();
+  try {
+    const res = await fetch(`${server.url}/media/blog/x.webp`);
+    await res.text();
+    assert.equal(res.status, 404);
   } finally {
     await server.stop();
   }

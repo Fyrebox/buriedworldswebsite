@@ -175,8 +175,8 @@ export function createBlogRouter({ store, siteUrl, product, author = 'Bellare St
   // is content-hashed, so caching forever is safe; Cloudflare's edge then
   // holds it and R2 is read about once per image. A key must stay within blog/.
   if (media) {
-    router.get('/media/:key(*)', async (req, res, next) => {
-      const key = String(req.params.key ?? '');
+    router.get(/^\/media\/(.+)$/, async (req, res, next) => {
+      const key = String(req.params[0] ?? '');
       if (!/^blog\/[A-Za-z0-9._-]+$/.test(key)) return next();
       try {
         const object = await media.get(key);
