@@ -220,8 +220,9 @@ test('the homepage cards link to their pages', async () => {
 
 // ---- Sitemap -----------------------------------------------------------
 
-test('the sitemap lists every destination page', () => {
-  const sitemap = fs.readFileSync(path.join(root, 'public', 'sitemap.xml'), 'utf8');
+test('the sitemap lists every destination page', async () => {
+  const { renderSitemap, sitemapEntries } = await import('./blog.mjs');
+  const sitemap = renderSitemap(await sitemapEntries({ siteUrl }));
   for (const destination of destinations) {
     assert.ok(sitemap.includes(`<loc>${siteUrl}/destinations/${destination.slug}</loc>`), destination.slug);
   }

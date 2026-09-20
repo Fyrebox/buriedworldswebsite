@@ -1,0 +1,54 @@
+//- One post. The body arrives as sanitised HTML rendered from the post's
+//- Markdown at save time; the template never renders raw Markdown.
+extends layout
+
+include partials/footer
+
+block content
+  main#content.destination.blog(data-screen-label=`Blog — ${post.title}`)
+    .destination__inner
+      if preview
+        p.admin-alert(role="status") Preview of a draft. Only someone with this link can see it; it is not published, indexed or listed.
+
+      nav.destination__crumbs(aria-label="Breadcrumb")
+        a(href="/") Buried Worlds VR
+        span.destination__crumb-sep(aria-hidden="true") ›
+        a(href="/blog") Blog
+        span.destination__crumb-sep(aria-hidden="true") ›
+        span(aria-current="page")= post.title
+
+      header.destination__head
+        span.destination__kicker
+          if post.publishedAt
+            time(datetime=post.publishedAt)= new Date(post.publishedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
+          else
+            | Draft
+          |  · #{post.minutes} min read · #{author}
+        h1.h1.guide__h1= post.title
+        if post.description
+          p.serif-italic.destination__tagline= post.description
+
+      if post.heroUrl
+        figure.destination__hero.blog-hero
+          img.destination__hero-img(src=post.heroUrl alt=post.heroAlt width=post.heroWidth || undefined height=post.heroHeight || undefined fetchpriority="high")
+
+      article.blog-body!= post.bodyHtml
+
+      if related.length
+        section.destination__section
+          h2.legal__h Places in this post
+          ul.guide__links
+            each d in related
+              li
+                a(href=`/destinations/${d.slug}`)= d.name
+                span.guide__link-note= d.tagline
+
+      .destination__cta
+        a.btn.btn--primary(href=links.metaQuestStoreCta + `?placement=blog-${post.slug}` target="_blank" rel="noopener noreferrer" data-cta=`blog-${post.slug}`) Get it on Meta Quest
+        a.btn.btn--secondary(href="/blog") All posts
+        p.hero__meta
+          | #{product.price} on the #{product.store}
+          span.hero__meta-dot ·
+          | #{product.devices}
+
+  +footer(links)

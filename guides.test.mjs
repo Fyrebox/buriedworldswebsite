@@ -137,7 +137,7 @@ test('each guide page renders with its own head, breadcrumb, and enough copy to 
 test('every internal link on every guide page resolves', async () => {
   const server = await startServer();
   try {
-    const known = new Set(['/', '/press', '/privacy', '/terms', '/discord', '/playtest', '/admin',
+    const known = new Set(['/', '/press', '/privacy', '/terms', '/discord', '/playtest', '/admin', '/blog',
       ...pages.map((page) => `/${page.slug}`),
       ...destinations.map((destination) => `/destinations/${destination.slug}`)]);
     for (const page of pages) {
@@ -212,8 +212,9 @@ test('the destination pages now link to the guide', async () => {
 
 // ---- Sitemap and footer ------------------------------------------------
 
-test('the sitemap lists every guide page', () => {
-  const sitemap = fs.readFileSync(path.join(root, 'public', 'sitemap.xml'), 'utf8');
+test('the sitemap lists every guide page', async () => {
+  const { renderSitemap, sitemapEntries } = await import('./blog.mjs');
+  const sitemap = renderSitemap(await sitemapEntries({ siteUrl }));
   for (const page of pages) {
     assert.ok(sitemap.includes(`<loc>${siteUrl}/${page.slug}</loc>`), page.slug);
   }

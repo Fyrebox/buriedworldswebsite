@@ -109,7 +109,7 @@ test('no rule fills a pale-text control with the brand bronze', () => {
 test('small bronze text never uses the brand bronze directly', () => {
   // Every `color: var(--bronze)` left in the stylesheet must be decorative or
   // large: ornaments, markers, separators, hover states, the 2rem loop numerals.
-  const allowed = /^(a:hover|\.ornament|\.loop-card__num|\.legal__home:hover|\.hero__meta-dot|\.ea-card__list li::marker|\.press-loop li::marker|\.destination__crumbs a:hover|\.destination__crumb-sep|\.destination__beats li::marker|\.destination__sibling:hover|\.guide__links a:hover)/;
+  const allowed = /^(a:hover|\.ornament|\.loop-card__num|\.legal__home:hover|\.hero__meta-dot|\.ea-card__list li::marker|\.press-loop li::marker|\.destination__crumbs a:hover|\.destination__crumb-sep|\.destination__beats li::marker|\.destination__sibling:hover|\.guide__links a:hover|\.blog-body li::marker)/;
   const lines = css.split('\n');
   let selector = '';
   for (const line of lines) {

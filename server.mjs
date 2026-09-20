@@ -32,6 +32,8 @@ import { createFeedbackRouter } from './feedback.mjs';
 import { createErrorHandler, notFoundHandler } from './errors.mjs';
 import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
 import { createAdminRouter } from './admin.mjs';
+import { createBlogRouter } from './blog.mjs';
+import { createBlogStore } from './blog-store.mjs';
 import { createMailer } from './mailer.mjs';
 import { createSesEventsRouter } from './ses-events.mjs';
 import { createPlaytestRouter, createPlaytestStore } from './playtest.mjs';
@@ -92,6 +94,10 @@ const trackingStore = await createTrackingStore({
 const playtestStore = await createPlaytestStore({
   databaseUrl: process.env.DATABASE_URL ?? ''
 });
+
+// Blog posts. Markdown in, sanitised HTML out, and the checklist a post must
+// pass before it is published (blog-store.mjs).
+const blogStore = await createBlogStore({ databaseUrl: process.env.DATABASE_URL ?? '' });
 
 // Structured data for the landing page. Search and social crawlers read price,
 // platform and publisher from here rather than inferring them from the copy.
@@ -189,6 +195,16 @@ app.get('/', (req, res) => {
 
 // One page per destination, linked from the homepage cards (destinations.mjs).
 app.use(createDestinationsRouter({ siteUrl, product }));
+
+// The blog, its feed, and the sitemap — which lists published posts, so it is
+// built on request rather than served from public/ (blog.mjs).
+app.use(createBlogRouter({
+  store: blogStore,
+  siteUrl,
+  product,
+  author: product.publisher,
+  previewSecret: process.env.ADMIN_SESSION_SECRET ?? ''
+}));
 
 // The guide pages — each built to own one generic search the brand page never
 // can, and to send its visitors on to the destinations (guides.mjs).
@@ -352,7 +368,7 @@ function shutdown(signal) {
   deadline.unref();
   server.close(async () => {
     try {
-      await Promise.allSettled([trackingStore.close(), playtestStore.close()]);
+      await Promise.allSettled([trackingStore.close(), playtestStore.close(), blogStore.close()]);
     } finally {
       process.exit(0);
     }

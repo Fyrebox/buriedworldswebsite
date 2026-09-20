@@ -1,0 +1,47 @@
+//- The blog index: every published post, newest first.
+extends layout
+
+include partials/footer
+
+block content
+  main#content.destination.blog(data-screen-label="Blog")
+    .destination__inner
+      nav.destination__crumbs(aria-label="Breadcrumb")
+        a(href="/") Buried Worlds VR
+        span.destination__crumb-sep(aria-hidden="true") ›
+        span(aria-current="page") Blog
+
+      header.destination__head
+        span.destination__kicker Notes from the dig
+        h1.h1 Blog
+        p.serif-italic.destination__tagline The places, the finds, and what changed in the game and why.
+
+      if posts.length
+        .blog-grid
+          each post in posts
+            article.blog-card
+              a.blog-card__link(href=`/blog/${post.slug}`)
+                if post.heroUrl
+                  .blog-card__img
+                    img(src=post.heroUrl alt="" loading="lazy" width=post.heroWidth || undefined height=post.heroHeight || undefined)
+                .blog-card__body
+                  h2.blog-card__title= post.title
+                  p.blog-card__desc= post.description
+                  span.blog-card__meta
+                    time(datetime=post.publishedAt)= new Date(post.publishedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
+                    |  · #{post.minutes} min read
+        if pages > 1
+          nav.blog-pages(aria-label="Pages")
+            if page > 1
+              a.btn.btn--secondary(href=page === 2 ? '/blog' : `/blog?page=${page - 1}`) ← Newer
+            span.blog-pages__label Page #{page} of #{pages}
+            if page < pages
+              a.btn.btn--secondary(href=`/blog?page=${page + 1}`) Older →
+      else
+        p.destination__reward Nothing published yet. The first post is on its way.
+
+      .destination__cta
+        a.btn.btn--primary(href=links.metaQuestStoreCta + '?placement=blog' target="_blank" rel="noopener noreferrer" data-cta="blog") Get it on Meta Quest
+        a.btn.btn--secondary(href="/blog/feed.xml") RSS feed
+
+  +footer(links)

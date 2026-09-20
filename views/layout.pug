@@ -79,7 +79,10 @@ html(lang="en")
 
     //- Open Graph. Every launch link posted to Reddit, Discord, X or an email
     //- renders from these; without them the site shares as a bare grey url.
-    meta(property="og:type" content="website")
+    meta(property="og:type" content=ogType || "website")
+    if ogType === 'article' && post && post.publishedAt
+      meta(property="article:published_time" content=post.publishedAt)
+      meta(property="article:modified_time" content=post.updatedAt)
     meta(property="og:site_name" content="Buried Worlds VR")
     meta(property="og:locale" content="en_AU")
     meta(property="og:title" content=title)
