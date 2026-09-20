@@ -6,6 +6,7 @@ mixin adminNav()
       a(href="/admin/links") Links
       a(href="/admin/playtest") Playtest
       a(href="/admin/playtest/emails") Emails
+      a(href="/admin/blog") Blog
       form(action="/admin/logout" method="post")
         input(type="hidden" name="_csrf" value=csrf)
         button.admin-nav__logout(type="submit") Sign out

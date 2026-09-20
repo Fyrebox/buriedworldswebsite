@@ -1,0 +1,125 @@
+extends layout
+include partials/admin-nav
+block content
+  +adminNav()
+  main#content.admin-shell.admin-shell--narrow
+    a.admin-back(href="/admin/blog") ← All posts
+    .admin-heading.admin-heading--detail
+      div
+        span.admin-kicker
+          if post.status === 'published'
+            | Published #{post.publishedAt ? post.publishedAt.slice(0, 10) : ''}
+          else
+            | Draft
+        h1= post.title
+
+    if error
+      p.admin-alert(role="alert")= error
+    if post.generation === 'running'
+      p.admin-alert(role="status") Writing a draft now — this takes a minute. Reload the page to see it.
+    if post.generationError
+      p.admin-alert(role="alert") The last generation failed: #{post.generationError}
+
+    if canGenerate
+      .admin-panel(style="margin-bottom:24px")
+        h2 Generate with AI
+        p(style="margin:0 0 14px;color:var(--ink-soft);font-size:13px") A brief in, a full draft out — title, description, body and an image prompt. It never publishes; you revise first.
+        form(action=`/admin/blog/${post.id}/generate` method="post")
+          input(type="hidden" name="_csrf" value=csrf)
+          .admin-field.admin-field--wide
+            span Brief
+            textarea.playtest-textarea(name="brief" rows="3" placeholder="e.g. A post about the real Ballarat gold rush and how the puddling machine in the game reflects it. Warm, factual, links to the Ballarat destination page.")= values.brief
+          .admin-form__actions
+            button.btn.btn--secondary(type="submit") Generate draft
+
+    form.admin-form#editor(action=`/admin/blog/${post.id}` method="post")
+      input(type="hidden" name="_csrf" value=csrf)
+      .admin-field.admin-field--wide(class=(errorField === 'title' ? 'admin-field--error' : ''))
+        span Title
+        input#f-title(type="text" name="title" value=values.title maxlength="120" required data-count="title")
+      .admin-field.admin-field--wide(class=(errorField === 'slug' ? 'admin-field--error' : ''))
+        span Slug
+        .admin-slug
+          span /blog/
+          input(type="text" name="slug" value=values.slug maxlength="80" placeholder="left blank, made from the title")
+      .admin-field.admin-field--wide(class=(errorField === 'description' ? 'admin-field--error' : ''))
+        span Meta description
+        textarea#f-desc.playtest-textarea(name="description" rows="2" maxlength="200" data-count="description")= values.description
+        small The one line under the title in Google. 120–160 characters.
+      .admin-field.admin-field--wide(class=(errorField === 'bodyMarkdown' ? 'admin-field--error' : ''))
+        span Body (Markdown)
+        textarea#f-body.playtest-textarea(name="bodyMarkdown" rows="22" style="font-family:var(--font-mono);font-size:13.5px" data-count="body")= values.bodyMarkdown
+
+      fieldset.admin-fieldset
+        legend Hero image
+        if heroUrlValue
+          img(src=heroUrlValue alt="" style="max-width:100%;border-radius:10px;margin-bottom:12px")
+        .admin-field.admin-field--wide
+          span Alt text
+          input(type="text" name="heroAlt" value=values.heroAlt maxlength="300")
+        input(type="hidden" name="heroKey" value=values.heroKey)
+        input(type="hidden" name="heroWidth" value=values.heroWidth)
+        input(type="hidden" name="heroHeight" value=values.heroHeight)
+        if canGenerate
+          .admin-field.admin-field--wide
+            span Image prompt
+            textarea.playtest-textarea(name="heroPrompt" rows="2")= values.heroPrompt
+          p(style="margin:0;color:var(--ink-soft);font-size:12.5px") Save the prompt, then use “Generate image” below. The result is stored and shown here.
+
+      .admin-form__actions
+        button.btn.btn--primary(type="submit" name="action" value="save") Save draft
+        button.btn.btn--primary(type="submit" name="action" value="publish") Save & publish
+        a.btn.btn--secondary(href=previewUrl target="_blank" rel="noopener") Preview
+
+    if canGenerate
+      form(action=`/admin/blog/${post.id}/image` method="post" style="margin-top:12px")
+        input(type="hidden" name="_csrf" value=csrf)
+        input(type="hidden" name="heroPrompt" value=values.heroPrompt)
+        button.btn.btn--secondary(type="submit") Generate image from the saved prompt
+
+    .admin-panel(style="margin-top:24px")
+      h2 Before it can publish
+      ul.legal__list#checklist(style="margin:0")
+        each item in checklist
+          li(data-check=item.id)
+            span(style=`color:${item.ok ? '#466538' : '#9b473d'};font-weight:600`)= item.ok ? '✓' : '✗'
+            |  #{item.label}
+            span(style="color:var(--ink-soft)")  — #{item.detail}
+
+    if post.status === 'published' || post.generation
+      .admin-panel(style="margin-top:24px")
+        h2 More
+        .admin-table__actions
+          if post.status === 'published'
+            form(action=`/admin/blog/${post.id}/unpublish` method="post")
+              input(type="hidden" name="_csrf" value=csrf)
+              button.btn.btn--secondary(type="submit") Unpublish
+          form(action=`/admin/blog/${post.id}/delete` method="post" onsubmit="return confirm('Delete this post for good?')")
+            input(type="hidden" name="_csrf" value=csrf)
+            button.btn.btn--secondary(type="submit") Delete
+
+    script.
+      // Live word/character counts and a re-tick of the checklist as you type.
+      // The server's checklist is authoritative on save; this is only guidance.
+      (function () {
+        var body = document.getElementById('f-body');
+        var min = { title: 65, descMin: 120, descMax: 160, words: 600, headings: 2 };
+        function words(t) { return (t.replace(/[#*_>`\-]/g, ' ').match(/[A-Za-z0-9]+/g) || []).length; }
+        function tick(id, ok) {
+          var li = document.querySelector('#checklist li[data-check="' + id + '"] span');
+          if (li) { li.textContent = ok ? '✓' : '✗'; li.style.color = ok ? '#466538' : '#9b473d'; }
+        }
+        function recompute() {
+          var t = document.getElementById('f-title').value.trim();
+          var d = document.getElementById('f-desc').value.trim();
+          var b = body.value;
+          tick('title', t.length > 0 && t.length <= min.title);
+          tick('description', d.length >= min.descMin && d.length <= min.descMax);
+          tick('words', words(b) >= min.words);
+          tick('headings', (b.match(/^##\s/gm) || []).length >= min.headings);
+          tick('links', /\]\((\/|https?:\/\/(www\.)?buriedworlds\.com)/.test(b));
+          tick('alt', document.querySelector('[name=heroAlt]').value.trim().length > 10);
+        }
+        ['f-title', 'f-desc', 'f-body'].forEach(function (id) { document.getElementById(id).addEventListener('input', recompute); });
+        document.querySelector('[name=heroAlt]').addEventListener('input', recompute);
+      })();

@@ -33,6 +33,7 @@ import { createErrorHandler, notFoundHandler } from './errors.mjs';
 import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
 import { createAdminRouter } from './admin.mjs';
 import { createBlogRouter } from './blog.mjs';
+import { createBlogAdminRouter } from './blog-admin.mjs';
 import { createBlogStore } from './blog-store.mjs';
 import { createMailer } from './mailer.mjs';
 import { createSesEventsRouter } from './ses-events.mjs';
@@ -303,8 +304,19 @@ const playtestNotify = playtestMailer && process.env.PLAYTEST_NOTIFY_TO
 app.use(createAdminRouter({
   trackingStore,
   playtestStore,
+  blogStore,
   adminPassword: process.env.ADMIN_PASSWORD ?? '',
   sessionSecret: process.env.ADMIN_SESSION_SECRET ?? ''
+}));
+
+// The blog editor (blog-admin.mjs). `studio` — the AI generator — is wired in
+// a later step; without it the AI buttons are hidden and the editor is manual.
+app.use(createBlogAdminRouter({
+  store: blogStore,
+  siteUrl,
+  adminPassword: process.env.ADMIN_PASSWORD ?? '',
+  sessionSecret: process.env.ADMIN_SESSION_SECRET ?? '',
+  previewSecret: process.env.ADMIN_SESSION_SECRET ?? ''
 }));
 
 app.use(createPlaytestRouter({

@@ -1,0 +1,51 @@
+extends layout
+include partials/admin-nav
+block content
+  +adminNav()
+  main#content.admin-shell
+    .admin-heading
+      div
+        span.admin-kicker Private dashboard
+        h1 Blog
+        p Write, generate, revise and publish posts.
+      form(action="/admin/blog" method="post" style="display:flex;gap:10px;align-items:flex-end")
+        input(type="hidden" name="_csrf" value=csrf)
+        button.btn.btn--primary(type="submit") New post
+
+    if notice
+      p.admin-alert.admin-alert--success(role="status")= notice
+
+    if posts.length
+      .admin-table-wrap
+        table.admin-table
+          thead
+            tr
+              th Post
+              th Status
+              th Words
+              th Updated
+              th
+          tbody
+            each post in posts
+              tr
+                td
+                  a.admin-table__name(href=`/admin/blog/${post.id}`)= post.title
+                  code /blog/#{post.slug}
+                td
+                  if post.status === 'published'
+                    span.admin-status.admin-status--live Published
+                  else if post.generation === 'running'
+                    span.admin-status Generating…
+                  else
+                    span.admin-status Draft
+                td.admin-table__number= post.wordCount
+                td= post.updatedAt.slice(0, 10)
+                td
+                  a.admin-table__action(href=`/admin/blog/${post.id}`) Edit
+    else
+      .admin-empty
+        h2 No posts yet
+        p Start one from scratch, or generate a first draft with AI.
+        form(action="/admin/blog" method="post")
+          input(type="hidden" name="_csrf" value=csrf)
+          button.btn.btn--primary(type="submit") New post

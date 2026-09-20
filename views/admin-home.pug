@@ -25,7 +25,7 @@ block content
     else
       p.admin-alert.admin-alert--success(role="status") Nothing needs you right now.
 
-    .admin-metrics(style="grid-template-columns:repeat(2,1fr)")
+    .admin-metrics(style="grid-template-columns:repeat(3,1fr)")
       .admin-panel
         h2 Playtest
         .admin-metrics(style="grid-template-columns:repeat(3,1fr);margin-bottom:18px")
@@ -57,3 +57,14 @@ block content
         .admin-table__actions
           a.btn.btn--primary(href="/admin/links") All links
           a.btn.btn--secondary(href="/admin/links/new") New link
+      .admin-panel
+        h2 Blog
+        .admin-metrics(style="grid-template-columns:repeat(2,1fr);margin-bottom:18px")
+          .admin-metric
+            span.admin-metric__value= blog.published
+            span.admin-metric__label Published
+          .admin-metric
+            span.admin-metric__value= blog.drafts
+            span.admin-metric__label Drafts
+        .admin-table__actions
+          a.btn.btn--primary(href="/admin/blog") Posts

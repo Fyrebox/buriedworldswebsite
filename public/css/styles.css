@@ -1741,3 +1741,6 @@ html { scroll-behavior: smooth; }
 .blog-body table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 15px; }
 .blog-body th, .blog-body td { padding: 10px 12px; border-bottom: 1px solid rgba(31, 33, 31, .12); text-align: left; }
 .blog-body hr { border: 0; border-top: 1px solid rgba(31, 33, 31, .15); margin: 32px 0; }
+
+/* Blog editor field-error border, matching the campaign form. */
+.admin-field--error input, .admin-field--error textarea { border-color: #9b473d; }

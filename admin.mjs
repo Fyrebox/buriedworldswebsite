@@ -12,6 +12,7 @@ import { csrfToken, readSession } from './admin-session.mjs';
 export function createAdminRouter({
   trackingStore,
   playtestStore,
+  blogStore = null,
   adminPassword = '',
   sessionSecret = '',
   now = () => Date.now()
@@ -28,12 +29,17 @@ export function createAdminRouter({
     if (!expiresAt) return res.redirect(303, '/admin/login');
     res.locals.csrf = csrfToken(sessionSecret, expiresAt);
 
-    const [links, summary, keys, troubled] = await Promise.all([
+    const [links, summary, keys, troubled, blogPosts] = await Promise.all([
       trackingStore.listLinks(),
       playtestStore.summarise(),
       playtestStore.keySummary(),
-      playtestStore.troubledApplicationIds()
+      playtestStore.troubledApplicationIds(),
+      blogStore ? blogStore.listAll() : Promise.resolve([])
     ]);
+    const blog = {
+      published: blogPosts.filter((p) => p.status === 'published').length,
+      drafts: blogPosts.filter((p) => p.status !== 'published').length
+    };
     const clicks7d = links.reduce((total, link) => total + link.clicks7d, 0);
     const active = links.filter((link) => link.active).length;
     const attention = [];
@@ -49,6 +55,7 @@ export function createAdminRouter({
       disableAnalytics: true,
       links: { total: links.length, active, clicks7d },
       playtest: { summary, keys },
+      blog,
       attention
     });
   });
