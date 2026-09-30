@@ -26,7 +26,7 @@ async function serve(publicDir) {
 
 test('assets are immutable for a year, except the files that change in place', () => {
   assert.equal(cacheControlFor('/public/css/styles.css'), 'public, max-age=31536000, immutable');
-  assert.equal(cacheControlFor('/public/video/hero-loop-detector.mp4'), 'public, max-age=31536000, immutable');
+  assert.equal(cacheControlFor('/public/video/hero-loop-detector-2.mp4'), 'public, max-age=31536000, immutable');
   assert.equal(cacheControlFor('/public/images/hero-poster.jpg'), 'public, max-age=31536000, immutable');
   for (const file of ['/public/sitemap.xml', '/public/robots.txt', '/public/press/buried-worlds-press-kit.zip']) {
     assert.equal(cacheControlFor(file), 'public, max-age=3600', file);

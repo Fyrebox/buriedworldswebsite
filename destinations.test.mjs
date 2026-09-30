@@ -129,7 +129,7 @@ test('share images are the page’s own screenshot where one is big enough', asy
   const server = await startServer();
   try {
     const ballarat = await (await fetch(`${server.url}/destinations/ballarat`)).text();
-    assert.equal(meta(ballarat, 'property', 'og:image'), `${siteUrl}/press/screenshots/01-ballarat-detector.jpg`);
+    assert.equal(meta(ballarat, 'property', 'og:image'), `${siteUrl}/press/screenshots/01-ballarat-detector-2.jpg`);
     assert.equal(meta(ballarat, 'property', 'og:image:width'), '1920');
     assert.equal(meta(ballarat, 'property', 'og:image:height'), '1080');
     assert.ok(meta(ballarat, 'property', 'og:image:alt').includes('Ballarat'));
@@ -176,7 +176,7 @@ test('the Ballarat page carries the teaser as a click-to-load facade with video 
     assert.ok(video, 'VideoObject present');
     assert.equal(video.uploadDate, '2026-09-06T16:55:22-07:00');
     assert.equal(video.duration, 'PT1M41S');
-    assert.equal(video.thumbnailUrl, `${siteUrl}/press/screenshots/02-ballarat-panning.jpg`);
+    assert.equal(video.thumbnailUrl, `${siteUrl}/press/screenshots/02-ballarat-panning-2.jpg`);
 
     const coloma = await (await fetch(`${server.url}/destinations/coloma`)).text();
     assert.ok(!coloma.includes('yt-facade'), 'only Ballarat has the video');

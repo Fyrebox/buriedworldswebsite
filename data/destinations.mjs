@@ -34,7 +34,7 @@ export const destinations = [
     description:
       'Ballarat is where Buried Worlds VR begins: gold-rush bush, a river to pan for gold, and an abandoned puddling machine to bring back to life. Open from day one.',
     hero: {
-      src: '/press/screenshots/01-ballarat-detector.jpg',
+      src: '/press/screenshots/01-ballarat-detector-2.jpg',
       alt: 'A gloved hand holds the Pro metal detector over red Ballarat dirt, the faceplate reading brass, gum trees behind.',
       width: 1920,
       height: 1080
@@ -117,7 +117,7 @@ export const destinations = [
       duration: 'PT1M41S',
       durationLabel: '1:41',
       poster: {
-        src: '/press/screenshots/02-ballarat-panning.jpg',
+        src: '/press/screenshots/02-ballarat-panning-2.jpg',
         alt: 'A gold pan full of dirt held at the surface of the river at Ballarat, a progress ring above it.',
         width: 1920,
         height: 1080
@@ -138,7 +138,7 @@ export const destinations = [
     description:
       'Coloma in Buried Worlds VR is the 1849 California gold rush: buy a claim, blast it with dynamite, and run a sluice box in the American River. Unlocks at 1,000.',
     hero: {
-      src: '/press/screenshots/04-coloma-camp.jpg',
+      src: '/press/screenshots/04-coloma-camp-2.jpg',
       alt: 'The gold-rush town at Coloma: a red timber store, a covered wagon and the church beyond, under a wide blue sky.',
       width: 1920,
       height: 1080
@@ -228,7 +228,7 @@ export const destinations = [
     description:
       'Carcassonne in Buried Worlds VR: lower a fishing magnet into the wells of a walled medieval city and restore seven plaques to the chapel. Unlocks at 5,000.',
     hero: {
-      src: '/press/screenshots/06-carcassonne-citadel.jpg',
+      src: '/press/screenshots/06-carcassonne-citadel-2.jpg',
       alt: 'A cow and a flock of geese on the green below the towered walls of Carcassonne.',
       width: 1920,
       height: 1080
@@ -422,7 +422,7 @@ export const destinations = [
     description:
       'Bolonia in Buried Worlds VR, the beach below Baelo Claudia: rebuild an amphora to turn the tide, follow a crab to a coffer, raise columns. Unlocks at 12,500.',
     hero: {
-      src: '/press/screenshots/08-bolonia-ruins.jpg',
+      src: '/press/screenshots/08-bolonia-ruins-2.jpg',
       alt: 'The Roman colonnade of Baelo Claudia at Bolonia, pale columns on the sand below grey cliffs, one capital glowing blue.',
       width: 1920,
       height: 1080

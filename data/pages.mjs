@@ -42,7 +42,7 @@ export const pages = [
     title: 'VR Metal Detecting Game for Meta Quest | Buried Worlds VR',
     description: 'A VR metal detecting game for Meta Quest: sweep a real-style detector, read the target scale, dig, and bank finds across five real sites. No combat, no timers.',
     hero: {
-      src: '/press/screenshots/01-ballarat-detector.jpg',
+      src: '/press/screenshots/01-ballarat-detector-2.jpg',
       alt: 'A gloved hand holds a metal detector over red dirt, the faceplate reading the target as brass.',
       width: 1920,
       height: 1080
@@ -111,7 +111,7 @@ export const pages = [
     title: 'Gold Panning in VR — Buried Worlds VR on Meta Quest',
     description: 'Gold panning in VR, by hand: swirl a pan at the river in Ballarat, run a sluice at Coloma, and bring a colonial puddling machine back to life. On Meta Quest.',
     hero: {
-      src: '/press/screenshots/02-ballarat-panning.jpg',
+      src: '/press/screenshots/02-ballarat-panning-2.jpg',
       alt: 'A gold pan held level at the surface of the river, gravel washing down as it swirls.',
       width: 1920,
       height: 1080
@@ -192,7 +192,7 @@ export const pages = [
     title: 'Seated VR Game for Meta Quest — Comfort in Buried Worlds VR',
     description: 'Buried Worlds VR plays seated or standing, teleport or free movement. No combat, no timers. What the store’s Moderate comfort rating means here, stated plainly.',
     hero: {
-      src: '/press/screenshots/05-coloma-diggings.jpg',
+      src: '/press/screenshots/05-coloma-diggings-2.jpg',
       alt: 'An eagle standing on the open ground at Coloma beside the player, the detector reading gold, a calm scene with nothing moving fast.',
       width: 1920,
       height: 1080
@@ -362,7 +362,7 @@ export const pages = [
     title: 'How to Play Buried Worlds VR — Loop, Hub and Unlock Order',
     description: 'How Buried Worlds VR works: detect, recover, stow, spend, travel. The travel hub, three save slots, the unlock order for five destinations, and the beer can.',
     hero: {
-      src: '/press/screenshots/03-coloma-mine.jpg',
+      src: '/press/screenshots/03-coloma-mine-2.jpg',
       alt: 'A bundle of dynamite held in both hands at the mouth of a mine at Coloma, an ore cart beside it.',
       width: 1920,
       height: 1080

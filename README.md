@@ -369,7 +369,7 @@ mechanism:
   URL changes; deploy without touching it, and the cache stands.
 - Images, video and fonts do not. **Replace one under the same filename and anyone who
   has visited before is served the old bytes for a year.** New poster: `hero-poster-2.webp`,
-  then point `data/content.mjs` at it. Never overwrite `hero-poster.webp` in place.
+  then point `data/content.mjs` at it. Never overwrite `hero-poster-2.webp` in place.
 - The exceptions are the files that change in place by design and are fetched by robots
   rather than browsers: `sitemap.xml`, `robots.txt` and the press kit zip get an hour.
 
@@ -494,10 +494,10 @@ with `+faststart`:
 
 | File | What | Size |
 |---|---|---|
-| `hero-loop-detector.mp4` | The detector sweep — the game's core verb. **Shipped**, on screens ≥ 720 px only | 630 KB |
-| `hero-loop-well.mp4` | Magnet fishing a well under Carcassonne | 710 KB |
-| `hero-loop-ruins.mp4` | The camera crossing the ruins at Bolonia | 640 KB |
-| `buried-worlds-trailer-720p.mp4` | The full trailer, click-to-play | 14 MB |
+| `hero-loop-detector-2.mp4` | The detector sweep — the game's core verb. **Shipped**, on screens ≥ 720 px only | 630 KB |
+| `hero-loop-well-2.mp4` | Magnet fishing a well under Carcassonne | 710 KB |
+| `hero-loop-ruins-2.mp4` | The camera crossing the ruins at Bolonia | 640 KB |
+| `buried-worlds-trailer-720p-2.mp4` | The full trailer, click-to-play | 14 MB |
 
 Swap the hero's mood by pointing `trailer.loop` in `data/content.mjs` at a different
 one. The 1080p master stays out of this repo — it is what press and YouTube should get.
