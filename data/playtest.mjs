@@ -38,7 +38,7 @@ export const study = {
   // every page already links; submissions come in through the questionnaire
   // form; and data requests go to the privacy address on /privacy, which a
   // privacy policy has to carry. The site sends its own mail through SES.
-  privacyEmail: 'privacy@buriedworlds.com'
+  privacyEmail: 'cyril@bellare.com.au'
 };
 
 // Supported headsets. Kept separate from product.devicesList because the study
