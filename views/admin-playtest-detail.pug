@@ -121,7 +121,13 @@ block content
           each question in questionnaire.questions
             .playtest-terms__row
               dt= question.text
-              dd(style="white-space:pre-wrap")= submission.answers[question.id] || '—'
+              - var answer = submission.answers[question.id] || ''
+              - var words = (answer.match(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu) || []).length
+              dd(style="white-space:pre-wrap")
+                = answer || '—'
+                if answer
+                  br
+                  small(style=`color:${words < (question.minWords || 0) ? 'var(--danger, #b3261e)' : 'var(--ink-soft)'};white-space:normal`) #{words} words#{question.minWords ? ` · minimum ${question.minWords}` : ''}
       else
         p(style="margin:0;color:var(--ink-soft);font-size:13px").
           Nothing submitted yet. A tester submits on /playtest/questionnaire with their reference and email; the status moves to Submitted on its own when they do.

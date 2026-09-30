@@ -15,7 +15,7 @@ import {
 import { applicationNotice, createPlaytestRouter, normaliseSubmission } from './playtest.mjs';
 import { createMailer } from './mailer.mjs';
 import { makeSession } from './admin-session.mjs';
-import { study } from './data/playtest.mjs';
+import { countWords, questionnaire, study } from './data/playtest.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const ADMIN_PASSWORD = 'correct horse battery staple';
@@ -413,10 +413,13 @@ test('one connection cannot bury the study in applications', async () => {
 
 const FORM_SECRET = 'a-playtest-form-secret-longer-than-32-characters!!';
 
+// Long enough for every question's minimum word count.
+const answerFor = (id) => `My answer about ${id}: I swept the detector for a while, dug where it beeped, and found the marketplace later.`;
+
 function submissionInput(overrides = {}) {
   const answers = Object.fromEntries(
     ['first-goal', 'confusion', 'detect-dig', 'best-moment', 'wanted-to-stop', 'discomfort', 'play-again']
-      .map((id) => [`answer_${id}`, `My answer about ${id}.`])
+      .map((id) => [`answer_${id}`, answerFor(id)])
   );
   return {
     ...answers,
@@ -544,7 +547,7 @@ test('a submission is stored, flips the status, tells both people, and never put
     const submission = await server.store.getSubmission(stored.id);
     assert.equal(submission.paypalAccount, 'tester-paypal@example.com');
     assert.equal(submission.minutesPlayed, 24);
-    assert.equal(submission.answers['first-goal'], 'My answer about first-goal.');
+    assert.equal(submission.answers['first-goal'], answerFor('first-goal'));
     assert.equal(submission.submissionCount, 1);
 
     await new Promise((resolve) => setTimeout(resolve, 20));
@@ -610,7 +613,7 @@ test('a forged, expired or missing token cannot submit, and validation names the
     const html = await bad.text();
     assert.equal(bad.status, 400);
     assert.ok(html.includes('playtest-field--error'));
-    assert.ok(html.includes('My answer about first-goal.'), 'other answers survive a rejection');
+    assert.ok(html.includes(answerFor('first-goal')), 'other answers survive a rejection');
     assert.equal(await server.store.getSubmission(stored.id), null);
 
     clock += 25 * 60 * 60 * 1000;
@@ -635,6 +638,7 @@ test('submission validation', () => {
     ['minutesPlayed', { minutesPlayed: 'twenty' }], ['minutesPlayed', { minutesPlayed: '0' }], ['minutesPlayed', { minutesPlayed: '9999' }],
     ['headsetPlayed', { headsetPlayed: 'index' }], ['progressReturned', { progressReturned: 'maybe' }],
     ['answer_play-again', { 'answer_play-again': '   ' }], ['answer_confusion', { answer_confusion: 'x'.repeat(2001) }],
+    ['answer_best-moment', { 'answer_best-moment': "yeah it's good" }], ['answer_discomfort', { answer_discomfort: 'No.' }],
     ['ownAnswers', { ownAnswers: '' }]
   ];
   for (const [field, overrides] of cases) {
@@ -656,7 +660,8 @@ test('the dashboard shows the submission and the PayPal account, exports it, and
 
     const detail = await (await fetch(`${server.url}/admin/playtest/${stored.id}`, { headers: { cookie } })).text();
     assert.ok(detail.includes('tester-paypal@example.com'), 'but is on the detail page');
-    assert.ok(detail.includes('My answer about first-goal.'));
+    assert.ok(detail.includes(answerFor('first-goal')));
+    assert.ok(detail.includes('20 words'), 'the dashboard shows each answer\'s word count');
     assert.ok(detail.includes('href="https://drive.google.com/example-screenshot"'));
 
     const csv = await (await fetch(`${server.url}/admin/playtest/submissions.csv`, { headers: { cookie } })).text();
@@ -1252,6 +1257,32 @@ test('export.csv is not mistaken for an application id', async () => {
     });
     await response.text();
     assert.equal(response.status, 200);
+  } finally {
+    await server.stop();
+  }
+});
+
+test('answers need their minimum number of words, counted the same on the form and the server', async () => {
+  assert.equal(countWords("yeah it's good"), 3, "an apostrophe does not split a word");
+  assert.equal(countWords("Pêche à l'aimant — oui !"), 4, 'French counts too; punctuation is not a word');
+  assert.equal(countWords(''), 0);
+  for (const question of questionnaire.questions) assert.ok(question.minWords >= 3, question.id);
+  assert.equal(questionnaire.questions.find((q) => q.id === 'discomfort').minWords, 3, '"No, none at all" is a real answer there');
+  assert.doesNotThrow(() => normaliseSubmission(submissionInput({ answer_discomfort: 'No, none at all' })));
+  assert.throws(() => normaliseSubmission(submissionInput({ answer_confusion: 'Not really, it was fine.' })),
+    (error) => error.field === 'answer_confusion' && /at least 15 words/.test(error.message) && /you wrote 5/.test(error.message));
+
+  const server = await startServer({ formSecret: FORM_SECRET });
+  try {
+    const stored = await invitedApplicant(server);
+    const found = await (await post(server.url, '/playtest/questionnaire/find', { reference: stored.reference, email: 'tester@example.com' })).text();
+    assert.ok(found.includes('data-min-words="15"') && found.includes('At least 15 words'), 'the form states the minimum up front');
+    const response = await post(server.url, '/playtest/questionnaire', { submissionToken: tokenFrom(found), ...submissionInput({ 'answer_play-again': 'Yes.' }) });
+    assert.equal(response.status, 400);
+    const html = await response.text();
+    assert.ok(html.includes('Please write at least 15 words here (you wrote 1)'), 'the reason is shown on the form');
+    assert.ok(html.includes(answerFor('first-goal')), 'nothing already typed is lost');
+    assert.equal(await server.store.getSubmission(stored.id), null, 'nothing is stored');
   } finally {
     await server.stop();
   }

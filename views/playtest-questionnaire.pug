@@ -41,10 +41,11 @@ block content
 
           h2.legal__h The questions
           p.
-            Answer in your own words, as long or short as you like. There are no
-            right answers and nothing is scored — a sentence that says "I had no
-            idea what the pickaxe was for" is worth more to us than a paragraph of
-            praise.
+            Answer in your own words, in a sentence or two — most questions need at
+            least 15 words, and one-line answers like "it was good" are sent back.
+            There are no right answers and nothing is scored: "I had no idea what
+            the pickaxe was for, so I kept swinging the detector at the ground" is
+            worth more to us than a paragraph of praise.
           ol.legal__list.playtest-questions
             each question in questionnaire.questions
               li= question.text
@@ -111,7 +112,8 @@ block content
             each question in questionnaire.questions
               .playtest-field(class=(errorField === `answer_${question.id}` ? 'playtest-field--error' : ''))
                 label(for=`answer-${question.id}`)= question.text
-                textarea.playtest-textarea(id=`answer-${question.id}` name=`answer_${question.id}` rows="4" maxlength="2000" required)= values.answers[question.id]
+                textarea.playtest-textarea(id=`answer-${question.id}` name=`answer_${question.id}` rows="4" maxlength="2000" required data-min-words=question.minWords aria-describedby=`answer-${question.id}-words`)= values.answers[question.id]
+                small.playtest-words(id=`answer-${question.id}-words` data-for=`answer-${question.id}`) At least #{question.minWords} words
                 +fieldError(`answer_${question.id}`)
 
             h2.legal__h Your session
@@ -171,6 +173,23 @@ block content
             .playtest-form__actions
               button.btn.btn--primary(type="submit")= existing ? 'Update my submission' : 'Submit my session'
               span.playtest-form__aside You will get one email confirming it arrived.
+
+        //- Live word counts. The server enforces the minimum either way; this
+        //- only saves a round trip. Same rule as countWords in data/playtest.mjs.
+        script.
+          (function () {
+            var re = /[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu;
+            document.querySelectorAll('textarea[data-min-words]').forEach(function (area) {
+              var min = Number(area.dataset.minWords), note = document.getElementById(area.id + '-words');
+              if (!note) return;
+              function update() {
+                var n = (area.value.match(re) || []).length;
+                note.textContent = n + ' / ' + min + ' words' + (n >= min ? ' ✓' : '');
+                note.classList.toggle('playtest-words--ok', n >= min);
+              }
+              area.addEventListener('input', update); update();
+            });
+          })();
 
         p.legal__meta(style="margin-top:40px")
           | Study terms version #{study.termsVersion}. The full payment conditions are on the

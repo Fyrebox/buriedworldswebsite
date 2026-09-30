@@ -10,7 +10,7 @@ import crypto from 'node:crypto';
 
 import pg from 'pg';
 
-import { ageGroups, captureMethods, headsets, questionnaire, statuses, study, submittableStatuses, vrFrequencies } from './data/playtest.mjs';
+import { ageGroups, captureMethods, countWords, headsets, questionnaire, statuses, study, submittableStatuses, vrFrequencies } from './data/playtest.mjs';
 
 const { Pool } = pg;
 
@@ -176,15 +176,25 @@ function normaliseHttpsUrl(value, field, label, { required = true } = {}) {
 }
 
 /**
- * Validate one questionnaire submission. Every question needs an answer — a
- * short one is fine, an empty one is a form that was not filled in — and the
- * evidence link is required because it is the one thing that shows the
- * session happened.
+ * Validate one questionnaire submission. Every question needs an answer of at
+ * least its `minWords` — a one-liner like "yeah it's good" is sent back with
+ * the count, since it tells us nothing — and the evidence link is required
+ * because it is the one thing that shows the session happened.
  */
 export function normaliseSubmission(input = {}) {
   const answers = {};
   for (const question of questionnaire.questions) {
-    answers[question.id] = cleanText(input[`answer_${question.id}`], `answer_${question.id}`, 'This answer', LIMITS.answer);
+    const field = `answer_${question.id}`;
+    const answer = cleanText(input[field], field, 'This answer', LIMITS.answer);
+    const words = countWords(answer);
+    if (question.minWords && words < question.minWords) {
+      throw new ApplicationValidationError(
+        `Please write at least ${question.minWords} words here (you wrote ${words}). `
+          + 'A sentence or two about what happened, what you tried and how it felt is what makes the answer useful.',
+        field
+      );
+    }
+    answers[question.id] = answer;
   }
   const minutes = Number.parseInt(String(input.minutesPlayed ?? '').trim(), 10);
   if (!Number.isInteger(minutes) || minutes < 1 || minutes > LIMITS.minutesMax) {

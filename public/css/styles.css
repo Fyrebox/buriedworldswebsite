@@ -1451,6 +1451,7 @@ html { scroll-behavior: smooth; }
   font-size: 12.5px;
   line-height: 1.5;
 }
+.playtest-words--ok { color: #4f7a3a; }
 .playtest-field--error input,
 .playtest-field--error .playtest-fieldset { border-color: #9b473d; }
 

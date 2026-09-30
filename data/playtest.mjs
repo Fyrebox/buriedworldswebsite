@@ -180,14 +180,18 @@ export const questionnaire = {
   ],
   // Stable ids: answers are stored against these, so reordering or rewording a
   // question never orphans what a tester already wrote.
+  //
+  // `minWords`: one-line answers ("yeah it's good") told us nothing and still
+  // got paid, so each answer needs a couple of sentences. Discomfort is the
+  // exception — "No, none at all" is a complete, useful answer there.
   questions: [
-    { id: 'first-goal', text: 'What did you think you were supposed to do first?' },
-    { id: 'confusion', text: 'Where did you get confused, and what did you try next?' },
-    { id: 'detect-dig', text: 'How did detecting and digging feel? Describe anything awkward or satisfying.' },
-    { id: 'best-moment', text: 'What was your most satisfying discovery or moment?' },
-    { id: 'wanted-to-stop', text: 'Was there a point where you wanted to stop? What caused it?' },
-    { id: 'discomfort', text: 'Did you experience discomfort, difficulty reaching objects, unreadable text or technical problems?' },
-    { id: 'play-again', text: 'Would you voluntarily play again? What would you want to do next?' }
+    { id: 'first-goal', text: 'What did you think you were supposed to do first?', minWords: 15 },
+    { id: 'confusion', text: 'Where did you get confused, and what did you try next?', minWords: 15 },
+    { id: 'detect-dig', text: 'How did detecting and digging feel? Describe anything awkward or satisfying.', minWords: 15 },
+    { id: 'best-moment', text: 'What was your most satisfying discovery or moment?', minWords: 15 },
+    { id: 'wanted-to-stop', text: 'Was there a point where you wanted to stop? What caused it?', minWords: 15 },
+    { id: 'discomfort', text: 'Did you experience discomfort, difficulty reaching objects, unreadable text or technical problems?', minWords: 3 },
+    { id: 'play-again', text: 'Would you voluntarily play again? What would you want to do next?', minWords: 15 }
   ],
   progressOptions: [
     { id: 'yes', label: 'Yes, everything was there' },
@@ -235,4 +239,9 @@ export function recruitmentPost({ siteUrl, applyUrl = `${siteUrl}/playtest` }) {
       `Applying doesn't guarantee a place — I pick for a spread of headsets and VR experience, and you'll hear either way. Please keep email addresses out of the comments.`
     ].join('\n')
   };
+}
+
+/** Words in an answer: runs of letters or digits, so "it's" and "l'aimant" are one word and punctuation is none. */
+export function countWords(text) {
+  return (String(text ?? '').match(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu) ?? []).length;
 }
