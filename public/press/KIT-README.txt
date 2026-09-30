@@ -7,7 +7,7 @@ Out now in Early Access on the Meta Horizon Store.
   Store    https://www.meta.com/experiences/buried-worlds/1129006663640647/
   Site     https://www.buriedworlds.com/
   Kit      https://www.buriedworlds.com/press
-  Contact  press@buriedworlds.com
+  Contact  cyril@bellare.com.au
 
 FACTS
   Store title    Buried Worlds (the store lists it without "VR")

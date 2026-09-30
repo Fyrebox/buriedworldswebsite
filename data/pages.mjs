@@ -603,7 +603,7 @@ export const pages = [
           { links: [
             { href: '/discord', label: 'Discord', note: 'The developer is in there most days. Questions, bug reports, and the first place new destinations get argued about.' },
             { href: '/press', label: 'Press kit', note: 'Fact sheet, screenshots, key art and the trailer, free to use in coverage.' },
-            { href: 'mailto:press@buriedworlds.com', label: 'press@buriedworlds.com', note: 'For coverage, keys and interviews.' },
+            { href: 'mailto:cyril@bellare.com.au', label: 'cyril@bellare.com.au', note: 'For coverage, keys and interviews.' },
             { href: '/privacy', label: 'Privacy', note: 'What we collect, which is very little, and what we do with it.' }
           ] }
         ]

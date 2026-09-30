@@ -10,7 +10,7 @@
 // purpose — when every outlet quotes the same paragraphs as the store page, the
 // game reads as one thing rather than five slightly different ones.
 
-export const pressContact = 'press@buriedworlds.com';
+export const pressContact = 'cyril@bellare.com.au';
 
 export const descriptions = {
   // For a listing line, a tweet, a roundup entry.
