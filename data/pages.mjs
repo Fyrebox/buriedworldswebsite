@@ -43,7 +43,7 @@ export const pages = [
     description: 'A VR metal detecting game for Meta Quest: sweep a real-style detector, read the target scale, dig, and bank finds across five real sites. No combat, no timers.',
     hero: {
       src: '/press/screenshots/01-ballarat-detector.jpg',
-      alt: 'A metal detector coil swept low over dry ground, the faceplate lit with a rising signal.',
+      alt: 'A gloved hand holds a metal detector over red dirt, the faceplate reading the target as brass.',
       width: 1920,
       height: 1080
     },
@@ -193,7 +193,7 @@ export const pages = [
     description: 'Buried Worlds VR plays seated or standing, teleport or free movement. No combat, no timers. What the store’s Moderate comfort rating means here, stated plainly.',
     hero: {
       src: '/press/screenshots/05-coloma-diggings.jpg',
-      alt: 'Open diggings at Coloma under a wide sky, a calm scene with nothing moving fast.',
+      alt: 'An eagle standing on the open ground at Coloma beside the player, the detector reading gold, a calm scene with nothing moving fast.',
       width: 1920,
       height: 1080
     },
@@ -363,7 +363,7 @@ export const pages = [
     description: 'How Buried Worlds VR works: detect, recover, stow, spend, travel. The travel hub, three save slots, the unlock order for five destinations, and the beer can.',
     hero: {
       src: '/press/screenshots/03-coloma-mine.jpg',
-      alt: 'A mine entrance at Coloma with a blast socket set at its mouth.',
+      alt: 'A bundle of dynamite held in both hands at the mouth of a mine at Coloma, an ore cart beside it.',
       width: 1920,
       height: 1080
     },

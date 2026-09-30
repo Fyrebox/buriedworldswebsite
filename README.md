@@ -535,10 +535,8 @@ link to the watch page that JavaScript upgrades into a `youtube-nocookie.com` pl
 in place. `/privacy` § *This website* describes it. Keep it that way — a normal
 YouTube iframe sets cookies on page load, which the policy would then have to cover.
 
-**Hoxne has no full-size screenshot** (the trailer cut has no Hoxne footage), so its
-page shows the 384 px card image over the terrain gradient and keeps the site cover
-as its share image. Drop a 1920×1080 capture into `public/press/screenshots/`,
-point `hero.src` at it and remove `hero.gradient`, and both fix themselves.
+**Hoxne's page uses `09-hoxne-hoard.jpg`** (the hoard breaking out of its soil block),
+captured 30 September 2026 with the rest of the 1.0.3 screenshots and trailer.
 
 ## Guide pages
 
@@ -600,10 +598,8 @@ a stale figure.
 directory and `/press` is a route; with the default on, static answers `/press` with a
 301 to `/press/` before the route is reached and the page is unreachable.
 
-**Gap:** there is no Hoxne screenshot, because the final trailer cut contains no
-Hoxne footage — the shot list planned it and it did not survive. Hoxne is the
-strongest press hook there is (the lost hammer, the British Museum, the archaeology
-angle), so it wants a fresh capture via MQDH.
+The kit has ten screenshots since 30 September 2026, including the Hoxne hoard
+(`09`) — the strongest press hook there is — and the Ballarat kangaroo (`10`).
 
 Destinations live in the `worlds` array. Kimberley is withheld from the current
 release — it is left out of that array rather than deleted, and its images and

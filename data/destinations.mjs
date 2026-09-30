@@ -35,7 +35,7 @@ export const destinations = [
       'Ballarat is where Buried Worlds VR begins: gold-rush bush, a river to pan for gold, and an abandoned puddling machine to bring back to life. Open from day one.',
     hero: {
       src: '/press/screenshots/01-ballarat-detector.jpg',
-      alt: 'A metal detector coil swept low over dry Australian scrub at Ballarat, gum trees behind.',
+      alt: 'A gloved hand holds the Pro metal detector over red Ballarat dirt, the faceplate reading brass, gum trees behind.',
       width: 1920,
       height: 1080
     },
@@ -118,7 +118,7 @@ export const destinations = [
       durationLabel: '1:41',
       poster: {
         src: '/press/screenshots/02-ballarat-panning.jpg',
-        alt: 'A gold pan held level at the surface of the river at Ballarat.',
+        alt: 'A gold pan full of dirt held at the surface of the river at Ballarat, a progress ring above it.',
         width: 1920,
         height: 1080
       }
@@ -139,7 +139,7 @@ export const destinations = [
       'Coloma in Buried Worlds VR is the 1849 California gold rush: buy a claim, blast it with dynamite, and run a sluice box in the American River. Unlocks at 1,000.',
     hero: {
       src: '/press/screenshots/04-coloma-camp.jpg',
-      alt: 'The ’49er camp at Coloma, timber buildings on the flat with open country beyond.',
+      alt: 'The gold-rush town at Coloma: a red timber store, a covered wagon and the church beyond, under a wide blue sky.',
       width: 1920,
       height: 1080
     },
@@ -229,7 +229,7 @@ export const destinations = [
       'Carcassonne in Buried Worlds VR: lower a fishing magnet into the wells of a walled medieval city and restore seven plaques to the chapel. Unlocks at 5,000.',
     hero: {
       src: '/press/screenshots/06-carcassonne-citadel.jpg',
-      alt: 'The citadel at the heart of Carcassonne, stone walls and towers under a pale sky.',
+      alt: 'A cow and a flock of geese on the green below the towered walls of Carcassonne.',
       width: 1920,
       height: 1080
     },
@@ -317,14 +317,10 @@ export const destinations = [
     description:
       'Buried Worlds VR retells the 1992 Hoxne Hoard: follow four clue signs to a lost hammer, mend a fence, and brush nineteen Roman pieces out of one block of soil.',
     hero: {
-      src: '/images/HoxneShot.webp',
-      alt: 'Quiet Suffolk farmland at Hoxne, a dead oak on the rise and a farmhouse beyond.',
-      width: 384,
-      height: 256,
-      // No 1920×1080 capture of Hoxne exists yet: the trailer cut contains no
-      // Hoxne footage (README § Press kit). Until one is taken, the page shows
-      // the card image over its terrain gradient rather than nothing.
-      gradient: 'linear-gradient(160deg,#85A857,#668C45 50%,#8C734C 82%,#C2B280)'
+      src: '/press/screenshots/09-hoxne-hoard.jpg',
+      alt: 'The Hoxne hoard bursting out of its block of soil in a Suffolk field: gold solidi, silver siliquae and a Roman silver spoon, each named in the air.',
+      width: 1920,
+      height: 1080
     },
     facts: {
       tool: 'Detector, pickaxe, a hammer and a cleaning brush',
@@ -427,7 +423,7 @@ export const destinations = [
       'Bolonia in Buried Worlds VR, the beach below Baelo Claudia: rebuild an amphora to turn the tide, follow a crab to a coffer, raise columns. Unlocks at 12,500.',
     hero: {
       src: '/press/screenshots/08-bolonia-ruins.jpg',
-      alt: 'The Roman ruins of Baelo Claudia at Bolonia, pale columns standing in sand.',
+      alt: 'The Roman colonnade of Baelo Claudia at Bolonia, pale columns on the sand below grey cliffs, one capital glowing blue.',
       width: 1920,
       height: 1080
     },

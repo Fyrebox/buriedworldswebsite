@@ -134,10 +134,10 @@ test('share images are the page’s own screenshot where one is big enough', asy
     assert.equal(meta(ballarat, 'property', 'og:image:height'), '1080');
     assert.ok(meta(ballarat, 'property', 'og:image:alt').includes('Ballarat'));
 
-    // Hoxne has only the 384 px card image, so it keeps the site cover.
+    // Hoxne gained its own 1920×1080 capture (the hoard) and shares it.
     const hoxne = await (await fetch(`${server.url}/destinations/hoxne`)).text();
-    assert.equal(meta(hoxne, 'property', 'og:image'), `${siteUrl}/images/og-cover.jpg`);
-    assert.equal(meta(hoxne, 'property', 'og:image:width'), '1200');
+    assert.equal(meta(hoxne, 'property', 'og:image'), `${siteUrl}/press/screenshots/09-hoxne-hoard.jpg`);
+    assert.equal(meta(hoxne, 'property', 'og:image:width'), '1920');
   } finally {
     await server.stop();
   }

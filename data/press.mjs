@@ -111,14 +111,16 @@ export const loop = [
 // Captions are what an outlet will print under the image, so each one names the
 // destination and what is actually happening rather than describing the mood.
 export const screenshots = [
-  ['01-ballarat-detector.jpg', 'Ballarat — sweeping the coil across the diggings. The basic detector reports signal strength and nothing about what is under it.'],
-  ['02-ballarat-panning.jpg', 'Ballarat — panning river gravel. The pan is swirled by hand until the silt washes over the lip.'],
-  ['03-coloma-mine.jpg', 'Coloma — a staked claim on the American River diggings.'],
-  ['04-coloma-camp.jpg', 'Coloma — the camp above the workings.'],
-  ['05-coloma-diggings.jpg', 'Coloma — working ground that other prospectors have already been over.'],
-  ['06-carcassonne-citadel.jpg', 'Carcassonne — a well below the walls of the fortified city.'],
-  ['07-carcassonne-well.jpg', 'Carcassonne — magnet fishing a flooded well. Some things are not dug for.'],
-  ['08-bolonia-ruins.jpg', 'Bolonia — the Roman ruins of Baelo Claudia, exposed at low tide.']
+  ['01-ballarat-detector.jpg', 'Ballarat — the Pro detector reads the target before you dig. Here the faceplate calls brass; gold and lead share a band, so even the good machine leaves a gamble.'],
+  ['02-ballarat-panning.jpg', 'Ballarat — panning river dirt. The pan is swirled by hand at the surface until the gold settles.'],
+  ['03-coloma-mine.jpg', 'Coloma — dynamite in hand at the mouth of a claimed mine, an ore cart beside it.'],
+  ['04-coloma-camp.jpg', 'Coloma — the gold-rush town, a covered wagon outside the store and the church beyond.'],
+  ['05-coloma-diggings.jpg', 'Coloma — an eagle lands beside the player while the detector reads gold. The bird settles over the biggest nuggets.'],
+  ['06-carcassonne-citadel.jpg', 'Carcassonne — a cow and the goose flock on the green below the citadel walls. Fed, they dig up buried finds.'],
+  ['07-carcassonne-well.jpg', 'Carcassonne — magnet fishing a well in the medieval city. Some things are not dug for.'],
+  ['08-bolonia-ruins.jpg', 'Bolonia — the Roman colonnade of Baelo Claudia, a glowing marker where a column piece belongs.'],
+  ['09-hoxne-hoard.jpg', 'Hoxne — the hoard breaks out of its block of soil: gold solidi, silver siliquae and a Roman silver spoon.'],
+  ['10-ballarat-kangaroo.jpg', 'Ballarat — a kangaroo beside the hole it dug. Feed the wildlife and they dig for you.']
 ];
 
 export const art = [

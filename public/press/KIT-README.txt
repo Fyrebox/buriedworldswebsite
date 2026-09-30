@@ -25,7 +25,7 @@ FACTS
   Internet       Not required once installed
 
 CONTENTS
-  screenshots/   Eight 1920x1080 JPEGs. Captions are on the web version
+  screenshots/   Ten 1920x1080 JPEGs. Captions are on the web version
                  of this kit at buriedworlds.com/press
   art/           Key art, cover art, wordmark (transparent), app icon
 

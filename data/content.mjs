@@ -70,7 +70,7 @@ export const trailer = {
   poster: '/images/hero-poster.webp',
   full: '/video/buried-worlds-trailer-720p.mp4',
   fullPoster: '/images/og-cover.jpg',
-  duration: '2:00'
+  duration: '1:59'
 };
 
 // Hero variant: "poster" | "split" | "banner". Poster is the shipped default;
