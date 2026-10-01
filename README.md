@@ -213,7 +213,7 @@ at startup like the campaign tables. It is the only place on the site holding
 contact details, so it holds nothing that was not typed into the form: no IP
 address, no cookie, no user agent, nothing derived.
 
-### Keys and the three emails
+### Keys and the invitation email
 
 Selection is two clicks per tester. Generate store keys in the Meta developer dashboard
 (Distribution → Keys → Generate) and paste them into the box on `/admin/playtest`.
@@ -223,11 +223,11 @@ Then, on an application:
   the applicant: the key, how to redeem it in the Meta Horizon app, the brief link, and
   their week. With no keys left it refuses and changes nothing — a "you're in" with
   no key in it would be worse than silence.
-- **Declined** emails "not selected". **Paid** emails "payment sent".
-- Everything else only records. Saving a note without changing status sends nothing;
-  walking an application back and re-inviting reuses the key it already holds.
+- Everything else only records, Declined and Paid included: a declined applicant is
+  not chased, and PayPal already tells a tester when payment lands. Saving a note
+  without changing status sends nothing; walking an application back and re-inviting reuses the key it already holds.
 
-The exact text of all three is shown on the detail page before you click. An emailed key
+The exact text is shown on the detail page before you click. An emailed key
 is spent for good — deleting the application unlinks it but keeps it counted, so it can
 never be offered twice. Keys unlock the **store build**; if a later wave needs an
 unreleased fix, that is a release-channel invite from the Meta dashboard again.

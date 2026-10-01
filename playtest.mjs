@@ -144,9 +144,10 @@ export function submissionReceipt(application, { corrected, siteUrl }) {
 }
 
 /**
- * The emails a status change sends to the applicant. Plain text, one screen,
- * and each says what happens next and what the applicant need not do.
- * Rendered on the dashboard before the click, so nothing goes out unseen.
+ * The email a status change sends to the applicant: only Invited writes.
+ * Declined testers are not chased, and PayPal already tells a tester when
+ * payment lands. Plain text, one screen, rendered on the dashboard before
+ * the click, so nothing goes out unseen.
  */
 export function statusEmails(application, { siteUrl, key = '' }) {
   const ref = application.reference;
@@ -166,26 +167,6 @@ export function statusEmails(application, { siteUrl, key = '' }) {
         `You have ${study.deadlineLabel} from this email. Play about ${study.playMinutes} minutes, get at least ${study.minLoot} of finds in the game's own money, and take a screenshot of the marketplace showing it. Then submit on that page with your reference (${ref}) and this email address. Payment of ${study.fee} follows by ${study.payoutMethod} within ${study.paymentWindowHours} hours — whether or not you liked it.`,
         ``,
         `Stuck, or not sure what to do? Message the developer on Discord and he'll walk you through it. Asking does not affect payment. If ${study.deadlineLabel} stops being realistic, say so before it runs out and you'll get more.`
-      ].join('\n')
-    },
-    declined: {
-      subject: `Buried Worlds VR playtest ${ref} — not selected`,
-      text: [
-        `Thanks for applying to the Buried Worlds VR playtest. You haven't been selected this time.`,
-        ``,
-        `That's almost always about which headsets were already covered at the time, not about you. The study is ongoing, so you're welcome to apply again later.`,
-        ``,
-        `Your application will be deleted within 30 days, as the page said. Nothing else will be sent to this address.`
-      ].join('\n')
-    },
-    paid: {
-      subject: `Buried Worlds VR playtest ${ref} — payment sent`,
-      text: [
-        `${study.fee} has been sent by ${study.payoutMethod} to the account you gave with your submission. It can take a little while to show.`,
-        ``,
-        `Thank you — what you wrote is going straight into the next build. Your answers and details are deleted 90 days from now; the game key is yours to keep.`,
-        ``,
-        `Nothing else will be sent to this address.`
       ].join('\n')
     }
   };
@@ -692,8 +673,6 @@ export function createPlaytestRouter({
     ]);
     const sentLabels = {
       invited: 'Application updated. The invitation, with their key, has been emailed to them.',
-      declined: 'Application updated. They have been emailed that they were not selected.',
-      paid: 'Application updated. They have been emailed that payment was sent.',
       unconfigured: 'Application updated — but no email was sent: mail is not configured on this deployment. Tell them yourself.'
     };
     let notice = req.query.saved === '1' ? (sentLabels[req.query.sent] ?? 'Application updated.') : '';
@@ -720,10 +699,10 @@ export function createPlaytestRouter({
     });
   });
 
-  // Three transitions write to the applicant; the rest only record. Invited
+  // Only Invited writes to the applicant; the rest only record. Invited
   // needs a key and refuses without one — a "you're in" email with no key in
   // it would be worse than no email. The email goes out after the status is
-  // saved, fire and forget, and the redirect says which one was sent so the
+  // saved, fire and forget, and the redirect says it was sent so the
   // dashboard can confirm it.
   router.post('/admin/playtest/:id/status', requireCsrf, async (req, res) => {
     const application = await store.getById(Number(req.params.id));
@@ -744,7 +723,7 @@ export function createPlaytestRouter({
       return res.status(400).send(error.message);
     }
     let sent = '';
-    if (changed && ['invited', 'declined', 'paid'].includes(nextStatus)) {
+    if (changed && nextStatus === 'invited') {
       if (notify) {
         sendToApplicant(updated, nextStatus, statusEmails(updated, { siteUrl, key })[nextStatus]);
         sent = nextStatus;

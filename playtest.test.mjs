@@ -803,7 +803,7 @@ test('Invited takes the next key, emails it, and never hands the same applicatio
     // The detail page shows the key and the previews.
     const detail = await (await fetch(`${server.url}/admin/playtest/${application.id}`, { headers: { cookie } })).text();
     assert.ok(detail.includes('KEY01-AAAAA-AAAAA-AAAAA-AAAAA'));
-    assert.ok(detail.includes('not selected') && detail.includes('payment sent'), 'email previews');
+    assert.ok(!detail.includes('not selected') && !detail.includes('payment sent'), 'only the invitation is previewed');
   } finally {
     await server.stop();
   }
@@ -829,23 +829,18 @@ test('with no keys left, Invited is refused and the status does not change', asy
   }
 });
 
-test('Declined and Paid email the applicant; Waitlist and Testing do not', async () => {
+test('only Invited emails the applicant; Waitlist, Testing, Declined and Paid do not', async () => {
   const sent = [];
   const server = await startServer({ notify: { to: 'owner@example.com', sendQuietly: async (message) => { sent.push(message); } } });
   try {
     const { application } = await server.store.createApplication(applicationInput());
     const cookie = adminCookie();
     const csrf = await csrfFor(server, cookie, application.id);
-    for (const [status, expectMail, marker] of [['waitlist', false], ['testing', false], ['declined', true, 'not selected'], ['paid', true, 'payment sent']]) {
+    for (const status of ['waitlist', 'testing', 'declined', 'paid']) {
       sent.length = 0;
       await adminPost(server, cookie, `/admin/playtest/${application.id}/status`, { status, adminNote: '', _csrf: csrf });
       await new Promise((resolve) => setTimeout(resolve, 20));
-      assert.equal(sent.length, expectMail ? 1 : 0, status);
-      if (expectMail) {
-        assert.equal(sent[0].to, 'tester@example.com');
-        assert.ok(sent[0].subject.includes(marker), status);
-        assert.ok(!sent[0].text.includes('paypal'), 'no payment detail echoed');
-      }
+      assert.equal(sent.length, 0, status);
     }
   } finally {
     await server.stop();

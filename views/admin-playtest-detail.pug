@@ -140,7 +140,8 @@ block content
           each status in statuses
             option(value=status.id selected=(status.id === application.status))= `${status.label} — ${status.hint}`
         small.
-          Invited, Declined and Paid each email the applicant — the exact text is below.
+          Only Invited emails the applicant — the exact text is below. Declined and Paid only
+          record; PayPal tells them when payment lands.
           Dates above are stamped the first time a status is reached and never moved, so
           correcting a mistake cannot rewrite when an invitation actually went out.
       .admin-field.admin-field--wide(style="margin-top:22px")
@@ -205,10 +206,10 @@ block content
     .admin-panel(style="margin-top:32px")
       h2 What they receive
       p(style="margin:0 0 14px;color:var(--ink-soft);font-size:13px")
-        | Sent to #[code= application.email] when the status changes to each of these. Nothing else is ever sent.
+        | Sent to #[code= application.email] when the status changes to Invited. No other status sends anything.
         if !mailConfigured
           |  #[strong Mail is not configured on this deployment; nothing will be sent.]
-      each name in ['invited', 'declined', 'paid']
+      each name in ['invited']
         details(style="margin-bottom:10px")
           summary(style="cursor:pointer;font:600 13px var(--font-display);letter-spacing:.04em;text-transform:uppercase")= name
           pre(style="white-space:pre-wrap;font:13px/1.5 var(--font-body);background:var(--paper);padding:14px;border-radius:8px;margin:8px 0 0")
