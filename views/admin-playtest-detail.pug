@@ -82,6 +82,9 @@ block content
           dt Joined
           dd= application.joinedAt ? application.joinedAt.slice(0, 10) : 'not yet'
         .playtest-terms__row
+          dt Nudged
+          dd= application.nudgedAt ? application.nudgedAt.slice(0, 10) : 'not yet'
+        .playtest-terms__row
           dt Paid
           dd= application.paidAt ? application.paidAt.slice(0, 10) : 'not yet'
 
@@ -140,8 +143,9 @@ block content
           each status in statuses
             option(value=status.id selected=(status.id === application.status))= `${status.label} — ${status.hint}`
         small.
-          Only Invited emails the applicant — the exact text is below. Declined and Paid only
-          record; PayPal tells them when payment lands.
+          Only Invited emails the applicant — the exact text is below. Every other status only
+          records: Nudged notes that you reminded them yourself, Didn't complete closes the
+          application so they are not contacted again, and PayPal tells them when payment lands.
           Dates above are stamped the first time a status is reached and never moved, so
           correcting a mistake cannot rewrite when an invitation actually went out.
       .admin-field.admin-field--wide(style="margin-top:22px")

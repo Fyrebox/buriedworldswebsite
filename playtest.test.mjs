@@ -240,6 +240,12 @@ test('funnel timestamps are stamped once and survive a status being walked back'
     const joined = await store.setStatus(application.id, 'joined');
     assert.equal(joined.invitedAt, invited.invitedAt, 'moving on does not clear it');
 
+    const nudged = await store.setStatus(application.id, 'nudged');
+    assert.ok(nudged.nudgedAt, 'nudging stamps the date');
+    await store.setStatus(application.id, 'lapsed');
+    const nudgedAgain = await store.setStatus(application.id, 'nudged');
+    assert.equal(nudgedAgain.nudgedAt, nudged.nudgedAt, 'a second nudge keeps the date of the first');
+
     const backToInvited = await store.setStatus(application.id, 'invited');
     assert.equal(
       backToInvited.invitedAt,
@@ -511,7 +517,7 @@ test('only an application that was offered a place can submit', async () => {
     const expectations = [
       ['new', 403, 'hasn'], ['waitlist', 403, 'hasn'], ['declined', 403, 'hasn'],
       ['invited', 200, 'paypalAccount'], ['joined', 200, 'paypalAccount'], ['testing', 200, 'paypalAccount'],
-      ['paid', 403, 'closed']
+      ['nudged', 200, 'paypalAccount'], ['paid', 403, 'closed'], ['lapsed', 403, 'without a submission']
     ];
     for (const [status, code, marker] of expectations) {
       await server.store.setStatus(stored.id, status);

@@ -85,9 +85,14 @@ export const statuses = [
   { id: 'invited', label: 'Invited', hint: 'Key emailed. Waiting for them to redeem it.' },
   { id: 'joined', label: 'Key redeemed', hint: 'The Keys page in the Meta dashboard shows it redeemed. They have the game.' },
   { id: 'testing', label: 'Testing', hint: 'Playing, inside their week.' },
+  // Recorded by hand: the site sends no reminder itself. The nudge goes out on
+  // Discord or by email, and this status is the note that it has, so nobody
+  // gets reminded twice. They can still submit.
+  { id: 'nudged', label: 'Nudged', hint: 'Reminded once to play and submit. Still able to submit.' },
   { id: 'submitted', label: 'Submitted', hint: 'Questionnaire and evidence received.' },
   { id: 'paid', label: 'Paid', hint: 'Payment sent.' },
-  { id: 'declined', label: 'Declined', hint: 'Not selected, or withdrew. Deleted within 30 days.' }
+  { id: 'declined', label: 'Declined', hint: 'Not selected, or withdrew. Deleted within 30 days.' },
+  { id: 'lapsed', label: 'Didn’t complete', hint: 'Had a key, never submitted. Do not contact again.' }
 ];
 
 // What the page promises before it asks for anything. Each is a commitment that
@@ -206,11 +211,11 @@ export const questionnaire = {
   ]
 };
 
-// Which applications may submit. The three between being told and being
+// Which applications may submit. The four between being told and being
 // paid; and Submitted again, so a tester asked for a correction can update
 // what they sent. Before Invited there is no key to have played with, and
 // after Paid the study is over for that person.
-export const submittableStatuses = ['invited', 'joined', 'testing', 'submitted'];
+export const submittableStatuses = ['invited', 'joined', 'testing', 'nudged', 'submitted'];
 
 
 // The recruitment post, generated from the terms above so it cannot say one

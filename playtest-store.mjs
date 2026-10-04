@@ -285,6 +285,7 @@ function rowToApplication(row) {
     updatedAt: iso(row.updated_at),
     invitedAt: iso(row.invited_at),
     joinedAt: iso(row.joined_at),
+    nudgedAt: iso(row.nudged_at),
     paidAt: iso(row.paid_at)
   };
 }
@@ -330,6 +331,7 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       invited_at TIMESTAMPTZ,
       joined_at TIMESTAMPTZ,
+      nudged_at TIMESTAMPTZ,
       paid_at TIMESTAMPTZ
     );
 
@@ -347,7 +349,8 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
   // an adult, because that is what the form required at the time. A fresh
   // table already has every column, so this loop is a no-op for it.
   const added = [
-    ['playtest_applications', 'age_group', `TEXT NOT NULL DEFAULT 'adult'`]
+    ['playtest_applications', 'age_group', `TEXT NOT NULL DEFAULT 'adult'`],
+    ['playtest_applications', 'nudged_at', 'TIMESTAMPTZ']
   ];
   async function migrate(rows) {
     for (const [table, column, definition] of rows) {
@@ -501,7 +504,7 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
   /**
    * Move an application to a new status.
    *
-   * The three funnel timestamps are stamped the first time their status is
+   * The funnel timestamps are stamped the first time their status is
    * reached and never moved afterwards, so walking an application backwards to
    * correct a mistake cannot rewrite the date an invitation actually went out.
    */
@@ -515,6 +518,7 @@ export async function createPlaytestStore({ databaseUrl, pool: suppliedPool }) {
         admin_note = COALESCE($2, admin_note),
         invited_at = CASE WHEN $1 = 'invited' AND invited_at IS NULL THEN NOW() ELSE invited_at END,
         joined_at = CASE WHEN $1 = 'joined' AND joined_at IS NULL THEN NOW() ELSE joined_at END,
+        nudged_at = CASE WHEN $1 = 'nudged' AND nudged_at IS NULL THEN NOW() ELSE nudged_at END,
         paid_at = CASE WHEN $1 = 'paid' AND paid_at IS NULL THEN NOW() ELSE paid_at END,
         updated_at = NOW()
       WHERE id = $3

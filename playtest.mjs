@@ -378,9 +378,12 @@ export function createPlaytestRouter({
         return renderQuestionnaire(req, res, { status: 404, lookup, lookupError: 'We couldn\u2019t match that reference and email address. Check both against the confirmation you were shown when you applied.' });
       }
       if (!canSubmit(application)) {
-        const message = application.status === 'paid'
-          ? 'This application has been paid and is closed. Thank you for taking part.'
-          : 'This application hasn\u2019t been offered a place yet, so there is nothing to submit. You will be emailed if it is.';
+        const messages = {
+          paid: 'This application has been paid and is closed. Thank you for taking part.',
+          lapsed: 'This application closed without a submission. If you think that\u2019s a mistake, message the developer on Discord.'
+        };
+        const message = messages[application.status]
+          ?? 'This application hasn\u2019t been offered a place yet, so there is nothing to submit. You will be emailed if it is.';
         return renderQuestionnaire(req, res, { status: 403, lookup, lookupError: message });
       }
       const existing = await store.getSubmission(application.id);
@@ -589,7 +592,7 @@ export function createPlaytestRouter({
     const columns = [
       'reference', 'created_at', 'status', 'email', 'horizon_username', 'headset',
       'vr_frequency', 'capture_method', 'recent_games', 'country', 'played_before', 'age_group',
-      'notes', 'admin_note', 'terms_version', 'invited_at', 'joined_at', 'paid_at'
+      'notes', 'admin_note', 'terms_version', 'invited_at', 'joined_at', 'nudged_at', 'paid_at'
     ];
     const applications = await store.listApplications();
     const rows = applications.map((application) => [
@@ -597,7 +600,7 @@ export function createPlaytestRouter({
       application.horizonUsername, application.headset, application.vrFrequency,
       application.captureMethod, application.recentGames, application.country,
       application.playedBefore, application.ageGroup, application.notes, application.adminNote,
-      application.termsVersion, application.invitedAt, application.joinedAt, application.paidAt
+      application.termsVersion, application.invitedAt, application.joinedAt, application.nudgedAt, application.paidAt
     ]);
     const csv = [
       columns.join(','),

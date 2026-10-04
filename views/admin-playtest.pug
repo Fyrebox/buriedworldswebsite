@@ -20,7 +20,7 @@ block content
     unless applicationsOpen
       p.admin-alert(role="status") The public form is closed. Set PLAYTEST_OPEN=true to reopen it.
 
-    .admin-metrics
+    .admin-metrics.admin-metrics--five
       .admin-metric
         span.admin-metric__value= summary.total
         span.admin-metric__label Applications
@@ -30,6 +30,9 @@ block content
       .admin-metric
         span.admin-metric__value= summary.byStatus.joined
         span.admin-metric__label Joined · account confirmed
+      .admin-metric
+        span.admin-metric__value= summary.byStatus.nudged
+        span.admin-metric__label Nudged · reminded once
       .admin-metric
         span.admin-metric__value= summary.byStatus.paid
         span.admin-metric__label Paid
@@ -104,6 +107,12 @@ block content
                     span.admin-status.admin-status--live= application.statusLabel
                   else
                     span.admin-status= application.statusLabel
+                  if application.status === 'nudged' && application.nudgedAt
+                    br
+                    small(style="color:var(--ink-soft)") nudged #{application.nudgedAt.slice(0, 10)}
+                  else if ['invited', 'joined', 'testing'].includes(application.status) && application.invitedAt
+                    br
+                    small(style="color:var(--ink-soft)") invited #{application.invitedAt.slice(0, 10)}
                 td= application.createdAt ? application.createdAt.slice(0, 10) : '—'
                 td
                   a.admin-table__action(href=`/admin/playtest/${application.id}`) Open

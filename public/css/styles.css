@@ -1029,6 +1029,7 @@ html { scroll-behavior: smooth; }
 .admin-back { display: inline-block; margin-bottom: 28px; font-size: 14px; }
 
 .admin-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px; }
+.admin-metrics--five { grid-template-columns: repeat(5, 1fr); }
 .admin-metric {
   min-height: 118px;
   padding: 22px;
