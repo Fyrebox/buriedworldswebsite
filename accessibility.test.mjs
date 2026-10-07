@@ -149,6 +149,11 @@ test('the paid playtest is announced across the top of the homepage while it is 
 
     const closed = await (await fetch(`${server.url}/?closed=1`)).text();
     assert.ok(!closed.includes('playtest-strip'));
+    assert.ok(!open.includes('discord-strip'), 'one strip at a time');
+    const discord = /<div class="discord-strip"[\s\S]*?<\/div><\/div>/.exec(closed)?.[0];
+    assert.ok(discord, 'the Discord takes the slot when the playtest closes');
+    assert.ok(closed.indexOf('discord-strip') < closed.indexOf('<header class="hero"'), 'above the hero');
+    assert.ok(discord.includes('href="https://discord.gg/') && discord.includes('Join the Discord'));
     assert.ok(!closed.includes('href="/playtest"'), 'no route to a closed form');
     assert.ok(closed.includes('<a class="ea-card__link" href="https://discord.gg/'), 'the card falls back to the Discord');
   } finally {

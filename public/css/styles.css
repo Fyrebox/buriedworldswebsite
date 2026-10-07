@@ -1710,6 +1710,24 @@ html { scroll-behavior: smooth; }
 .playtest-strip__link:hover { color: var(--bw-gold-bright); text-decoration: underline; }
 .playtest-strip__link:focus-visible { outline: 2px solid var(--bw-text); outline-offset: 3px; }
 
+/* ---------- Discord strip (homepage, while the playtest is closed) ---------- */
+.discord-strip { background: var(--bw-bg); color: var(--bw-text); }
+.discord-strip__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 24px;
+  font-size: 15px;
+  line-height: 1.45;
+  text-align: center;
+}
+.discord-strip__text strong { color: var(--bw-gold); font-weight: 600; }
+.discord-strip__cta { padding: 10px 20px; font-size: 14.5px; white-space: nowrap; }
+
 /* ---------- Blog ---------- */
 .blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 22px; margin-top: 32px; }
 .blog-card { border: 1px solid rgba(31, 33, 31, .12); border-radius: 14px; overflow: hidden; background: rgba(255, 255, 255, .26); transition: transform .15s ease, outline-color .15s ease; }

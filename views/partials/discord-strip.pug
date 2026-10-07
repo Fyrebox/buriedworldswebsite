@@ -1,0 +1,16 @@
+//- The Discord, announced across the top of the homepage whenever the paid
+//- playtest is not. Same slot, same dark band: the first thing on the page,
+//- above the hero, so it is on screen before anything else on every device.
+//- A gold button rather than a text link — this is the ask for anyone not
+//- ready to buy, and the developer is in there most days.
+include icons
+
+mixin discordStrip(links)
+  .discord-strip(data-screen-label="Discord strip")
+    .discord-strip__inner
+      span.discord-strip__text
+        strong Talk to the developer.
+        |  Test invites, new worlds and patch news go out on Discord first.
+      a.btn.btn--gold.btn--icon.discord-strip__cta(href=links.discord target="_blank" rel="noopener noreferrer" data-cta="discord-strip")
+        +discordIcon(18)
+        span Join the Discord
