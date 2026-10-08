@@ -103,35 +103,35 @@ export const worlds = [
     slug: 'ballarat',
     subtitle: 'The Victorian gold rush, Australia. Where the expedition begins.',
     gradient: 'linear-gradient(160deg,#85A857,#668C45 45%,#8C734C 78%,#C2B280)',
-    image: '/images/CastlemaineShot.webp'
+    image: '/images/dest-ballarat.webp'
   },
   {
     name: 'Coloma',
     slug: 'coloma',
     subtitle: 'California, 1849. The American River strike that started it all.',
     gradient: 'linear-gradient(160deg,#DEC480,#CCAD66 40%,#B28F5C 65%,#9B7653 85%,#6B4C33)',
-    image: '/images/ColomaShot.webp'
+    image: '/images/dest-coloma.webp'
   },
   {
     name: 'Carcassonne',
     slug: 'carcassonne',
     subtitle: 'Medieval France. Coin hoards beneath a walled hilltop city.',
     gradient: 'linear-gradient(160deg,#94B261,#789E4C 45%,#6B8C47 75%,#857854)',
-    image: '/images/CarcassonneShot.webp'
+    image: '/images/dest-carcassonne.webp'
   },
   {
     name: 'Hoxne',
     slug: 'hoxne',
     subtitle: 'A Suffolk field, 1992. The largest Roman hoard ever found in Britain.',
     gradient: 'linear-gradient(160deg,#85A857,#668C45 50%,#8C734C 82%,#C2B280)',
-    image: '/images/HoxneShot.webp'
+    image: '/images/dest-hoxne.webp'
   },
   {
     name: 'Bolonia',
     slug: 'bolonia',
     subtitle: "Spain's Atlantic coast. Roman ruins in the dunes.",
     gradient: 'linear-gradient(160deg,#8C8575,#9E9E61 35%,#CCBD85 60%,#DECC99 80%,#9E8C6B)',
-    image: '/images/BoloniaShot.webp'
+    image: '/images/dest-bolonia.webp'
   }
 ];
 
