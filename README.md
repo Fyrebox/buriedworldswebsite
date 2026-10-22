@@ -1,8 +1,9 @@
 # Buried Worlds — Marketing Landing Page
 
 A single-page marketing site for **Buried Worlds**, built from the design handoff in
-`design_handoff/`. Sells **Buried Worlds VR**, live in Early Access on the Meta Horizon
-Store since 26 August 2026 (primary CTA), and carries the free **Buried Worlds on
+`design_handoff/`. Sells **Buried Worlds VR**, publicly available on the Meta Horizon
+Store since 22 October 2026 (primary CTA), following the original Early Access
+launch on 26 August 2026, and carries the free **Buried Worlds on
 Reddit** daily deduction game below it as a companion.
 
 Before launch the Reddit band was the primary call to action and the hero said "coming
@@ -80,6 +81,8 @@ views/
   privacy.pug           /privacy — long-form policy on parchment
   terms.pug             /terms — same treatment
   partials/
+    features.pug         Current features, comfort and developer contact
+    latest-news.pug      Public release and the latest published blog post
     hero.pug            Hero (poster default; split + banner reference variants)
     reddit.pug          "Play now on Reddit" dark olive band + detector card
     vr.pug              "The Prospector's Day" 5-step core loop
@@ -197,8 +200,8 @@ metadata or requiring a deploy.
 ## Playtest recruitment
 
 While `PLAYTEST_OPEN` is not `false`, the homepage announces the study in a strip above the
-hero ("Paid playtest: US$10 for about 25 minutes… Become a playtester →") and the Early
-Access card's link points at `/playtest`; closed, the strip is not rendered and the card
+hero ("Paid playtest: US$10 for about 25 minutes… Become a playtester →") and the developer
+card's link points at `/playtest`; closed, the strip is not rendered and the card
 points at the Discord again. The page itself stays `noindex` and off the sitemap.
 
 `/playtest` is the page a paid-playtest recruitment post links to: US$10 for 25
@@ -447,6 +450,29 @@ served but writing still works.
 Variables: `OPENAI_API_KEY`, `OPENAI_TEXT_MODEL`, `OPENAI_IMAGE_MODEL`, `R2_ACCOUNT_ID`,
 `R2_BUCKET`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`.
 
+## First journal article and release refresh
+
+The public release is dated **22 October 2026**, as confirmed by the developer.
+Historical entries retain the original **26 August 2026** Early Access launch;
+current purchase messaging says “Available now”.
+
+`data/blog-posts.mjs` contains the first article, *Gold Prospecting Near Ballarat:
+A Beginner’s Guide*. `server.mjs` passes it to `createBlogStore` as `seedPosts`.
+Startup imports it once as a published post, through the same validation and
+sanitisation as the editor. The `blog_content_seeds` table records that import
+independently of the post. Admin edits, unpublishing and deletion therefore survive
+redeploys; a pre-existing post at the same slug is never overwritten or published.
+Edit the article in `/admin/blog` after its first deployment. Changes to the seed
+file alone deliberately do not overwrite the database version.
+
+The article uses an existing original gameplay screenshot, clearly labelled as
+an in-game scene. Access and permit guidance links to Parks Victoria and Resources
+Victoria, checked 23 October 2026. Recheck these sources when revising the article.
+The Ballarat destination and gold-panning guide link to it, and the homepage queries
+the latest published post. Sitemap `lastmod` uses editorial timestamps rather than
+the current request date. Update `siteContentUpdated` and relevant page
+`lastModified` fields when their content changes.
+
 ## Design fidelity
 
 Colors, typography, spacing, radii, and hover states are transcribed from
@@ -465,15 +491,18 @@ Edit `data/content.mjs` → `links`:
 - `subreddit` — r/BuriedWorlds
 - `discord` — the invite the footer, community section and `/discord` all use
 
-`data/content.mjs` → `product` holds the store facts — price, devices, release date,
-version, languages, rating. They are read off the live product detail page and the
-developer dashboard, and they feed the hero, the sticky buy bar, the share card and the
+`data/content.mjs` → `product` holds the store facts — price, devices, public release
+date, original Early Access date, version, languages, rating. `version` is blank until
+the current store build is verified, so the site does not advertise 1.0 as current.
+The trailer keeps its original upload date independently of the public release date.
+Store facts are read off the product listing and developer dashboard, and feed
+the hero, the sticky buy bar, the share card and the
 `VideoGame` structured data at once. **Change them here, nowhere else.** `price` carries
 its currency because Meta localises the real figure per region.
 
 `heroVariant` (`'poster' | 'split' | 'banner'`) and `showLockedCard` are also set there.
-`showLockedCard` is on since launch: Kimberley is finished and held back as the first
-post-launch destination, so the locked card states a fact rather than a hope.
+`showLockedCard` is off. The homepage presents the five available destinations
+without promising an unreleased destination, a final destination count or extra languages.
 
 ## Launch surfaces
 
@@ -483,8 +512,9 @@ post-launch destination, so the locked card states a fact rather than a hope.
 | Structured data | `gameJsonLd` in `server.mjs` | Crawlers read price, platform and publisher from here rather than inferring them from the copy |
 | Sticky buy bar | `views/partials/buybar.pug` | Revealed once the hero CTA scrolls away, hidden again when it returns. Hidden by default and shown by script, so with JavaScript off it never appears rather than permanently covering the footer |
 | Store click tracking | `data-cta` attributes + the listener at the foot of `views/layout.pug` | The site cannot see installs, so views-into-store-clicks is the only conversion number it has. GA4 sends via `sendBeacon`, which survives the navigation away |
-| Early Access statement | `views/partials/earlyaccess.pug` | Meta's own guidance asks for this on the listing; the same reasoning applies to the page that sends people there. Every claim in it is true on launch day — nothing about future pricing, nothing promised on a date |
-| `robots.txt`, `sitemap.xml` | `public/` | Served straight off `express.static` |
+| Game features | `views/partials/features.pug` | Current play modes, languages, offline support and developer contact |
+| Journal feature | `views/partials/latest-news.pug` | Public release news and the latest published article; drafts never appear here |
+| `robots.txt`, `sitemap.xml` | `public/robots.txt`, `blog.mjs` | Robots is static; the sitemap includes published articles and records actual content modification dates |
 | Trailer | `views/partials/trailer.pug`, `public/video/` | Self-hosted, not YouTube — a normal YouTube embed sets cookies the policy would have to cover. The hero plays a muted 7s loop (~630 KB); the full 2:00 trailer is 14 MB and only downloads on click |
 
 ### Video
@@ -558,7 +588,8 @@ to the destinations so ranking power flows through the site rather than pooling 
 / FAQPage / AboutPage node, the page's own screenshot as share image. The same tests as
 the destinations apply — title ≤ 65, description 120–160, ≥ 350 words, every image on
 disk, every internal link resolving, nothing about Kimberley — plus FAQPage carrying
-every question, and the updates log dated newest-first with the release recorded.
+every question, and the updates log dated newest-first with both the Early Access
+and public releases recorded. Release history appears ahead of the explanatory sections.
 
 **Every fact on these pages is sourced** — the gameplay document, the store listing,
 `product`, and for the hoard the British Museum record via Wikipedia. Where a claim

@@ -31,14 +31,14 @@ mixin destinations(worlds, showLockedCard)
               span.dest-card__dash
               span.dest-card__sub= w.subtitle
         if showLockedCard
-          //- 7th card — locked "more worlds coming" variant
+          //- Optional card; enable only when a destination is confirmed.
           .dest-card.dest-card--locked
             .locked__img
               span.padlock
                 span.padlock__shackle
                 span.padlock__body
             .locked__meta
-              span.locked__title More worlds coming
-              span.locked__sub Kimberley, the Western Australian diamond country, is built and waiting. It is the first destination to arrive after launch.
+              span.locked__title Follow the expedition
+              span.locked__sub Visit Updates for the latest news from the developer.
               .locked__track
                 .locked__fill

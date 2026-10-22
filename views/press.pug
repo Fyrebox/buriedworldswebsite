@@ -35,7 +35,7 @@ block content
             dd #{product.price} (Meta shows local currency by region)
           div
             dt Released
-            dd #{product.releaseDateLabel}, in #{product.status}
+            dd #{product.releaseDateLabel} — public release
           div
             dt Developer
             dd Cyril Gaillard, working alone
@@ -134,15 +134,18 @@ block content
             strong= step[0]
             |  — #{step[1]}
 
-      h2.legal__h What Early Access means here
+      h2.legal__h Available now on Meta Quest
       p.
-        Five destinations are in the game today, along with the whole loop —
-        detector, pickaxe, pan, sieve, magnet and brush. Kimberley, the Western
-        Australian diamond country, is built and waiting as the first
-        destination to arrive after launch. The full version is working toward
-        twelve destinations and six languages, translated by people rather than
-        by machine. There is a feedback screen inside the game that reaches the
-        developer directly and does not ask who you are.
+        Buried Worlds VR became publicly available on #{product.releaseDateLabel}.
+        Anyone can buy and install it from the Meta Horizon Store without an
+        invitation or test key. Five destinations are included, with metal
+        detecting, digging, gold panning, sluicing, magnet fishing and careful
+        recovery with a brush or sand scoop. Play in English or French, seated
+        or standing, with teleport or free movement. The game works offline
+        once installed. The in-game feedback panel reaches the developer directly.
+      p
+        | The original Early Access launch was #{product.earlyAccessDateLabel}.
+        |  See the #[a(href="/updates") release history] for dated announcements.
 
       h2.legal__h The developer
       p.

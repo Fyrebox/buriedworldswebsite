@@ -10,6 +10,7 @@ import { createGuidesRouter, pages } from './guides.mjs';
 import { createDestinationsRouter, destinations } from './destinations.mjs';
 import { links, product, siteUrl, trailer } from './data/content.mjs';
 import { notFoundHandler } from './errors.mjs';
+import { launchPosts } from './data/blog-posts.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
@@ -139,6 +140,7 @@ test('every internal link on every guide page resolves', async () => {
   try {
     const known = new Set(['/', '/press', '/privacy', '/terms', '/discord', '/playtest', '/admin', '/blog',
       ...pages.map((page) => `/${page.slug}`),
+      ...launchPosts.map((post) => `/blog/${post.slug}`),
       ...destinations.map((destination) => `/destinations/${destination.slug}`)]);
     for (const page of pages) {
       const html = await (await fetch(`${server.url}/${page.slug}`)).text();

@@ -220,7 +220,7 @@ html { scroll-behavior: smooth; }
 .footer__link:focus-visible,
 .footer__legal:focus-visible,
 .footer__cta:focus-visible,
-.ea-card__link:focus-visible {
+.feature-card__link:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 3px;
 }
@@ -641,7 +641,7 @@ html { scroll-behavior: smooth; }
 
 /* ============================================================
    LAUNCH (27 August 2026) — live badge, hero meta line,
-   sticky buy bar, Early Access statement
+   sticky buy bar, game features
    ============================================================ */
 
 /* The pre-launch badge was an outline in --ink-soft, which is right for a
@@ -699,12 +699,12 @@ html { scroll-behavior: smooth; }
    on top of the footer's last row. */
 .footer { padding-bottom: 96px; }
 
-/* ---------- Early Access statement ---------- */
-.ea { background: var(--parchment); padding: 88px 24px; }
-.ea__inner { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
-.ea .serif-italic { font-size: 1.3rem; color: var(--ink-soft); max-width: 34em; line-height: 1.4; margin: 0; }
-.ea-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; align-items: stretch; }
-.ea-card {
+/* ---------- Game features ---------- */
+.features { background: var(--parchment); padding: 88px 24px; }
+.features__inner { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
+.features .serif-italic { font-size: 1.3rem; color: var(--ink-soft); max-width: 34em; line-height: 1.4; margin: 0; }
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; align-items: stretch; }
+.feature-card {
   background: var(--paper);
   border-radius: 16px;
   padding: 26px 24px;
@@ -713,7 +713,8 @@ html { scroll-behavior: smooth; }
   gap: 14px;
   outline: 1px solid rgba(31, 33, 31, .10);
 }
-.ea-card__label {
+.feature-card__label {
+  margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 13px;
@@ -721,22 +722,13 @@ html { scroll-behavior: smooth; }
   text-transform: uppercase;
   color: var(--bronze-link);
 }
-.ea-card__list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 9px; }
-.ea-card__list li { font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
-.ea-card__list li::marker { color: var(--bronze); }
-.ea-card__link { margin-top: auto; font-size: 14px; font-weight: 500; }
-.ea__note {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 1.15rem;
-  color: var(--ink-soft);
-  max-width: 46em;
-  line-height: 1.5;
-}
-
+.feature-card__list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 9px; }
+.feature-card__list li { font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+.feature-card__list li::marker { color: var(--bronze); }
+.feature-card__copy { margin: 0; font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+.feature-card__link { margin-top: auto; font-size: 14px; font-weight: 500; }
 @media (max-width: 900px) {
-  .ea-grid { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
   .buybar__meta { display: none; }
 }
 
@@ -1764,3 +1756,19 @@ html { scroll-behavior: smooth; }
 
 /* Blog editor field-error border, matching the campaign form. */
 .admin-field--error input, .admin-field--error textarea { border-color: #9b473d; }
+
+/* ---------- Homepage journal ---------- */
+.journal { padding: 80px 24px; background: var(--paper); }
+.journal__inner { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
+.journal .serif-italic { margin: 0; color: var(--ink-soft); font-size: 1.3rem; line-height: 1.4; }
+.journal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: stretch; }
+.journal-release { padding: 32px; border: 1px solid rgba(31, 33, 31, .12); border-radius: 14px; background: var(--parchment); display: flex; flex-direction: column; gap: 18px; }
+.journal__kicker { color: var(--bronze-link); font: 600 12px var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
+.journal__title { margin: 0; font: 600 2rem/1.15 var(--font-serif); }
+.journal-release p { margin: 0; color: var(--ink-soft); font-size: 15px; line-height: 1.65; }
+.journal__all { align-self: center; font-size: 14px; font-weight: 500; }
+@media (max-width: 700px) {
+  .journal-grid { grid-template-columns: 1fr; }
+  .journal { padding: 56px 20px; }
+  .journal-release { padding: 26px; }
+}

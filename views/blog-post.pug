@@ -23,7 +23,7 @@ block content
             time(datetime=post.publishedAt)= new Date(post.publishedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
           else
             | Draft
-          |  · #{post.minutes} min read · #{author}
+          |  · #{post.minutes} min read · By #{author}
         h1.h1.guide__h1= post.title
         if post.description
           p.serif-italic.destination__tagline= post.description

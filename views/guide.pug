@@ -22,6 +22,18 @@ block content
         .destination__hero
           img.destination__hero-img(src=page.hero.src alt=page.hero.alt width=page.hero.width height=page.hero.height fetchpriority="high")
 
+      if page.updates
+        section.destination__section
+          h2.legal__h Release history
+          each entry in page.updates
+            article.guide__update(id=entry.date)
+              h3.guide__update-title
+                time(datetime=entry.date)= entry.label
+                |  ·
+                | #{entry.title}
+              each paragraph in entry.body
+                p= paragraph
+
       each section in page.sections
         section.destination__section
           h2.legal__h= section.heading
@@ -70,18 +82,6 @@ block content
             .guide__faq-item
               h2.guide__q= item.q
               p= item.a
-
-      if page.updates
-        section.destination__section
-          h2.legal__h Shipped
-          each entry in page.updates
-            article.guide__update(id=entry.date)
-              h3.guide__update-title
-                time(datetime=entry.date)= entry.label
-                |  ·
-                | #{entry.title}
-              each paragraph in entry.body
-                p= paragraph
 
       if page.related && page.related.length
         section.destination__section

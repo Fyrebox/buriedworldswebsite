@@ -1,0 +1,27 @@
+mixin latestNews(post, product)
+  section#journal.journal(data-screen-label="Notes from the dig")
+    .journal__inner
+      .section-head
+        .ornament
+          span.rule
+          span.diamond
+          span.rule
+        h2.h2 Notes from the dig
+        p.serif-italic Real goldfields, curious finds, and news from Buried Worlds VR.
+      .journal-grid
+        article.journal-release
+          span.journal__kicker Game news · #{product.releaseDateLabel}
+          h3.journal__title The expedition is open to everyone
+          p Buried Worlds VR is available now on Meta Quest. Sweep, dig and pan across five historic destinations, at your own pace.
+          a.feature-card__link(href="/updates") Read the release update →
+        if post
+          article.blog-card
+            a.blog-card__link(href=`/blog/${post.slug}`)
+              if post.heroUrl
+                .blog-card__img
+                  img(src=post.heroUrl alt="" width=post.heroWidth height=post.heroHeight loading="lazy")
+              .blog-card__body
+                span.blog-card__meta From the journal · #{post.minutes} min read
+                h3.blog-card__title= post.title
+                p.blog-card__desc= post.description
+      a.journal__all(href="/blog") Explore the blog →

@@ -109,7 +109,7 @@ test('no rule fills a pale-text control with the brand bronze', () => {
 test('small bronze text never uses the brand bronze directly', () => {
   // Every `color: var(--bronze)` left in the stylesheet must be decorative or
   // large: ornaments, markers, separators, hover states, the 2rem loop numerals.
-  const allowed = /^(a:hover|\.ornament|\.loop-card__num|\.legal__home:hover|\.hero__meta-dot|\.ea-card__list li::marker|\.press-loop li::marker|\.destination__crumbs a:hover|\.destination__crumb-sep|\.destination__beats li::marker|\.destination__sibling:hover|\.guide__links a:hover|\.blog-body li::marker)/;
+  const allowed = /^(a:hover|\.ornament|\.loop-card__num|\.legal__home:hover|\.hero__meta-dot|\.feature-card__list li::marker|\.press-loop li::marker|\.destination__crumbs a:hover|\.destination__crumb-sep|\.destination__beats li::marker|\.destination__sibling:hover|\.guide__links a:hover|\.blog-body li::marker)/;
   const lines = css.split('\n');
   let selector = '';
   for (const line of lines) {
@@ -145,7 +145,7 @@ test('the paid playtest is announced across the top of the homepage while it is 
     assert.ok(open.indexOf('playtest-strip') < open.indexOf('<header class="hero"'), 'above the hero');
     assert.ok(strip.includes(study.fee) && !/\bplaces\b/.test(strip), 'no fixed number of places');
     assert.ok(strip.includes('<a class="playtest-strip__link" href="/playtest">Become a playtester'));
-    assert.ok(open.includes('<a class="ea-card__link" href="/playtest">Become a playtester</a>'), 'and the Early Access card points at it too');
+    assert.ok(open.includes('<a class="feature-card__link" href="/playtest">Become a playtester</a>'), 'and the developer card points at it too');
 
     const closed = await (await fetch(`${server.url}/?closed=1`)).text();
     assert.ok(!closed.includes('playtest-strip'));
@@ -155,7 +155,7 @@ test('the paid playtest is announced across the top of the homepage while it is 
     assert.ok(closed.indexOf('discord-strip') < closed.indexOf('<header class="hero"'), 'above the hero');
     assert.ok(discord.includes('href="https://discord.gg/') && discord.includes('Join the Discord'));
     assert.ok(!closed.includes('href="/playtest"'), 'no route to a closed form');
-    assert.ok(closed.includes('<a class="ea-card__link" href="https://discord.gg/'), 'the card falls back to the Discord');
+    assert.ok(closed.includes('<a class="feature-card__link" href="https://discord.gg/'), 'the card falls back to the Discord');
   } finally {
     await server.stop();
   }
@@ -212,7 +212,7 @@ test('the homepage keeps the hero as a header, with the sections inside main', a
     const main = html.search(/<main\b[^>]*\bid="content"/);
     const footer = html.indexOf('<footer class="footer"');
     assert.ok(header > 0 && header < main && main < footer, 'header, then main, then footer');
-    for (const id of ['vr', 'destinations', 'early-access', 'reddit', 'community']) {
+    for (const id of ['vr', 'destinations', 'play-your-way', 'journal', 'reddit', 'community']) {
       const at = html.indexOf(`id="${id}"`);
       assert.ok(at > main && at < footer, `#${id} is inside main`);
     }
@@ -250,7 +250,7 @@ test('footer legal links are underlined, and buttons have a visible focus ring',
   assert.ok(legal.includes('text-decoration: underline'));
   assert.ok(/\.btn:focus-visible/.test(css));
   assert.ok(/\.footer__link:focus-visible/.test(css));
-  assert.ok(/\.ea-card__link:focus-visible/.test(css));
+  assert.ok(/\.feature-card__link:focus-visible/.test(css));
   assert.ok(/@media \(prefers-reduced-motion: reduce\)/.test(css));
   assert.ok(/\.skip:focus\s*\{/.test(css));
 });

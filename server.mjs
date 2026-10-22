@@ -32,11 +32,12 @@ import { createFeedbackRouter } from './feedback.mjs';
 import { createErrorHandler, notFoundHandler } from './errors.mjs';
 import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
 import { createAdminRouter } from './admin.mjs';
-import { createBlogRouter } from './blog.mjs';
+import { createBlogRouter, heroUrl } from './blog.mjs';
+import { launchPosts } from './data/blog-posts.mjs';
 import { createBlogAdminRouter } from './blog-admin.mjs';
 import { createMediaStore } from './media.mjs';
 import { createStudio, createOpenAiClient } from './blog-studio.mjs';
-import { createBlogStore } from './blog-store.mjs';
+import { createBlogStore, readingMinutes } from './blog-store.mjs';
 import { createMailer } from './mailer.mjs';
 import { createSesEventsRouter } from './ses-events.mjs';
 import { createPlaytestRouter, createPlaytestStore } from './playtest.mjs';
@@ -100,7 +101,7 @@ const playtestStore = await createPlaytestStore({
 
 // Blog posts. Markdown in, sanitised HTML out, and the checklist a post must
 // pass before it is published (blog-store.mjs).
-const blogStore = await createBlogStore({ databaseUrl: process.env.DATABASE_URL ?? '' });
+const blogStore = await createBlogStore({ databaseUrl: process.env.DATABASE_URL ?? '', seedPosts: launchPosts });
 
 // Blog images in R2, and the AI studio. Each is optional: no R2 credentials
 // means images cannot be generated or served but writing still works; no
@@ -137,7 +138,7 @@ const gameJsonLd = {
   playMode: 'SinglePlayer',
   inLanguage: ['en', 'fr'],
   datePublished: product.releaseDate,
-  softwareVersion: product.version,
+  ...(product.version ? { softwareVersion: product.version } : {}),
   contentRating: `IARC ${product.ageRating}`,
   author: { '@type': 'Organization', name: product.developer },
   publisher: { '@type': 'Organization', name: product.publisher },
@@ -156,9 +157,8 @@ const gameJsonLd = {
       'river, and the five destinations the expedition travels between.',
     thumbnailUrl: `${siteUrl}${trailer.fullPoster}`,
     contentUrl: `${siteUrl}${trailer.full}`,
-    // Search Console flags a bare date here as "missing a timezone". The game
-    // shipped from Australia, so the trailer went up at midnight AEST.
-    uploadDate: `${product.releaseDate}T00:00:00+10:00`,
+    // The trailer's original upload date is independent of the public release.
+    uploadDate: trailer.uploadDate,
     duration: 'PT1M59S'
   }
 };
@@ -196,8 +196,10 @@ app.use(createStaticMiddleware(publicDir));
 const playtestOpen = (process.env.PLAYTEST_OPEN ?? 'true').toLowerCase() !== 'false';
 
 // Home — the landing page.
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  const [latest] = await blogStore.listPublished({ limit: 1 });
   res.render('index', {
+    latestPost: latest ? { ...latest, heroUrl: heroUrl(latest.heroKey), minutes: readingMinutes(latest.wordCount) } : null,
     heroVariant,
     showLockedCard,
     loopSteps,
@@ -281,7 +283,7 @@ app.get('/terms', (req, res) => {
     pageTitle: 'Terms of Service — Buried Worlds VR',
     pageDescription:
       'The terms covering the Buried Worlds VR game and website: licensing, ' +
-      'a game still in development, your saves, and fair use.'
+      'updates and test builds, your saves, and fair use.'
   });
 });
 

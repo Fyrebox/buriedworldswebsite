@@ -15,7 +15,7 @@ mixin heroPoster(links, product, trailer)
     .hero__inner
       h1.h1 Buried Worlds VR
       p.hero__tagline Sweep, dig, pan, and travel the world's great gold rushes. A gold-prospecting adventure in virtual reality.
-      span.badge.badge--live Out now · Early Access
+      span.badge.badge--live Available now on Meta Quest
       //- CTAs sit above the key art so they stay above the fold on short screens.
       //- The second button is the Discord, not a scroll to the loop section:
       //- the person who built the game is in there most days, and a visitor who
@@ -61,12 +61,12 @@ mixin heroSplit(links, product)
         .ornament
           span.rule(style="width:44px")
           span.diamond
-          span.hero-split__kicker An expedition in six worlds
+          span.hero-split__kicker An expedition in five worlds
         h1.h1 Buried
           br
           | Worlds VR
         p.serif(style="margin:0;font-size:1.35rem;color:var(--ink-soft);line-height:1.45") Sweep, dig, pan, and travel the world's great gold rushes — from the creeks of Ballarat to a Suffolk field that hid a Roman hoard for sixteen centuries.
-        span.badge.badge--live(style="padding:6px 16px;font-size:12.5px") Out now · Early Access
+        span.badge.badge--live(style="padding:6px 16px;font-size:12.5px") Available now on Meta Quest
         .hero__cta(style="justify-content:flex-start;margin-top:0")
           a.btn.btn--primary(href=links.metaQuestStoreCta + '?placement=hero-split' target="_blank" rel="noopener noreferrer" data-cta="hero-split") Get it on Meta Quest
           a.btn.btn--secondary.btn--icon(href=links.discord target="_blank" rel="noopener noreferrer")
@@ -85,4 +85,4 @@ mixin heroBanner(links, product)
       p.hero-banner__tagline Sweep, dig, pan, and travel the world's great gold rushes.
       .hero__cta(style="justify-content:flex-start;margin-top:0;align-items:center")
         a.btn.btn--gold.btn--gold-banner(href=links.metaQuestStoreCta + '?placement=hero-banner' target="_blank" rel="noopener noreferrer" data-cta="hero-banner") Get it on Meta Quest
-        span.badge.badge--live.badge--live-light Out now · Early Access
+        span.badge.badge--live.badge--live-light Available now on Meta Quest

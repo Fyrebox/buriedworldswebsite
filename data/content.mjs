@@ -17,9 +17,9 @@ export const links = {
 // data. Both require absolute URLs — a relative path silently yields no preview.
 export const siteUrl = 'https://www.buriedworlds.com';
 
-// Store facts, read off the live product detail page and the developer dashboard
-// on 27 August 2026. They live here rather than in the templates because the
-// same numbers appear in the hero, the buy bar, the structured data and the
+// Store facts, shared across the templates and structured data. The public
+// release date was confirmed by the developer on 23 October 2026. The same
+// numbers appear in the hero, the buy bar, the structured data and the
 // share card, and a launch is exactly when they drift apart.
 //
 // `price` is deliberately labelled with its currency. Meta localises the real
@@ -31,16 +31,20 @@ export const product = {
   // structured data as alternateName so the two stay linked.
   name: 'Buried Worlds VR',
   storeListingName: 'Buried Worlds',
-  status: 'Early Access',
-  price: 'US$14.99',
-  priceAmount: '14.99',
+  status: 'Available now',
+  price: 'US$9.99',
+  priceAmount: '9.99',
   priceCurrency: 'USD',
   store: 'Meta Horizon Store',
   devices: 'Quest 2, Quest 3, Quest 3S and Quest Pro',
   devicesList: ['Meta Quest 2', 'Meta Quest 3', 'Meta Quest 3S', 'Meta Quest Pro'],
-  releaseDate: '2026-08-26',
-  releaseDateLabel: '26 August 2026',
-  version: '1.0',
+  releaseDate: '2026-10-22',
+  releaseDateLabel: '22 October 2026',
+  earlyAccessDate: '2026-08-26',
+  earlyAccessDateLabel: '26 August 2026',
+  // Do not advertise the original 1.0 as the current store build. Leave this
+  // blank until the current version is verified; softwareVersion is optional.
+  version: '',
   size: '462 MB',
   languages: ['English', 'French'],
   comfort: 'Moderate',
@@ -70,17 +74,19 @@ export const trailer = {
   poster: '/images/hero-poster-2.webp',
   full: '/video/buried-worlds-trailer-720p-2.mp4',
   fullPoster: '/images/og-cover.jpg',
-  duration: '1:59'
+  duration: '1:59',
+  uploadDate: '2026-08-26T00:00:00+10:00'
 };
 
 // Hero variant: "poster" | "split" | "banner". Poster is the shipped default;
 // the others are alternate layouts kept for reference (README §1).
 export const heroVariant = 'poster';
 
-// Toggle for the trailing "More worlds coming" destination card. On since
-// launch: Kimberley is finished and held back as the first post-launch
-// destination, so the locked card now states a fact rather than a hope.
-export const showLockedCard = true;
+// Only show a future-destination card once its contents are confirmed.
+export const showLockedCard = false;
+
+// Real editorial changes, rather than request time, drive sitemap lastmod.
+export const siteContentUpdated = '2026-10-23';
 
 // Section 3 — the VR core loop, "The Prospector's Day".
 export const loopSteps = [

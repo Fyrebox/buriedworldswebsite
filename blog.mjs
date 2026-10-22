@@ -13,6 +13,7 @@ import express from 'express';
 import { previewTokenValid, readingMinutes } from './blog-store.mjs';
 import { destinations } from './data/destinations.mjs';
 import { pages as guidePages } from './data/pages.mjs';
+import { siteContentUpdated } from './data/content.mjs';
 
 const PAGE_SIZE = 12;
 
@@ -61,17 +62,19 @@ export function postJsonLd(post, { siteUrl, product, author }) {
 }
 
 /** Everything that belongs in the sitemap: the fixed pages plus every published post. */
-export async function sitemapEntries({ siteUrl, store, today = new Date().toISOString().slice(0, 10) }) {
-  const entries = [
-    { loc: `${siteUrl}/`, lastmod: today, changefreq: 'weekly', priority: '1.0' },
-    ...destinations.map((d) => ({ loc: `${siteUrl}/destinations/${d.slug}`, lastmod: '2026-09-15', changefreq: 'monthly', priority: '0.8' })),
-    ...guidePages.map((p) => ({ loc: `${siteUrl}/${p.slug}`, lastmod: '2026-09-15', changefreq: p.slug === 'updates' ? 'weekly' : 'monthly', priority: p.slug === 'vr-metal-detecting-game' ? '0.8' : '0.7' })),
-    { loc: `${siteUrl}/blog`, lastmod: today, changefreq: 'weekly', priority: '0.7' },
-    { loc: `${siteUrl}/press`, changefreq: 'monthly', priority: '0.6' },
-    { loc: `${siteUrl}/privacy`, changefreq: 'yearly', priority: '0.3' },
-    { loc: `${siteUrl}/terms`, changefreq: 'yearly', priority: '0.3' }
-  ];
+export async function sitemapEntries({ siteUrl, store }) {
   const posts = store ? await store.listPublished({ limit: 1000 }) : [];
+  const editorialDates = posts.map((post) => (post.updatedAt ?? post.publishedAt).slice(0, 10));
+  const journalUpdated = [siteContentUpdated, ...editorialDates].sort().at(-1);
+  const entries = [
+    { loc: `${siteUrl}/`, lastmod: journalUpdated, changefreq: 'weekly', priority: '1.0' },
+    ...destinations.map((d) => ({ loc: `${siteUrl}/destinations/${d.slug}`, lastmod: d.lastModified ?? '2026-09-15', changefreq: 'monthly', priority: '0.8' })),
+    ...guidePages.map((p) => ({ loc: `${siteUrl}/${p.slug}`, lastmod: p.lastModified ?? '2026-09-15', changefreq: p.slug === 'updates' ? 'weekly' : 'monthly', priority: p.slug === 'vr-metal-detecting-game' ? '0.8' : '0.7' })),
+    { loc: `${siteUrl}/blog`, lastmod: journalUpdated, changefreq: 'weekly', priority: '0.7' },
+    { loc: `${siteUrl}/press`, lastmod: siteContentUpdated, changefreq: 'monthly', priority: '0.6' },
+    { loc: `${siteUrl}/privacy`, changefreq: 'yearly', priority: '0.3' },
+    { loc: `${siteUrl}/terms`, lastmod: siteContentUpdated, changefreq: 'yearly', priority: '0.3' }
+  ];
   for (const post of posts) {
     entries.push({ loc: `${siteUrl}/blog/${post.slug}`, lastmod: (post.updatedAt ?? post.publishedAt).slice(0, 10), changefreq: 'monthly', priority: '0.7' });
   }

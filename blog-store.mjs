@@ -190,7 +190,7 @@ function rowToPost(row) {
   };
 }
 
-export async function createBlogStore({ databaseUrl, pool: suppliedPool }) {
+export async function createBlogStore({ databaseUrl, pool: suppliedPool, seedPosts = [] }) {
   if (!suppliedPool && !databaseUrl) throw new Error('DATABASE_URL is required for the blog');
   const pool = suppliedPool ?? new Pool({
     connectionString: databaseUrl,
@@ -314,6 +314,42 @@ export async function createBlogStore({ databaseUrl, pool: suppliedPool }) {
   async function listAll() {
     const result = await pool.query(`SELECT * FROM blog_posts ORDER BY updated_at DESC, id DESC`);
     return result.rows.map(rowToPost);
+  }
+
+  // Track editorial imports independently of posts, so unpublishing or deleting
+  // one in Admin is respected on every future deploy. A transaction makes the
+  // marker and the published post one operation, including across replicas.
+  if (seedPosts.length) {
+    const seedsExist = await pool.query(`SELECT 1 FROM information_schema.tables WHERE table_name = 'blog_content_seeds'`);
+    if (!seedsExist.rows.length) await pool.query(`CREATE TABLE IF NOT EXISTS blog_content_seeds (
+      slug TEXT PRIMARY KEY,
+      applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`);
+    for (const input of seedPosts) {
+      const post = normalisePost(input);
+      if (!checklistPasses(post)) {
+        throw new PostValidationError(`Editorial import is incomplete: ${post.slug}`, 'checklist');
+      }
+      const imported = await pool.query('SELECT slug FROM blog_content_seeds WHERE slug = $1', [post.slug]);
+      if (imported.rows.length) continue;
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        const marker = await client.query(`INSERT INTO blog_content_seeds (slug) VALUES ($1)
+          ON CONFLICT (slug) DO NOTHING RETURNING slug`, [post.slug]);
+        if (marker.rows.length) {
+          await client.query(`INSERT INTO blog_posts (${COLUMNS.join(', ')}, status, published_at)
+            VALUES (${COLUMNS.map((_, i) => `$${i + 1}`).join(', ')}, 'published', NOW())
+            ON CONFLICT (slug) DO NOTHING`, values(post));
+        }
+        await client.query('COMMIT');
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
+    }
   }
 
   return {

@@ -7,17 +7,14 @@ include partials/trailer
 include partials/buybar
 include partials/vr
 include partials/destinations
-include partials/earlyaccess
+include partials/features
+include partials/latest-news
 include partials/reddit
 include partials/discord
 include partials/footer
 
 block content
-  //- Order changed at launch. The VR game is the thing being sold, so it now
-  //- takes the whole run from the hero to the Early Access statement, and the
-  //- free Reddit game sits after it as a companion rather than as the first
-  //- ask. Before launch the Reddit band was the primary call to action, which
-  //- is the right shape for a page with nothing to sell and the wrong one now.
+  //- Lead with the available VR game, then the journal and free companion.
   if playtestOpen
     +playtestStrip(study)
   else
@@ -28,7 +25,8 @@ block content
   main#content
     +vr(loopSteps)
     +destinations(worlds, showLockedCard)
-    +earlyaccess(links, product)
+    +features(links, product)
+    +latestNews(typeof latestPost !== 'undefined' ? latestPost : null, product)
     +reddit(links, signalRows)
     +discord(links)
   +footer(links)

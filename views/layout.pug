@@ -16,7 +16,7 @@ html(lang="en")
     - var shareHeight = pageImage ? (pageImageHeight || '') : '630'
     - var shareAlt = pageImage ? (pageImageAlt || '') : "The game's logo above the Roman ruins at Bolonia, columns standing in pale sand."
     - var title = pageTitle || 'Buried Worlds VR — Out now on Meta Quest'
-    - var description = pageDescription || "Sweep, dig, pan and travel five of the world's great treasure sites. Out now in Early Access on the Meta Horizon Store for Quest 2, 3, 3S and Pro."
+    - var description = pageDescription || "Sweep, dig and pan for gold across five historic destinations in Buried Worlds VR. Available now on Meta Quest 2, Quest 3, Quest 3S and Quest Pro."
 
     unless disableAnalytics
       //- Google tag (gtag.js) — GA4 property G-PVF7WKPPFD.
@@ -74,6 +74,7 @@ html(lang="en")
     title= title
     meta(name="description" content=description)
     link(rel="canonical" href=canonical)
+    link(rel="alternate" type="application/rss+xml" title="Buried Worlds VR — Notes from the dig" href=siteUrl + '/blog/feed.xml')
     if noIndex
       meta(name="robots" content="noindex,nofollow")
 

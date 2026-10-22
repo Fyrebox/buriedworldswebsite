@@ -104,6 +104,7 @@ export const pages = [
 
   {
     slug: 'gold-panning-vr',
+    lastModified: '2026-10-23',
     kind: 'WebPage',
     kicker: 'Ballarat and Coloma',
     h1: 'Gold panning in VR: the pan, the sluice and the puddling machine',
@@ -179,7 +180,8 @@ export const pages = [
     ],
     related: [
       { href: '/vr-metal-detecting-game', label: 'The detector', note: 'How the signal works, and the loop around it.' },
-      { href: '/how-to-play', label: 'How the game works', note: 'Unlock order, the travel hub, the marketplace.' }
+      { href: '/how-to-play', label: 'How the game works', note: 'Unlock order, the travel hub, the marketplace.' },
+      { href: '/blog/gold-prospecting-near-ballarat', label: 'Gold prospecting near Ballarat', note: 'Planning a first outing in the real Victorian goldfields.' }
     ]
   },
 
@@ -451,6 +453,7 @@ export const pages = [
 
   {
     slug: 'faq',
+    lastModified: '2026-10-23',
     kind: 'FAQPage',
     kicker: 'Before you buy',
     h1: 'Questions about Buried Worlds VR',
@@ -490,7 +493,7 @@ export const pages = [
       },
       {
         q: 'What languages is it in?',
-        a: `${product.languages.join(' and ')}, with six languages planned, translated by people rather than by machine.`
+        a: `${product.languages.join(' and ')}. These are the languages available in the game today; the updates page records any additions when they ship.`
       },
       {
         q: 'How many save slots are there?',
@@ -505,8 +508,8 @@ export const pages = [
         a: 'No. Single player only, with no online features and no other players in your world.'
       },
       {
-        q: 'What does Early Access mean here?',
-        a: 'The expedition is complete and playable — five destinations, the whole tool set, both languages. It is also still being extended, with more destinations planned. Every claim on this site is true of the build you can buy today; nothing is promised on a date.'
+        q: 'Is Buried Worlds VR available to everyone?',
+        a: `Yes. Buried Worlds VR became publicly available on ${product.releaseDateLabel} on the ${product.store}. You can buy it directly, with no invitation or test key. It includes five destinations and the full prospecting tool set. See Updates for the release history.`
       },
       {
         q: 'Is there a Steam or PC VR version?',
@@ -534,6 +537,7 @@ export const pages = [
 
   {
     slug: 'about',
+    lastModified: '2026-10-23',
     kind: 'AboutPage',
     kicker: 'Bellare Studios',
     h1: 'About Buried Worlds VR',
@@ -582,9 +586,9 @@ export const pages = [
             + `natively on ${product.devices}, fully offline once installed, in `
             + `${product.languages.join(' and ')}. It has no accounts, no analytics and no ads — `
             + 'the privacy policy is short because there is little to say.' },
-          { p: `It released on ${product.releaseDateLabel} in ${product.status} on the `
-            + `${product.store}, and is being extended from there. The updates page keeps the `
-            + 'record.' }
+          { p: `Buried Worlds VR became publicly available on ${product.releaseDateLabel} on the `
+            + `${product.store}, following its Early Access launch on ${product.earlyAccessDateLabel}. `
+            + 'Anyone can buy and play it without an invitation. The updates page keeps the release history.' }
         ]
       },
       {
@@ -617,12 +621,13 @@ export const pages = [
 
   {
     slug: 'updates',
+    lastModified: '2026-10-23',
     kind: 'WebPage',
     kicker: 'Changelog',
     h1: 'Updates',
-    tagline: 'What has shipped, dated, and what is being worked on. Nothing here is promised on a date.',
-    title: 'Buried Worlds VR Updates and Roadmap',
-    description: 'Every update to Buried Worlds VR since its Early Access release on 26 August 2026, and what is being worked on next. Dated and specific, no promises about when.',
+    tagline: 'Available to everyone since 22 October 2026. Release news and the history of the expedition.',
+    title: 'Buried Worlds VR Updates — Public Release and Game News',
+    description: 'Buried Worlds VR is available to everyone on Meta Quest from 22 October 2026. Read the public release news, earlier updates and how to report a problem.',
     hero: null,
     sections: [
       {
@@ -653,19 +658,30 @@ export const pages = [
         ]
       },
       {
-        heading: 'Being worked on',
+        heading: 'What comes next',
         blocks: [
-          { p: 'These are in progress, in no particular order, and none of them has a date. '
-            + 'They move to the list below when they ship.' },
-          { list: [
-            'A claim survey at Coloma, so there is evidence to read before money changes hands on a mine, followed by richer and poorer stretches of river. The six claims are not yet meaningfully different from one another, and the developer considers that the most important gap in the game.',
-            'More destinations after the current five, working toward twelve in the full version.',
-            'Six languages, translated by people rather than by machine.'
+          { p: 'This page records changes when they are available to players. Future destinations, '
+            + 'languages and features will be described here when there is confirmed news to share. '
+            + 'The five destination pages and FAQ describe what you can play today.' },
+          { links: [
+            { href: '/faq', label: 'What is in the game today', note: 'Supported headsets, languages, play modes and saves.' },
+            { href: '/blog', label: 'Notes from the dig', note: 'Real goldfields, prospecting and the inspiration behind the game.' }
           ] }
         ]
       }
     ],
     updates: [
+      {
+        date: product.releaseDate,
+        label: product.releaseDateLabel,
+        title: 'Public release — available to everyone on Meta Quest',
+        body: [
+          `${product.name} is now available to everyone on the ${product.store}. Buy and install it directly — no invitation, test channel or access key is needed. The listed price is ${product.price}; Meta shows the price in your local currency and region.`,
+          'Explore Ballarat, Coloma, Carcassonne, Hoxne and Bolonia with a detector and a different way to recover finds in each place. Pan for gold, run a sluice, fish wells with a magnet and uncover a Roman hoard. There is no combat and no timer: the pace is yours.',
+          `Play on ${product.devices}, in ${product.languages.join(' or ')}, seated or standing, with teleport or free movement. Three save slots keep separate expeditions, and the game works offline once installed.`,
+          `The expedition began with an Early Access launch on ${product.earlyAccessDateLabel}. The public release opens it to everyone. Questions and bug reports can go through the feedback panel in the game’s settings or directly to the developer on Discord.`
+        ]
+      },
       {
         date: '2026-09-06',
         label: '6 September 2026',
@@ -675,18 +691,18 @@ export const pages = [
         ]
       },
       {
-        date: product.releaseDate,
-        label: product.releaseDateLabel,
-        title: `Version ${product.version} — Early Access release`,
+        date: product.earlyAccessDate,
+        label: product.earlyAccessDateLabel,
+        title: 'Version 1.0 — Early Access release',
         body: [
-          `${product.name} is out on the ${product.store} for ${product.devices}, in ${product.status}, at ${product.price}.`,
+          `${product.name} first launched in Early Access on the ${product.store} on ${product.earlyAccessDateLabel}. This is the original launch entry; the public release followed on ${product.releaseDateLabel}.`,
           'Five destinations, each drawn from a real place where real treasure was found: Ballarat, Coloma, Carcassonne, Hoxne and Bolonia. The whole tool set — detector, pickaxe, gold pan and shovel, sluice box, dynamite, fishing magnet, cleaning brush and hand sand scoop. Three save slots. English and French. Seated or standing, teleport or free movement. No internet connection needed once installed.'
         ]
       }
     ],
     related: [
       { href: '/about', label: 'About', note: 'Who made it and how it is built.' },
-      { href: '/faq', label: 'What Early Access means here', note: 'And every other question before buying.' }
+      { href: '/faq', label: 'Questions before buying', note: 'Availability, headsets, languages and saves.' }
     ]
   }
 ];

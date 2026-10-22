@@ -1,0 +1,33 @@
+mixin features(links, product)
+  section#play-your-way.features(data-screen-label="Play your way")
+    .features__inner
+      .section-head
+        .ornament
+          span.rule
+          span.diamond
+          span.rule
+        h2.h2 Your expedition, your pace
+        p.serif-italic Five destinations to explore. No combat, no timers.
+      .features-grid
+        .feature-card
+          h3.feature-card__label Made for Meta Quest
+          ul.feature-card__list
+            li Runs on #{product.devices}, without a PC or cable.
+            li Play offline once installed.
+            li Available in #{product.languages.join(' and ')}.
+          a.feature-card__link(href="/faq") Questions before you buy
+        .feature-card
+          h3.feature-card__label Play your way
+          ul.feature-card__list
+            li Seated or standing, with teleport or free movement.
+            li Three save slots for three separate prospectors.
+            li Store comfort rating: #{product.comfort}.
+          a.feature-card__link(href="/seated-vr") Seated play and comfort
+        .feature-card
+          h3.feature-card__label A direct line to the developer
+          p.feature-card__copy Built by one person in Victoria, Australia. Send feedback from the game’s settings, or bring your questions to Discord.
+          if playtestOpen
+            p.feature-card__copy A paid playtest is running: #{study.fee} for about #{study.totalMinutes} minutes of play and feedback.
+            a.feature-card__link(href="/playtest") Become a playtester
+          else
+            a.feature-card__link(href=links.discord target="_blank" rel="noopener noreferrer") Join the Discord

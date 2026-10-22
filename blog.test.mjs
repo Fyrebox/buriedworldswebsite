@@ -13,6 +13,7 @@ import {
 import { createBlogRouter, heroUrl, postJsonLd, renderFeed, renderSitemap, sitemapEntries } from './blog.mjs';
 import { links, product, siteUrl, trailer } from './data/content.mjs';
 import { notFoundHandler } from './errors.mjs';
+import { launchPosts } from './data/blog-posts.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const SECRET = 'a-preview-secret-that-is-longer-than-32-characters';
@@ -45,8 +46,8 @@ function memoryPool() {
   return new (newDb({ autoCreateForeignKeyIndices: true }).adapters.createPg()).Pool();
 }
 
-async function startServer({ media } = {}) {
-  const store = await createBlogStore({ pool: memoryPool() });
+async function startServer({ media, seedPosts = [] } = {}) {
+  const store = await createBlogStore({ pool: memoryPool(), seedPosts });
   const app = express();
   app.set('view engine', 'pug'); app.set('views', path.join(root, 'views'));
   Object.assign(app.locals, { siteUrl, product, links, trailer });
@@ -141,6 +142,70 @@ test('slugs are unique', async () => {
     await assert.rejects(() => store.createPost(postInput()), (e) => e instanceof PostValidationError && e.field === 'slug');
   } finally {
     await store.close();
+  }
+});
+
+test('editorial launch posts import once and respect edits, unpublishing and deletion', async () => {
+  const pool = memoryPool();
+  const store = await createBlogStore({ pool, seedPosts: launchPosts });
+  try {
+    const original = await store.getBySlug(launchPosts[0].slug);
+    assert.equal(original.status, 'published');
+    assert.ok(checklistPasses(original));
+    await store.updatePost(original.id, { ...original, title: 'A title edited in Admin' });
+    await store.unpublish(original.id);
+    await createBlogStore({ pool, seedPosts: launchPosts });
+    const edited = await store.getById(original.id);
+    assert.equal(edited.title, 'A title edited in Admin');
+    assert.equal(edited.status, 'draft');
+    await store.deletePost(original.id);
+    await createBlogStore({ pool, seedPosts: launchPosts });
+    assert.equal(await store.getBySlug(original.slug), null, 'deleted content stays deleted after a restart');
+  } finally {
+    await store.close();
+  }
+});
+
+test('an existing post with the editorial slug is never overwritten or published', async () => {
+  const pool = memoryPool();
+  const store = await createBlogStore({ pool });
+  try {
+    const original = await store.createPost(postInput({ slug: launchPosts[0].slug }));
+    await createBlogStore({ pool, seedPosts: launchPosts });
+    const preserved = await store.getById(original.id);
+    assert.equal(preserved.title, original.title);
+    assert.equal(preserved.status, 'draft');
+  } finally {
+    await store.close();
+  }
+});
+
+test('sitemap dates describe editorial changes rather than the request date', async () => {
+  const entries = await sitemapEntries({ siteUrl });
+  assert.equal(entries.find((entry) => entry.loc === `${siteUrl}/`).lastmod, '2026-10-23');
+  assert.equal(entries.find((entry) => entry.loc === `${siteUrl}/updates`).lastmod, '2026-10-23');
+  assert.equal(entries.find((entry) => entry.loc === `${siteUrl}/destinations/coloma`).lastmod, '2026-09-15');
+});
+
+test('the launch article is public, indexable, and discoverable through the blog, feed and sitemap', async () => {
+  const server = await startServer({ seedPosts: launchPosts });
+  try {
+    const article = launchPosts[0];
+    const response = await fetch(`${server.url}/blog/${article.slug}`);
+    const html = await response.text();
+    assert.equal(response.status, 200);
+    assert.ok(!html.includes('noindex'));
+    assert.ok(html.includes(`href="${siteUrl}/blog/${article.slug}"`));
+    assert.ok(html.includes(`src="${article.heroKey}"`));
+    const graph = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)[1]);
+    const data = graph['@graph'].find((node) => node['@type'] === 'BlogPosting');
+    assert.ok(data.wordCount >= 600 && data.datePublished && data.dateModified);
+    for (const route of ['/blog', '/blog/feed.xml', '/sitemap.xml']) {
+      const content = await (await fetch(`${server.url}${route}`)).text();
+      assert.ok(content.includes(`/blog/${article.slug}`), route);
+    }
+  } finally {
+    await server.stop();
   }
 });
 

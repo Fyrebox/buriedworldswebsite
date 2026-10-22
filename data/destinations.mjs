@@ -23,6 +23,7 @@
 export const destinations = [
   {
     slug: 'ballarat',
+    lastModified: '2026-10-23',
     order: 1,
     name: 'Ballarat',
     country: 'Australia',
@@ -107,6 +108,11 @@ export const destinations = [
       + 'and the puddling machine was one of its real tools: a horse walked a circle, dragging '
       + 'harrows through a clay-filled trench until the gold dropped out. The place and its '
       + 'history are real. The people you meet are not.',
+    historyLink: {
+      href: '/blog/gold-prospecting-near-ballarat',
+      label: 'Gold prospecting near Ballarat: a beginner’s guide',
+      note: 'Planning a real outing, with links to official access guidance.'
+    },
     video: {
       youtubeId: '3dv1H7-Trgs',
       name: 'Buried Worlds | VR Gold Prospecting on Meta Quest | Official Teaser',
