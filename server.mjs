@@ -130,7 +130,8 @@ const gameJsonLd = {
   image: `${siteUrl}/images/og-cover.jpg`,
   description:
     "A VR treasure-hunting game. Sweep a metal detector, dig, pan river gravel " +
-    "and travel five real sites where real treasure was found.",
+    "and travel five real sites where real treasure was found. Free " +
+    `${product.trialMinutes}-minute trial on the ${product.store}.`,
   applicationCategory: 'Game',
   operatingSystem: 'Meta Horizon OS',
   gamePlatform: product.devicesList,

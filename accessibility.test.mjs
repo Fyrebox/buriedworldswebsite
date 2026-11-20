@@ -194,7 +194,7 @@ test('the hero offers the store and the Discord, in that order', async () => {
   try {
     const html = await (await fetch(`${server.url}/`)).text();
     const hero = /<header class="hero"[\s\S]*?<\/header>/.exec(html)[0];
-    const store = hero.indexOf('Get it on Meta Quest');
+    const store = hero.indexOf('Try it free on Meta Quest');
     const discord = hero.indexOf('Join the Discord');
     assert.ok(store > 0 && discord > store, 'store first, Discord second');
     assert.ok(hero.includes(`href="${links.discord}"`), 'the Discord button links to the invite');

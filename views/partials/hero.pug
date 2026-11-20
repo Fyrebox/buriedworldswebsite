@@ -15,19 +15,19 @@ mixin heroPoster(links, product, trailer)
     .hero__inner
       h1.h1 Buried Worlds VR
       p.hero__tagline Sweep, dig, pan, and travel the world's great gold rushes. A gold-prospecting adventure in virtual reality.
-      span.badge.badge--live Available now on Meta Quest
+      span.badge.badge--live Free to try on Meta Quest
       //- CTAs sit above the key art so they stay above the fold on short screens.
       //- The second button is the Discord, not a scroll to the loop section:
       //- the person who built the game is in there most days, and a visitor who
       //- is not ready to buy is worth more in the room than on the page.
       .hero__cta
-        a.btn.btn--primary(href=links.metaQuestStoreCta + '?placement=hero' target="_blank" rel="noopener noreferrer" data-cta="hero") Get it on Meta Quest
+        a.btn.btn--primary(href=links.metaQuestStoreCta + '?placement=hero' target="_blank" rel="noopener noreferrer" data-cta="hero") Try it free on Meta Quest
         a.btn.btn--secondary.btn--icon(href=links.discord target="_blank" rel="noopener noreferrer")
           +discordIcon(18)
           span Join the Discord
       //- The price carries its currency because Meta localises the real figure.
       p.hero__meta
-        | #{product.price} on the #{product.store}
+        | #{product.priceLine} on the #{product.store}
         span.hero__meta-dot ·
         | #{product.devices}
       //- The painted key art is the poster, so it is on screen instantly and
@@ -66,9 +66,9 @@ mixin heroSplit(links, product)
           br
           | Worlds VR
         p.serif(style="margin:0;font-size:1.35rem;color:var(--ink-soft);line-height:1.45") Sweep, dig, pan, and travel the world's great gold rushes — from the creeks of Ballarat to a Suffolk field that hid a Roman hoard for sixteen centuries.
-        span.badge.badge--live(style="padding:6px 16px;font-size:12.5px") Available now on Meta Quest
+        span.badge.badge--live(style="padding:6px 16px;font-size:12.5px") Free to try on Meta Quest
         .hero__cta(style="justify-content:flex-start;margin-top:0")
-          a.btn.btn--primary(href=links.metaQuestStoreCta + '?placement=hero-split' target="_blank" rel="noopener noreferrer" data-cta="hero-split") Get it on Meta Quest
+          a.btn.btn--primary(href=links.metaQuestStoreCta + '?placement=hero-split' target="_blank" rel="noopener noreferrer" data-cta="hero-split") Try it free on Meta Quest
           a.btn.btn--secondary.btn--icon(href=links.discord target="_blank" rel="noopener noreferrer")
             +discordIcon(18)
             span Join the Discord
@@ -84,5 +84,5 @@ mixin heroBanner(links, product)
       h1.h1 Buried Worlds VR
       p.hero-banner__tagline Sweep, dig, pan, and travel the world's great gold rushes.
       .hero__cta(style="justify-content:flex-start;margin-top:0;align-items:center")
-        a.btn.btn--gold.btn--gold-banner(href=links.metaQuestStoreCta + '?placement=hero-banner' target="_blank" rel="noopener noreferrer" data-cta="hero-banner") Get it on Meta Quest
-        span.badge.badge--live.badge--live-light Available now on Meta Quest
+        a.btn.btn--gold.btn--gold-banner(href=links.metaQuestStoreCta + '?placement=hero-banner' target="_blank" rel="noopener noreferrer" data-cta="hero-banner") Try it free on Meta Quest
+        span.badge.badge--live.badge--live-light Free to try on Meta Quest

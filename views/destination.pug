@@ -116,11 +116,11 @@ block content
             span.destination__sibling-name= next.name
 
       .destination__cta
-        a.btn.btn--primary(href=links.metaQuestStoreCta + `?placement=destination-${d.slug}` target="_blank" rel="noopener noreferrer" data-cta=`destination-${d.slug}`) Get it on Meta Quest
+        a.btn.btn--primary(href=links.metaQuestStoreCta + `?placement=destination-${d.slug}` target="_blank" rel="noopener noreferrer" data-cta=`destination-${d.slug}`) Try it free on Meta Quest
         a.btn.btn--secondary(href="/#destinations") All five destinations
         a.btn.btn--secondary(href="/how-to-play") How the game works
         p.hero__meta
-          | #{product.price} on the #{product.store}
+          | #{product.priceLine} on the #{product.store}
           span.hero__meta-dot ·
           | #{product.devices}
 

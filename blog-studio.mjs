@@ -24,7 +24,7 @@ import { destinations } from './data/destinations.mjs';
 function siteFacts() {
   const places = destinations.map((d) => `- ${d.name} (${d.region}): ${d.tagline} Its page is /destinations/${d.slug}.`).join('\n');
   return [
-    `${product.name} is a VR treasure-hunting game for ${product.store} (${product.devices}), ${product.status}, ${product.price}, by ${product.publisher}.`,
+    `${product.name} is a VR treasure-hunting game for ${product.store} (${product.devices}), ${product.status}, ${product.price} with a ${product.trial.toLowerCase()}, by ${product.publisher}. When a post mentions buying the game, say it can be tried free first.`,
     `You sweep a metal detector, dig, pan for gold and travel five real places where real treasure was found:`,
     places,
     `Other pages you may link: /vr-metal-detecting-game, /gold-panning-vr, /how-to-play, /faq, /hoxne-hoard.`

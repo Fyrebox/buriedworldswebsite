@@ -34,6 +34,13 @@ export const product = {
   status: 'Available now',
   price: 'US$9.99',
   priceAmount: '9.99',
+  // Meta's store-side free trial: the full game, time-limited, then the
+  // purchase prompt. Leads every call to action, because "free" is what turns a
+  // curious visitor without the headset on into one who installs tonight.
+  trial: 'Free 30-minute trial',
+  trialMinutes: 30,
+  // The line under every store button: the trial first, then what it costs.
+  priceLine: 'Free 30-minute trial, then US$9.99',
   priceCurrency: 'USD',
   store: 'Meta Horizon Store',
   devices: 'Quest 2, Quest 3, Quest 3S and Quest Pro',
@@ -86,7 +93,7 @@ export const heroVariant = 'poster';
 export const showLockedCard = false;
 
 // Real editorial changes, rather than request time, drive sitemap lastmod.
-export const siteContentUpdated = '2026-10-23';
+export const siteContentUpdated = '2026-11-20';
 
 // Section 3 — the VR core loop, "The Prospector's Day".
 export const loopSteps = [

@@ -453,7 +453,7 @@ export const pages = [
 
   {
     slug: 'faq',
-    lastModified: '2026-10-23',
+    lastModified: '2026-11-20',
     kind: 'FAQPage',
     kicker: 'Before you buy',
     h1: 'Questions about Buried Worlds VR',
@@ -472,8 +472,12 @@ export const pages = [
         a: 'Yes. Quest 2 is supported. It is the least powerful of the four headsets, so it is also where any performance report matters most to us.'
       },
       {
+        q: 'Is there a free trial?',
+        a: `Yes. The ${product.store} lets you play Buried Worlds VR free for ${product.trialMinutes} minutes before you buy, which is enough to try the detector, dig a first find and pan the river at Ballarat.`
+      },
+      {
         q: 'How much is it?',
-        a: `${product.price} on the ${product.store}. Meta shows the price in your own currency and region, so the exact figure you see may differ.`
+        a: `${product.price} on the ${product.store}, after a ${product.trial.toLowerCase()}. Meta shows the price in your own currency and region, so the exact figure you see may differ.`
       },
       {
         q: 'Can I play sitting down?',

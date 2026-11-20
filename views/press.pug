@@ -32,7 +32,7 @@ block content
             dd #{product.store} — #{product.devices}
           div
             dt Price
-            dd #{product.price} (Meta shows local currency by region)
+            dd #{product.price}, with a #{product.trial.toLowerCase()} on the store (Meta shows local currency by region)
           div
             dt Released
             dd #{product.releaseDateLabel} — public release
@@ -137,8 +137,9 @@ block content
       h2.legal__h Available now on Meta Quest
       p.
         Buried Worlds VR became publicly available on #{product.releaseDateLabel}.
-        Anyone can buy and install it from the Meta Horizon Store without an
-        invitation or test key. Five destinations are included, with metal
+        Anyone can install it from the Meta Horizon Store without an
+        invitation or test key, and play the full game free for
+        #{product.trialMinutes} minutes before buying. Five destinations are included, with metal
         detecting, digging, gold panning, sluicing, magnet fishing and careful
         recovery with a brush or sand scoop. Play in English or French, seated
         or standing, with teleport or free movement. The game works offline

@@ -182,7 +182,7 @@ test('an existing post with the editorial slug is never overwritten or published
 
 test('sitemap dates describe editorial changes rather than the request date', async () => {
   const entries = await sitemapEntries({ siteUrl });
-  assert.equal(entries.find((entry) => entry.loc === `${siteUrl}/`).lastmod, '2026-10-23');
+  assert.equal(entries.find((entry) => entry.loc === `${siteUrl}/`).lastmod, '2026-11-20');
   assert.equal(entries.find((entry) => entry.loc === `${siteUrl}/updates`).lastmod, '2026-10-23');
   assert.equal(entries.find((entry) => entry.loc === `${siteUrl}/destinations/coloma`).lastmod, '2026-09-15');
 });
