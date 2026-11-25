@@ -1,5 +1,5 @@
 // The guide pages: /vr-metal-detecting-game, /gold-panning-vr, /seated-vr,
-// /hoxne-hoard, /how-to-play, /faq, /about, /updates.
+// /hoxne-hoard, /how-to-play, /faq, /about, /updates, /gift-for-metal-detectorists.
 //
 // The site's homepage is a brand page, and the brand loses every search to a
 // television series of the same name. So each page here is built to own one
@@ -453,7 +453,7 @@ export const pages = [
 
   {
     slug: 'faq',
-    lastModified: '2026-11-20',
+    lastModified: '2026-11-25',
     kind: 'FAQPage',
     kicker: 'Before you buy',
     h1: 'Questions about Buried Worlds VR',
@@ -478,6 +478,10 @@ export const pages = [
       {
         q: 'How much is it?',
         a: `${product.price} on the ${product.store}, after a ${product.trial.toLowerCase()}. Meta shows the price in your own currency and region, so the exact figure you see may differ.`
+      },
+      {
+        q: 'Can I give it as a gift?',
+        a: `Yes. The ${product.store} sends games as gifts from a Quest headset, the Meta Horizon app or the store website, and the person receiving it gets an email with a code to redeem. They need a ${product.devices.replace(' and ', ' or ')}. The gift page on this site has the steps.`
       },
       {
         q: 'Can I play sitting down?',
@@ -707,6 +711,104 @@ export const pages = [
     related: [
       { href: '/about', label: 'About', note: 'Who made it and how it is built.' },
       { href: '/faq', label: 'Questions before buying', note: 'Availability, headsets, languages and saves.' }
+    ]
+  },
+  // ---------------------------------------------------------------- Gifting
+  // Built for the gift-buying season and the hobby-gift searches around it
+  // ("gifts for metal detectorists"). The gifting mechanics are Meta's, taken
+  // from its help article on app gifts, checked on 25 November 2026:
+  // https://www.meta.com/help/quest/291343079251233/ — if Meta changes the
+  // flow, change the steps here to match.
+  {
+    slug: 'gift-for-metal-detectorists',
+    lastModified: '2026-11-25',
+    kind: 'WebPage',
+    kicker: 'Gifting on the Meta Horizon Store',
+    h1: 'A gift for the metal detectorist who owns a Meta Quest',
+    tagline: 'For the frozen, flooded and off-limits days: a detector, a gold pan and five real treasure sites, sent straight to their headset.',
+    title: 'A VR Gift for Metal Detectorists — Buried Worlds VR on Quest',
+    description: 'Buying for a metal detectorist or gold prospector who owns a Meta Quest? Give Buried Worlds VR: detect, dig and pan at five real sites. How gifting works.',
+    ctaLabel: 'Gift it on the Meta Horizon Store',
+    hero: {
+      src: '/press/screenshots/10-ballarat-kangaroo.jpg',
+      alt: 'A kangaroo in the Ballarat bush beside the holes it has dug, under a clear blue sky.',
+      width: 1920,
+      height: 1080
+    },
+    sections: [
+      {
+        heading: 'Who it suits',
+        blocks: [
+          { p: 'Buried Worlds VR is a calm treasure-hunting game for Meta Quest, made by someone who '
+            + 'took a gold prospecting course before writing a line of it. It makes a good present '
+            + 'for a few kinds of people:' },
+          { list: [
+            'A detectorist or prospector between outings — the months when the ground is frozen, the creek is up, or the permission has not come through.',
+            'Someone who reads about hoards. Every destination is drawn from a real find: the Victorian goldfields, the 1849 California strike, the Hoxne Hoard in Suffolk, a Roman beach in Spain.',
+            'Someone who wants a VR game with no combat, no timers and no one to beat, and who would rather play sitting down.'
+          ] }
+        ]
+      },
+      {
+        heading: 'What they will be doing',
+        blocks: [
+          { p: 'Sweeping a metal detector low over the ground and watching a faceplate modelled on a '
+            + 'real one: a strength bar, and a target scale where gold and lead deliberately overlap. '
+            + 'Digging where the tone climbs. Panning river gravel until the colour settles. Later, '
+            + 'running a sluice, blasting a claim with dynamite, lowering a fishing magnet into '
+            + 'medieval wells and brushing Roman pieces out of a block of soil. Everything is worked '
+            + 'with their own hands, and what they find is sold to buy the tools and tickets that '
+            + 'open the next place.' },
+          { links: SITES }
+        ]
+      },
+      {
+        heading: 'How to send it',
+        blocks: [
+          { p: `Games on the ${product.store} can be sent as gifts from a Quest headset, the Meta `
+            + 'Horizon app on a phone, or the store website. In the Meta Horizon app:' },
+          { steps: [
+            { name: 'Find the game', body: `Tap Search and look up “${product.storeListingName}”, the name it is listed under.` },
+            { name: 'Choose gift', body: 'Select the gift box at the top of the screen.' },
+            { name: 'Pick the person', body: 'Find them, or enter their name or the email address their Meta account uses.' },
+            { name: 'Add a note', body: 'Write an optional gift note, then confirm the purchase.' }
+          ] },
+          { p: 'They receive an email from Meta with a 25-digit code. To redeem it, they open the '
+            + 'game’s page in the Meta Horizon app, tap Options, then Redeem gift, and enter the '
+            + 'code. The game then installs on their headset like anything else they own.' },
+          { links: [
+            { href: 'https://www.meta.com/help/quest/291343079251233/', label: 'Meta’s help article on sending and redeeming app gifts', note: 'The headset and website versions of these steps.', external: true }
+          ] }
+        ]
+      },
+      {
+        heading: 'Check before you buy',
+        blocks: [
+          { list: [
+            `They need a ${product.devices.replace(' and ', ' or ')}. The game runs on the headset itself, with no PC. There is no Steam or PC VR version yet.`,
+            `A gift is charged at the store’s standard public price — ${product.price}, shown in your own currency.`,
+            'Meta can restrict gifts by country, so the game has to be available where they live.',
+            'If the gift is not redeemed within 30 days it expires and the money comes back to you.',
+            'Only the person who received it can ask for a return, and the refund goes to you.',
+            `The game is rated ${product.ageRating}, is in ${product.languages.join(' and ')}, and plays offline once installed. The store rates its comfort as ${product.comfort}; the seated-play page explains what that means.`
+          ] }
+        ]
+      },
+      {
+        heading: 'Not sure it is their kind of game?',
+        blocks: [
+          { p: 'Watch the two-minute trailer on the homepage — it is the loop, start to finish. If '
+            + `you have a headset yourself, the ${product.trial.toLowerCase()} lets you play the `
+            + 'opening at Ballarat before you spend anything: the detector, a first dig and the '
+            + 'river.' }
+        ]
+      }
+    ],
+    related: [
+      { href: '/vr-metal-detecting-game', label: 'The detector', note: 'How the signal works, and the loop around it.' },
+      { href: '/gold-panning-vr', label: 'Gold panning in VR', note: 'The pan, the sluice and the puddling machine.' },
+      { href: '/seated-vr', label: 'Playing seated', note: 'What the Moderate comfort rating means here.' },
+      { href: '/faq', label: 'Questions before buying', note: 'Headsets, languages, saves and the free trial.' }
     ]
   }
 ];

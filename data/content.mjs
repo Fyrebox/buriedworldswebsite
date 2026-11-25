@@ -93,13 +93,13 @@ export const heroVariant = 'poster';
 export const showLockedCard = false;
 
 // Real editorial changes, rather than request time, drive sitemap lastmod.
-export const siteContentUpdated = '2026-11-20';
+export const siteContentUpdated = '2026-11-25';
 
 // Section 3 — the VR core loop, "The Prospector's Day".
 export const loopSteps = [
-  { num: '01', name: 'Detect', desc: "Sweep the coil low and slow. The signal tells you what's down there before you break ground." },
+  { num: '01', name: 'Detect', desc: "Sweep the metal detector low and slow. The signal tells you what's down there before you break ground." },
   { num: '02', name: 'Dig', desc: 'Pick your spot and put the pickaxe to work. Every hole is a small bet.' },
-  { num: '03', name: 'Pan', desc: 'Take the paydirt to water. Swirl, tilt, and watch the colour settle in the riffle.' },
+  { num: '03', name: 'Pan', desc: 'Take the paydirt to the river and pan for gold. Swirl, tilt, and watch the colour settle in the riffle.' },
   { num: '04', name: 'Stow & sell', desc: 'Fill the pouch, weigh in at the trader, and turn dust into a bankroll.' },
   { num: '05', name: 'Travel', desc: 'Buy a ticket to the next rush. Five worlds, each seeded by its real history.' }
 ];

@@ -55,11 +55,11 @@ function internalLinks(html) {
   return [...html.matchAll(/href="(\/[^"#?]*)/g)].map((match) => match[1]);
 }
 
-const EXPECTED = ['vr-metal-detecting-game', 'gold-panning-vr', 'seated-vr', 'hoxne-hoard', 'how-to-play', 'faq', 'about', 'updates'];
+const EXPECTED = ['vr-metal-detecting-game', 'gold-panning-vr', 'seated-vr', 'hoxne-hoard', 'how-to-play', 'faq', 'about', 'updates', 'gift-for-metal-detectorists'];
 
 // ---- Data integrity ----------------------------------------------------
 
-test('the eight guide pages exist, with slugs that cannot collide with other routes', () => {
+test('the nine guide pages exist, with slugs that cannot collide with other routes', () => {
   assert.deepEqual(pages.map((page) => page.slug).sort(), [...EXPECTED].sort());
   const reserved = new Set(['press', 'privacy', 'terms', 'discord', 'playtest', 'admin', 'go', 'api', 'destinations', 'images', 'css', 'video']);
   for (const page of pages) {
