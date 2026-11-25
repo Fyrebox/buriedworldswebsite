@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import express from 'express';
 
-import { createGuidesRouter, pages } from './guides.mjs';
+import { createGuidesRouter, frenchPages, pages } from './guides.mjs';
 import { createDestinationsRouter, destinations } from './destinations.mjs';
 import { links, product, siteUrl, trailer } from './data/content.mjs';
 import { notFoundHandler } from './errors.mjs';
@@ -55,11 +55,11 @@ function internalLinks(html) {
   return [...html.matchAll(/href="(\/[^"#?]*)/g)].map((match) => match[1]);
 }
 
-const EXPECTED = ['vr-metal-detecting-game', 'gold-panning-vr', 'seated-vr', 'hoxne-hoard', 'how-to-play', 'faq', 'about', 'updates', 'gift-for-metal-detectorists'];
+const EXPECTED = ['vr-metal-detecting-game', 'gold-panning-vr', 'seated-vr', 'hoxne-hoard', 'how-to-play', 'faq', 'about', 'updates', 'magnet-fishing-vr', 'best-metal-detecting-games', 'vr-games-for-seniors', 'gift-for-metal-detectorists'];
 
 // ---- Data integrity ----------------------------------------------------
 
-test('the nine guide pages exist, with slugs that cannot collide with other routes', () => {
+test('the guide pages exist, with slugs that cannot collide with other routes', () => {
   assert.deepEqual(pages.map((page) => page.slug).sort(), [...EXPECTED].sort());
   const reserved = new Set(['press', 'privacy', 'terms', 'discord', 'playtest', 'admin', 'go', 'api', 'destinations', 'images', 'css', 'video']);
   for (const page of pages) {
@@ -227,4 +227,77 @@ test('the footer reaches the guide pages from every page', () => {
   for (const slug of ['how-to-play', 'seated-vr', 'faq', 'about', 'updates']) {
     assert.ok(footer.includes(`href="/${slug}"`), slug);
   }
+});
+
+// ---- French pages ------------------------------------------------------
+
+test('the French pages are sized for a search result and each pairs with a real English page', () => {
+  const english = new Set(['/', ...pages.map((page) => `/${page.slug}`)]);
+  for (const page of frenchPages) {
+    assert.match(page.path, /^\/fr(\/[a-z0-9-]+)?$/);
+    assert.ok(english.has(page.alternate), `${page.path} pairs with ${page.alternate}, which is not a page`);
+    assert.ok(page.title.length <= 65, `${page.path}: title ${page.title.length} chars`);
+    assert.ok(page.description.length >= 120 && page.description.length <= 160,
+      `${page.path}: description ${page.description.length} chars`);
+  }
+});
+
+test('each French page renders in French, with hreflang both ways', async () => {
+  const server = await startServer();
+  try {
+    for (const page of frenchPages) {
+      const html = await (await fetch(`${server.url}${page.path}`)).text();
+      assert.ok(html.includes('<html lang="fr">'), `${page.path}: lang`);
+      assert.equal(meta(html, 'property', 'og:locale'), 'fr_FR');
+      assert.ok(html.includes(`<link rel="canonical" href="${siteUrl}${page.path}">`));
+      assert.ok(html.includes(`<link rel="alternate" hreflang="fr" href="${siteUrl}${page.path}">`), `${page.path}: self hreflang`);
+      assert.ok(html.includes(`<link rel="alternate" hreflang="en" href="${siteUrl}${page.alternate}">`), `${page.path}: English hreflang`);
+      assert.ok(html.includes(`<link rel="alternate" hreflang="x-default" href="${siteUrl}${page.alternate}">`));
+      assert.ok(html.includes('Essai gratuit sur Meta Quest'), `${page.path}: French CTA`);
+      assert.ok(!html.includes('Read next'), `${page.path}: English template words`);
+      assert.ok(bodyWordCount(html) >= 350, `${page.path} is thin`);
+      assert.equal(jsonLd(html)['@graph'].find((node) => node['@type'] === page.kind).inLanguage, 'fr');
+
+      // The English counterpart points back, unless it is the homepage (served by server.mjs).
+      if (page.alternate !== '/') {
+        const english = await (await fetch(`${server.url}${page.alternate}`)).text();
+        assert.ok(english.includes('<html lang="en">'));
+        assert.ok(english.includes(`<link rel="alternate" hreflang="fr" href="${siteUrl}${page.path}">`), `${page.alternate} links to ${page.path}`);
+      }
+    }
+  } finally {
+    await server.stop();
+  }
+});
+
+test('every internal link on the French pages resolves', async () => {
+  const server = await startServer();
+  try {
+    const known = new Set(['/', ...pages.map((page) => `/${page.slug}`), ...frenchPages.map((page) => page.path),
+      ...destinations.map((destination) => `/destinations/${destination.slug}`)]);
+    for (const page of frenchPages) {
+      const html = await (await fetch(`${server.url}${page.path}`)).text();
+      for (const href of internalLinks(html)) {
+        if (href.startsWith('/go/') || /\.[a-z0-9]+$/i.test(href) || ['/blog', '/about', '/faq', '/press', '/privacy', '/terms', '/admin', '/playtest', '/discord'].includes(href)) continue;
+        assert.ok(known.has(href), `${page.path} links to ${href}, which is not a page`);
+      }
+    }
+  } finally {
+    await server.stop();
+  }
+});
+
+test('the sitemap lists the French pages', async () => {
+  const { renderSitemap, sitemapEntries } = await import('./blog.mjs');
+  const sitemap = renderSitemap(await sitemapEntries({ siteUrl }));
+  for (const page of frenchPages) assert.ok(sitemap.includes(`<loc>${siteUrl}${page.path}</loc>`), page.path);
+});
+
+test('the blog index describes itself as a Blog listing its posts', async () => {
+  const { blogIndexJsonLd } = await import('./blog.mjs');
+  const data = blogIndexJsonLd(launchPosts.map((post) => ({ ...post, publishedAt: '2026-10-23T00:00:00Z', updatedAt: '2026-10-23T00:00:00Z' })),
+    { siteUrl, product, author: product.publisher });
+  const blog = data['@graph'].find((node) => node['@type'] === 'Blog');
+  assert.equal(blog.blogPost.length, launchPosts.length);
+  assert.equal(blog.blogPost[0].url, `${siteUrl}/blog/${launchPosts[0].slug}`);
 });

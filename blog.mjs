@@ -13,6 +13,7 @@ import express from 'express';
 import { previewTokenValid, readingMinutes } from './blog-store.mjs';
 import { destinations } from './data/destinations.mjs';
 import { pages as guidePages } from './data/pages.mjs';
+import { frenchPages } from './data/pages-fr.mjs';
 import { siteContentUpdated } from './data/content.mjs';
 
 const PAGE_SIZE = 12;
@@ -61,6 +62,42 @@ export function postJsonLd(post, { siteUrl, product, author }) {
   };
 }
 
+/**
+ * The blog index as a Blog with its listed posts, so search engines read the
+ * page as the collection it is rather than as an anonymous list of links.
+ */
+export function blogIndexJsonLd(posts, { siteUrl, product, author, pagePath = '/blog' }) {
+  const url = `${siteUrl}${pagePath}`;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [{
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: product.name, item: siteUrl },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${siteUrl}/blog` }
+      ]
+    }, {
+      '@type': 'Blog',
+      '@id': `${siteUrl}/blog`,
+      url,
+      name: `${product.name} blog`,
+      description: `Notes from the making of ${product.name}: the places, the finds, and what changed in the game and why.`,
+      inLanguage: 'en-AU',
+      publisher: { '@type': 'Organization', name: author, url: siteUrl },
+      about: { '@type': 'VideoGame', name: product.name, url: siteUrl },
+      blogPost: posts.map((post) => ({
+        '@type': 'BlogPosting',
+        '@id': `${siteUrl}/blog/${post.slug}`,
+        url: `${siteUrl}/blog/${post.slug}`,
+        headline: post.title,
+        description: post.description,
+        datePublished: post.publishedAt,
+        dateModified: post.updatedAt
+      }))
+    }]
+  };
+}
+
 /** Everything that belongs in the sitemap: the fixed pages plus every published post. */
 export async function sitemapEntries({ siteUrl, store }) {
   const posts = store ? await store.listPublished({ limit: 1000 }) : [];
@@ -70,6 +107,7 @@ export async function sitemapEntries({ siteUrl, store }) {
     { loc: `${siteUrl}/`, lastmod: journalUpdated, changefreq: 'weekly', priority: '1.0' },
     ...destinations.map((d) => ({ loc: `${siteUrl}/destinations/${d.slug}`, lastmod: d.lastModified ?? '2026-09-15', changefreq: 'monthly', priority: '0.8' })),
     ...guidePages.map((p) => ({ loc: `${siteUrl}/${p.slug}`, lastmod: p.lastModified ?? '2026-09-15', changefreq: p.slug === 'updates' ? 'weekly' : 'monthly', priority: p.slug === 'vr-metal-detecting-game' ? '0.8' : '0.7' })),
+    ...frenchPages.map((p) => ({ loc: `${siteUrl}${p.path}`, lastmod: p.lastModified, changefreq: 'monthly', priority: '0.6' })),
     { loc: `${siteUrl}/blog`, lastmod: journalUpdated, changefreq: 'weekly', priority: '0.7' },
     { loc: `${siteUrl}/press`, lastmod: siteContentUpdated, changefreq: 'monthly', priority: '0.6' },
     { loc: `${siteUrl}/privacy`, changefreq: 'yearly', priority: '0.3' },
@@ -135,7 +173,8 @@ export function createBlogRouter({ store, siteUrl, product, author = 'Bellare St
       pageDescription: `Notes from the making of ${product.name}: the places, the finds, and what changed in the game and why.`,
       pagePath: page > 1 ? `/blog?page=${page}` : '/blog',
       posts: posts.map((post) => ({ ...post, heroUrl: heroUrl(post.heroKey), minutes: readingMinutes(post.wordCount) })),
-      page, pages, total, author
+      page, pages, total, author,
+      jsonLd: blogIndexJsonLd(posts, { siteUrl, product, author, pagePath: page > 1 ? `/blog?page=${page}` : '/blog' })
     });
   });
 

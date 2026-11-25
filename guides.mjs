@@ -8,17 +8,25 @@
 import express from 'express';
 
 import { findPage, pages } from './data/pages.mjs';
+import { frenchAlternateOf, frenchPages, hreflangLinks } from './data/pages-fr.mjs';
 
-export { findPage, pages };
+export { findPage, frenchPages, pages };
+
+/** A guide's URL path: English guides live at /:slug, the French ones carry a full path. */
+export function guidePath(page) {
+  return page.path ?? `/${page.slug}`;
+}
 
 export function guideJsonLd(page, { siteUrl, product }) {
-  const url = `${siteUrl}/${page.slug}`;
+  const url = `${siteUrl}${guidePath(page)}`;
+  const home = page.ui?.home ? `${siteUrl}${page.ui.home}` : siteUrl;
   const node = {
     '@type': page.kind,
     '@id': url,
     url,
     name: page.title,
     description: page.description,
+    inLanguage: page.ui?.lang ?? 'en',
     isPartOf: { '@type': 'WebSite', name: product.name, url: siteUrl },
     about: { '@type': 'VideoGame', name: product.name, url: siteUrl }
   };
@@ -52,8 +60,8 @@ export function guideJsonLd(page, { siteUrl, product }) {
     '@graph': [{
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: product.name, item: siteUrl },
-        { '@type': 'ListItem', position: 2, name: page.h1, item: url }
+        { '@type': 'ListItem', position: 1, name: product.name, item: home },
+        ...(url === home ? [] : [{ '@type': 'ListItem', position: 2, name: page.h1, item: url }])
       ]
     }, node]
   };
@@ -63,8 +71,12 @@ export function createGuidesRouter({ siteUrl, product }) {
   if (!siteUrl || !product) throw new Error('createGuidesRouter requires siteUrl and product');
   const router = express.Router();
 
-  for (const page of pages) {
-    router.get(`/${page.slug}`, (req, res) => {
+  for (const page of [...pages, ...frenchPages]) {
+    const pagePath = guidePath(page);
+    // A page with a counterpart in the other language links to it, both ways.
+    const english = page.alternate ?? (frenchAlternateOf[pagePath] ? pagePath : null);
+    const alternates = english ? hreflangLinks(english, frenchAlternateOf[english], siteUrl) : undefined;
+    router.get(pagePath, (req, res) => {
       const share = page.hero && page.hero.width >= 600 ? {
         pageImage: page.hero.src,
         pageImageWidth: page.hero.width,
@@ -73,7 +85,10 @@ export function createGuidesRouter({ siteUrl, product }) {
       } : {};
       return res.render('guide', {
         page,
-        pagePath: `/${page.slug}`,
+        pagePath,
+        pageLang: page.ui?.lang,
+        ogLocale: page.ui?.ogLocale,
+        alternates,
         pageTitle: page.title,
         pageDescription: page.description,
         ...share,

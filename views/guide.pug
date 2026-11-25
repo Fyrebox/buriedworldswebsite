@@ -6,12 +6,16 @@ extends layout
 include partials/footer
 
 block content
+  //- A French page carries its own words for the template's fixed strings
+  //- (data/pages-fr.mjs); an English one falls back to these.
+  - var t = page.ui || {}
   main#content.destination.guide(data-screen-label=`Guide — ${page.h1}`)
     .destination__inner
       nav.destination__crumbs(aria-label="Breadcrumb")
-        a(href="/") Buried Worlds VR
-        span.destination__crumb-sep(aria-hidden="true") ›
-        span(aria-current="page")= page.h1
+        a(href=t.home || '/') Buried Worlds VR
+        unless page.path === t.home
+          span.destination__crumb-sep(aria-hidden="true") ›
+          span(aria-current="page")= page.h1
 
       header.destination__head
         span.destination__kicker= page.kicker
@@ -85,7 +89,7 @@ block content
 
       if page.related && page.related.length
         section.destination__section
-          h2.legal__h Read next
+          h2.legal__h= t.readNext || 'Read next'
           ul.guide__links
             each link in page.related
               li
@@ -94,11 +98,15 @@ block content
                   span.guide__link-note= link.note
 
       .destination__cta
-        a.btn.btn--primary(href=links.metaQuestStoreCta + `?placement=guide-${page.slug}` target="_blank" rel="noopener noreferrer" data-cta=`guide-${page.slug}`)= page.ctaLabel || 'Try it free on Meta Quest'
-        a.btn.btn--secondary(href="/#destinations") The five destinations
+        - var placement = page.slug || page.path.replace(/^\//, '').replace(/\//g, '-')
+        a.btn.btn--primary(href=links.metaQuestStoreCta + `?placement=guide-${placement}` target="_blank" rel="noopener noreferrer" data-cta=`guide-${placement}`)= page.ctaLabel || t.cta || 'Try it free on Meta Quest'
+        if t.secondary
+          a.btn.btn--secondary(href=t.secondary.href)= t.secondary.label
+        else
+          a.btn.btn--secondary(href="/#destinations") The five destinations
         p.hero__meta
-          | #{product.priceLine} on the #{product.store}
+          | #{t.priceLine || `${product.priceLine} on the ${product.store}`}
           span.hero__meta-dot ·
-          | #{product.devices}
+          | #{t.devices || product.devices}
 
   +footer(links)

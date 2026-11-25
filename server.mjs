@@ -28,6 +28,7 @@ import { assetVersion, createStaticMiddleware, stylesheetPath } from './assets.m
 import { study } from './data/playtest.mjs';
 import { createDestinationsRouter } from './destinations.mjs';
 import { createGuidesRouter } from './guides.mjs';
+import { frenchAlternateOf, hreflangLinks } from './data/pages-fr.mjs';
 import { createFeedbackRouter } from './feedback.mjs';
 import { createErrorHandler, notFoundHandler } from './errors.mjs';
 import { createTrackingRouter, createTrackingStore } from './tracking.mjs';
@@ -209,6 +210,7 @@ app.get('/', async (req, res) => {
     playtestOpen,
     study,
     pagePath: '/',
+    alternates: hreflangLinks('/', frenchAlternateOf['/'], siteUrl),
     // The hero poster is the largest paint on the homepage.
     preloadImage: trailer.poster,
     jsonLd: gameJsonLd
@@ -267,6 +269,27 @@ app.get('/press', (req, res) => {
       'Screenshots, key art, the trailer, fact sheet and descriptions for '
       + 'Buried Worlds VR, a VR treasure-hunting game on Meta Quest. Free to use '
       + 'in coverage.',
+    // The press kit as a page about the game, with its breadcrumb, so it is
+    // read as part of the same entity as the homepage rather than on its own.
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@graph': [{
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: product.name, item: siteUrl },
+          { '@type': 'ListItem', position: 2, name: 'Press kit', item: `${siteUrl}/press` }
+        ]
+      }, {
+        '@type': 'CollectionPage',
+        '@id': `${siteUrl}/press`,
+        url: `${siteUrl}/press`,
+        name: 'Press kit — Buried Worlds VR',
+        inLanguage: 'en',
+        isPartOf: { '@type': 'WebSite', name: product.name, url: siteUrl },
+        about: { '@type': 'VideoGame', name: product.name, alternateName: product.storeListingName, url: siteUrl },
+        publisher: { '@type': 'Organization', name: product.publisher, legalName: product.developer, url: siteUrl }
+      }]
+    },
     kitFile,
     kitSize: kitSize(),
     pressContact,

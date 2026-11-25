@@ -307,7 +307,12 @@ export const destinations = [
       'The fortified Cité de Carcassonne has stood on its hill above the Aude since '
       + 'the Romans, and has been UNESCO-listed since 1997. Lady Carcas is the legend the '
       + 'city’s name is said to come from. The place and its history are real. The '
-      + 'relics and the people you meet are not.'
+      + 'relics and the people you meet are not.',
+    historyLink: {
+      href: '/magnet-fishing-vr',
+      label: 'Magnet fishing, in the game and in real life',
+      note: 'How the magnet works here, and why the real hobby is restricted in France and elsewhere.'
+    }
   },
 
   {

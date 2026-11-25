@@ -1,5 +1,7 @@
 // The guide pages: /vr-metal-detecting-game, /gold-panning-vr, /seated-vr,
-// /hoxne-hoard, /how-to-play, /faq, /about, /updates, /gift-for-metal-detectorists.
+// /hoxne-hoard, /how-to-play, /faq, /about, /updates, /magnet-fishing-vr, /best-metal-detecting-games,
+// /vr-games-for-seniors,
+// /gift-for-metal-detectorists.
 //
 // The site's homepage is a brand page, and the brand loses every search to a
 // television series of the same name. So each page here is built to own one
@@ -97,6 +99,8 @@ export const pages = [
     ],
     related: [
       { href: '/gold-panning-vr', label: 'Gold panning in VR', note: 'The pan, the sluice and the puddling machine.' },
+      { href: '/magnet-fishing-vr', label: 'Magnet fishing in VR', note: 'The medieval wells of Carcassonne.' },
+      { href: '/best-metal-detecting-games', label: 'Other metal detecting games', note: 'PC, VR and mobile, compared honestly.' },
       { href: '/seated-vr', label: 'Playing seated', note: 'What the Moderate comfort rating means here.' },
       { href: '/how-to-play', label: 'How the game works', note: 'The loop, the travel hub and the unlock order.' }
     ]
@@ -258,6 +262,7 @@ export const pages = [
     ],
     related: [
       { href: '/faq', label: 'Questions before buying', note: 'Devices, price, languages, saves, refunds.' },
+      { href: '/vr-games-for-seniors', label: 'For older and first-time players', note: 'Setting it up for someone new to VR.' },
       { href: '/vr-metal-detecting-game', label: 'What the game is', note: 'The detector and the loop around it.' }
     ]
   },
@@ -713,6 +718,320 @@ export const pages = [
       { href: '/faq', label: 'Questions before buying', note: 'Availability, headsets, languages and saves.' }
     ]
   },
+  // ---------------------------------------------------------------- Magnet fishing
+  // "Magnet fishing game" is searched and no VR game answers it. The game side
+  // is Carcassonne's, from data/destinations.mjs; the real-hobby section is
+  // sourced, each source linked on the page.
+  {
+    slug: 'magnet-fishing-vr',
+    lastModified: '2026-11-25',
+    kind: 'WebPage',
+    kicker: 'Carcassonne, France',
+    h1: 'Magnet fishing in VR: the medieval wells of Carcassonne',
+    tagline: 'Lower a magnet on a rope into a medieval well, feel the pull tighten, and find out what has been down there all this time.',
+    title: 'Magnet Fishing in VR — Buried Worlds VR on Meta Quest',
+    description: 'Magnet fishing in VR: lower a magnet into the medieval wells of Carcassonne, feel for the hotspot, and haul up relics and rusty junk. On Meta Quest.',
+    hero: {
+      src: '/press/screenshots/07-carcassonne-well-2.jpg',
+      alt: 'A fishing magnet on its rope lowered into a stone well inside the walls of Carcassonne, a horseshoe and a nail already pulled out and stuck to the frame.',
+      width: 1920,
+      height: 1080
+    },
+    sections: [
+      {
+        heading: 'How the magnet works',
+        blocks: [
+          { p: 'At Carcassonne the expedition runs on water rather than soil. Buy the fishing magnet '
+            + 'for $80 at the marketplace and the purchase starts a short lesson at the barn trough. '
+            + 'From then on it works the same in every well: lower the magnet on its rope, sweep it '
+            + 'slowly through the water, and feel the controller’s vibration tighten as you cross a '
+            + 'hotspot. Hold it there and something clamps on.' },
+          { p: 'Like the real thing, most of what comes up is junk: rusty keys and scrap iron. '
+            + 'It is worth nothing and it is there on purpose: the ambiguity is the hunt. A well '
+            + 'also runs dry as you work it, so the question is always whether to keep fishing or '
+            + 'move on.' }
+        ]
+      },
+      {
+        heading: 'Seven wells, seven plaques',
+        blocks: [
+          { steps: [
+            { name: 'The trough', body: 'The barn trough’s lid lifts when you buy the magnet. Its relic is the first of seven.' },
+            { name: 'The wells', body: 'Six more wells sit behind permits, bought from a well claims board. A purchased well’s cover lifts out of the way, and each one holds a single Limoges plaque among the junk.' },
+            { name: 'The chapel', body: 'Seven sockets wait on the ruined chapel wall. Bring each plaque to its silhouette and it snaps flush. The seventh plays a one-time ceremony that ends with the Lady Carcas Crown on the altar.' }
+          ] },
+          { note: 'The magnet is not the only way to work Carcassonne. The detector and pickaxe still '
+            + 'find things here, and one of them is the only key that opens the chest in the citadel '
+            + '— the rusty keys the wells give up do not fit.' }
+        ]
+      },
+      {
+        heading: 'The real hobby, and why the wells are safer in VR',
+        blocks: [
+          { p: 'Magnet fishing is the retrieval of metal objects from water with a strong magnet on '
+            + 'a rope, in Historic Environment Scotland’s definition. Most kit guides suggest a '
+            + 'magnet rated somewhere around 300 to 500 lb of pull for a beginner, at least 15 '
+            + 'metres of rope, gloves and a bucket for what comes up. It is a real and popular '
+            + 'hobby, and in a lot of places it is restricted or banned outright:' },
+          { list: [
+            'In England and Wales the Canal & River Trust does not permit magnet fishing on its waterways.',
+            'In Scotland, scheduled monuments — the canal network among them — need Scheduled Monument Consent as well as Scottish Canals’ permission.',
+            'In France, searching for objects of historical or archaeological interest needs a prefect’s authorisation, and prefectures have said magnet fishing without it is illegal. In 2023 the prefecture of the Aude, the department Carcassonne is in, published an order banning magnet fishing across the whole department.',
+            'In South Carolina, the state’s archaeology institute says magnet fishing is prohibited in its waterways. Indiana allows it on state properties with a free permit.'
+          ] },
+          { p: 'The other reason for caution is what can come up. Canada’s Department of National '
+            + 'Defence, writing for magnet fishers, says to treat a suspected munition as explosive, '
+            + 'not to bring it ashore, and to call the police. The UK’s rules add a duty to report '
+            + 'finds that may be Treasure within 14 days.' },
+          { note: 'None of this applies inside a headset. The wells of the game’s Carcassonne hold '
+            + 'nothing more dangerous than rust, and nobody needs a permit to fish them except the '
+            + 'one sold on the claims board.' },
+          { links: [
+            { href: 'https://www.historicenvironment.scot/advice-and-support/applying-for-consents/scheduled-monument-consent/magnet-fishing', label: 'Historic Environment Scotland on magnet fishing', note: 'Definition, consent and safety.', external: true },
+            { href: 'https://canalrivertrust.org.uk/enjoy-the-waterways/fishing/fishing-faqs', label: 'Canal & River Trust fishing FAQs', note: 'Why magnet fishing is not permitted.', external: true },
+            { href: 'https://www.canada.ca/en/department-national-defence/services/uxo/unexploded-explosive-ordnance/magnet-fishing-and-uxo.html', label: 'Magnet fishing and unexploded ordnance', note: 'Canada’s Department of National Defence.', external: true },
+            { href: 'https://www.gov.uk/report-treasure-step-by-step', label: 'Reporting treasure in the UK', note: 'GOV.UK.', external: true }
+          ] }
+        ]
+      },
+      {
+        heading: 'Getting to Carcassonne',
+        blocks: [
+          { p: 'Carcassonne is the third destination. It opens once your lifetime finds reach 5,000, '
+            + 'earned at Ballarat and Coloma, and it is the richest place in the game: about 1,900 '
+            + 'buried items worth around 29,700. The city is laid out on the real wall circuit of '
+            + 'the medieval Cité, with a ruined chapel inside it and a citadel at its heart.' },
+          { links: SITES }
+        ]
+      }
+    ],
+    related: [
+      { href: '/destinations/carcassonne', label: 'Carcassonne in full', note: 'The expedition, the citadel chest and the real city.' },
+      { href: '/vr-metal-detecting-game', label: 'The detector', note: 'How the signal works, and the loop around it.' },
+      { href: '/how-to-play', label: 'How the game works', note: 'Unlock order, the travel hub, the marketplace.' }
+    ]
+  },
+
+  // ---------------------------------------------------------------- Roundup
+  // "Metal detecting game" is mostly searched with a platform after it — steam,
+  // pc, xbox, app — and Buried Worlds VR is none of those. An honest roundup is
+  // the one page that can stand in that search, and it only works if it is
+  // honest: our game is flagged as ours, and every other entry comes from its
+  // own store page, checked on 25 November 2026. Prices are US store base prices
+  // on that date. Re-check before changing anything here; prices and review
+  // labels move.
+  {
+    slug: 'best-metal-detecting-games',
+    lastModified: '2026-11-25',
+    kind: 'WebPage',
+    kicker: 'PC, VR and mobile · checked 25 November 2026',
+    h1: 'The best metal detecting games, on PC, VR and mobile',
+    tagline: 'Every metal detecting game we could find that you can actually buy today, what the detecting is like in each, and what it costs.',
+    title: 'Best Metal Detecting Games on PC, VR and Mobile (2026)',
+    description: 'The metal detecting games you can buy today on PC, VR and mobile: prices, platforms and what the detecting is actually like in each. Checked 25 November 2026.',
+    hero: {
+      src: '/press/screenshots/01-ballarat-detector-2.jpg',
+      alt: 'A gloved hand holds a metal detector over red dirt, the faceplate reading the target as brass.',
+      width: 1920,
+      height: 1080
+    },
+    sections: [
+      {
+        heading: 'A note before the list',
+        blocks: [
+          { p: 'We make one of these games, Buried Worlds VR, so it is on the list and it is flagged '
+            + 'as ours. Everything else comes from its own store page, read on 25 November 2026: the '
+            + 'developer, the price on the US store, the Steam review summary where there are enough '
+            + 'reviews for one, and what the store says the detecting involves. Prices change, and '
+            + 'sales come and go, so treat them as a guide.' }
+        ]
+      },
+      {
+        heading: 'At a glance',
+        blocks: [
+          { table: {
+            head: ['Game', 'Platform', 'Price (US)', 'In short'],
+            rows: [
+              ['Buried Worlds VR (ours)', 'Meta Quest', product.price, 'Detect, dig and pan at five real historic sites'],
+              ['Treasure Hunter: Metal Detector', 'Meta Quest', 'about $3.99', 'A tropical beach and 40 treasures'],
+              ['Treasure Hunter VR', 'PC VR (Steam)', '$0.99', 'Small VR detecting game, new maps unlock'],
+              ['Treasure Hunter Simulator', 'PC (Steam)', '$16.99', 'Countryside fields and old battle sites'],
+              ['Morgan: Metal Detective', 'PC (Steam)', '$14.99', 'Cosy: return lost things to islanders'],
+              ['Treasure Hunter: History of Monastery Gold', 'PC (Steam)', '$4.99', 'Open-world, quest-driven detecting'],
+              ['Metal Detector Island', 'PC (Steam)', '$9.99', 'Cosy island, chests and upgrades'],
+              ['Dirt Fishing: Metal Detecting Simulator', 'PC (Steam)', '$8.99', 'Forests, beaches, deserts and US coins'],
+              ['The Nugget', 'PC and Mac (Steam, Early Access)', '$14.99', 'Gold prospecting and survival in the outback'],
+              ['Treasure Hunter / Treasure Hunter World', 'Android / iOS', 'Free, in-app purchases', 'The best-known mobile detecting game']
+            ]
+          } }
+        ]
+      },
+      {
+        heading: 'In VR',
+        blocks: [
+          { p: 'Buried Worlds VR (ours). You hold the detector in your hand, sweep the coil and read '
+            + 'a faceplate modelled on a real one, then dig with a pickaxe and pan river gravel for '
+            + 'gold. Five destinations, each drawn from a real place where real treasure was found — '
+            + 'the Victorian goldfields, the 1849 California strike, medieval Carcassonne, the Hoxne '
+            + `Hoard and a Roman beach in Spain. No combat, no timers. ${product.price} on the `
+            + `${product.store}, with a ${product.trial.toLowerCase()}.` },
+          { p: 'Treasure Hunter: Metal Detector, by CaffeinesProduction, is a smaller Quest game set '
+            + 'on one sunny tropical beach: follow audio and haptic signals, dig up 40 treasures and '
+            + 'upgrade the detector through four levels. It released in August 2026 and is listed '
+            + 'at about $3.99 — the cheapest way to try detecting on a Quest.' },
+          { p: 'Treasure Hunter VR, from Lazy-Days LLC, is a $0.99 PC VR game on Steam (2023): '
+            + 'metal detecting in virtual reality, with treasure money unlocking new maps and '
+            + 'detectors. It needs a PC VR setup rather than a standalone Quest.' }
+        ]
+      },
+      {
+        heading: 'On PC',
+        blocks: [
+          { p: 'Treasure Hunter Simulator (DRAGO entertainment, 2018, $16.99) is the long-standing '
+            + 'name in the genre: detecting countryside fields, including old battle sites, for '
+            + 'artefacts. Its Steam reviews are Mixed (59% positive of about 1,100) — worth reading '
+            + 'before you buy. It has also been released on Xbox.' },
+          { p: 'Morgan: Metal Detective (Studio Morgan, 2025, $14.99) is the cosy option: a '
+            + 'first-person adventure on a Cornish island where you find lost belongings and return '
+            + 'them to the people who lost them. Mostly Positive on Steam.' },
+          { p: 'Treasure Hunter: History of Monastery Gold (Ulab Games, 2023, $4.99) is an open-world, '
+            + 'quest-driven detecting sim in the Eastern European countryside, rated Positive on Steam.' },
+          { p: 'Three newer games are too recent to have a Steam review score yet. Metal Detector '
+            + 'Island (BetDev, July 2026, $9.99) is a cosy island of signals, chests and upgrades. '
+            + 'Dirt Fishing: Metal Detecting Simulator (CalmBee, September 2026, $8.99) moves '
+            + 'between forests, beaches and deserts, with US coins to collect. The Nugget (OverLKD '
+            + 'Studio, Early Access since November 2026, $14.99) is the one for prospectors: tune a '
+            + 'detector, dig, wash paydirt, and manage food, water and fuel in the Australian outback.' }
+        ]
+      },
+      {
+        heading: 'On mobile',
+        blocks: [
+          { p: 'Treasure Hunter (Android) and Treasure Hunter World (iOS), from the makers of '
+            + 'History of Monastery Gold, are free with in-app purchases: an open-world quest '
+            + 'simulator of metal detecting. On Google Play it has over a million downloads and '
+            + 'just under 4 stars from more than 13,000 ratings.' }
+        ]
+      },
+      {
+        heading: 'If you like digging more than detecting',
+        blocks: [
+          { p: 'Hydroneer, the Cave Digger series (including Cave Digger VR on Quest) and Gold Mining '
+            + 'Simulator — the game once called Gold Rush: The Game — are mining and digging games '
+            + 'rather than detecting games: their store pages do not mention a metal detector. They '
+            + 'are worth a look if the shovel is the part you enjoy.' },
+          { p: 'Coming later: The Detectorist Guild (Full Stop Studios and PQube) is announced for '
+            + '2027, and a few smaller detecting games are wishlist-only on Steam for now.' }
+        ]
+      },
+      {
+        heading: 'Store pages',
+        blocks: [
+          { links: [
+            { href: 'https://www.meta.com/experiences/treasure-hunter-metal-detector/1288572877671322/', label: 'Treasure Hunter: Metal Detector', note: 'Meta Horizon Store.', external: true },
+            { href: 'https://store.steampowered.com/app/2165160', label: 'Treasure Hunter VR', note: 'Steam.', external: true },
+            { href: 'https://store.steampowered.com/app/748300', label: 'Treasure Hunter Simulator', note: 'Steam.', external: true },
+            { href: 'https://store.steampowered.com/app/2637220', label: 'Morgan: Metal Detective', note: 'Steam.', external: true },
+            { href: 'https://store.steampowered.com/app/2383780', label: 'Treasure Hunter: History of Monastery Gold', note: 'Steam.', external: true },
+            { href: 'https://store.steampowered.com/app/4916780', label: 'Metal Detector Island', note: 'Steam.', external: true },
+            { href: 'https://store.steampowered.com/app/5039190', label: 'Dirt Fishing: Metal Detecting Simulator', note: 'Steam.', external: true },
+            { href: 'https://store.steampowered.com/app/5277580', label: 'The Nugget', note: 'Steam, Early Access.', external: true },
+            { href: 'https://play.google.com/store/apps/details?id=com.ulab.treasurehunter', label: 'Treasure Hunter', note: 'Google Play.', external: true }
+          ] }
+        ]
+      }
+    ],
+    related: [
+      { href: '/vr-metal-detecting-game', label: 'Metal detecting in Buried Worlds VR', note: 'How the signal works, and the loop around it.' },
+      { href: '/gold-panning-vr', label: 'Gold panning in VR', note: 'The pan, the sluice and the puddling machine.' },
+      { href: '/magnet-fishing-vr', label: 'Magnet fishing in VR', note: 'The medieval wells of Carcassonne.' }
+    ]
+  },
+
+  // ---------------------------------------------------------------- Seniors
+  // For the adult children and grandchildren who set a Quest up for an older
+  // relative and search for something gentle to put on it. Every comfort claim
+  // here is the seated-play page's, restated for that reader; the health and
+  // safety link is Meta's own, checked on 25 November 2026.
+  {
+    slug: 'vr-games-for-seniors',
+    lastModified: '2026-11-25',
+    kind: 'WebPage',
+    kicker: 'Seniors and first-time players',
+    h1: 'A VR game for seniors: calm, seated, and nothing to fight',
+    tagline: 'For the parent or grandparent with a new headset and no interest in zombies — what Buried Worlds VR asks of a player, and what it never does.',
+    title: 'VR Games for Seniors: A Calm, Seated Pick | Buried Worlds VR',
+    description: 'A VR game for seniors and first-time players: Buried Worlds VR plays seated, with no combat, no timers and real history. What to know before starting.',
+    hero: {
+      src: '/press/screenshots/05-coloma-diggings-2.jpg',
+      alt: 'An eagle standing on the open ground at Coloma beside the player, the detector reading gold, a calm scene with nothing moving fast.',
+      width: 1920,
+      height: 1080
+    },
+    sections: [
+      {
+        heading: 'Why it suits an older player',
+        blocks: [
+          { p: 'Most of the best-known Quest games are about speed: shooting, swinging, dodging. '
+            + 'Buried Worlds VR is about patience. You sweep a metal detector over the ground, dig '
+            + 'where the tone climbs, and pan river gravel for gold, at whatever pace you like. It '
+            + 'appeals to the same people who enjoy a garden, a museum or a day at the beach with a '
+            + 'detector.' },
+          { list: [
+            'Seated play is a full mode, not a fallback. Nothing requires standing or crouching, and finds rise to chest height to be picked up.',
+            'No combat, nothing that chases you, no jump scares, no timers and no way to fail by taking your time.',
+            'Every destination is a real place with a real story: the Victorian goldfields, the 1849 California gold rush, a medieval French city, a Roman hoard in Suffolk and a Roman town on a Spanish beach.',
+            'It plays offline once installed, with no other players and no chat.',
+            'Three save slots, so a grandparent and a grandchild can each keep their own expedition on one headset.'
+          ] }
+        ]
+      },
+      {
+        heading: 'What it does ask of a player',
+        blocks: [
+          { p: `It is honest to say what might not suit. The ${product.store} rates the game’s comfort `
+            + `as ${product.comfort}, not Comfortable, because free movement is offered and because `
+            + 'digging means looking down and reaching toward the ground. Both can be softened: '
+            + 'choose teleport instead of free movement, and play seated.' },
+          { p: 'It uses the two Quest controllers, not hand tracking, and some actions use both hands '
+            + 'at once — shovelling into a pan, holding a magnet’s rope, pushing a machine around. '
+            + 'Someone who is new to controllers will want a few minutes of help with the grip and '
+            + 'trigger buttons at the start.' }
+        ]
+      },
+      {
+        heading: 'Setting it up for someone new to VR',
+        blocks: [
+          { steps: [
+            { name: 'Try it first', body: `Start with the ${product.trial.toLowerCase()} rather than buying straight away. It covers the opening at Ballarat: the detector, a first dig and the river.` },
+            { name: 'Choose seated and teleport', body: 'Set both in the game’s settings before the first session. It is the gentlest way to play.' },
+            { name: 'Keep the first session short', body: 'Stop well before anyone feels tired or queasy. The game saves, and the expedition will be exactly where it was left.' },
+            { name: 'Stay in the room', body: 'For the first session, sit nearby to help with the controllers and to keep the play area clear.' }
+          ] },
+          { p: 'Meta publishes health and safety warnings for its headsets, including advice for '
+            + 'people with existing medical conditions. They are worth reading together before a '
+            + 'first session.' },
+          { links: [
+            { href: 'https://www.meta.com/legal/quest/health-and-safety-warnings/', label: 'Meta Quest health and safety warnings', note: 'Meta’s own guidance, for any Quest headset.', external: true }
+          ] }
+        ]
+      },
+      {
+        heading: 'Where to go in the game',
+        blocks: [
+          { p: 'Everyone starts at Ballarat, the gentlest of the five, where the river can be panned '
+            + 'forever and no one runs out of things to do. The others open as the finds add up.' },
+          { links: SITES }
+        ]
+      }
+    ],
+    related: [
+      { href: '/seated-vr', label: 'Playing seated, in detail', note: 'What the Moderate comfort rating means here.' },
+      { href: '/gift-for-metal-detectorists', label: 'Giving it as a gift', note: 'How to send a Quest game to someone else’s headset.' },
+      { href: '/faq', label: 'Questions before buying', note: 'Headsets, languages, saves and the free trial.' }
+    ]
+  },
+
   // ---------------------------------------------------------------- Gifting
   // Built for the gift-buying season and the hobby-gift searches around it
   // ("gifts for metal detectorists"). The gifting mechanics are Meta's, taken
