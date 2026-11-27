@@ -110,7 +110,7 @@ export const destinations = [
       + 'history are real. The people you meet are not.',
     historyLink: {
       href: '/blog/gold-prospecting-near-ballarat',
-      label: 'Gold prospecting near Ballarat: a beginner’s guide',
+      label: 'Gold panning near Ballarat: a beginner’s guide',
       note: 'Planning a real outing, with links to official access guidance.'
     },
     video: {

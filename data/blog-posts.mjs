@@ -50,7 +50,7 @@ Keep minerals and heritage distinct. Resources Victoria’s guidance covers recr
 
 ## Explore the goldfields in Buried Worlds VR
 
-Our [Ballarat destination](/destinations/ballarat) turns that curiosity into a self-contained expedition. It is inspired by the Victorian goldfields, with a river to pan, ground to sweep and an abandoned puddling machine to restore. It is a game world, not a navigable map of a real prospecting location.
+Our version of [gold panning in Ballarat](/destinations/ballarat) turns that curiosity into a self-contained expedition. It is inspired by the Victorian goldfields, with a river to pan, ground to sweep and an abandoned puddling machine to restore. It is a game world, not a navigable map of a real prospecting location.
 
 You work the tools with your hands: sweep the detector, dig a target and swirl the gold pan. Read our [gold panning in VR guide](/gold-panning-vr) for how the pan, sluice and puddling machine work in the game. If the signal interests you more than the river, start with the [VR metal detecting guide](/vr-metal-detecting-game).
 
