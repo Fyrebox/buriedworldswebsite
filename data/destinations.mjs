@@ -321,12 +321,16 @@ export const destinations = [
     name: 'Hoxne',
     country: 'England',
     region: 'Suffolk, England',
+    lead:
+      'The Hoxne Hoard is the largest hoard of Roman gold and silver ever found in Britain, '
+      + 'unearthed in a Suffolk field in 1992. Hoxne is the destination in Buried Worlds VR that '
+      + 'retells that find, from the lost hammer to the block of soil you brush clean.',
     verb: 'Brush the block',
     unlock: 8000,
     tagline: 'A lost hammer, a quiet field, and the largest Roman hoard ever found in Britain.',
-    title: 'Hoxne — the lost hammer and the Roman hoard | Buried Worlds VR',
+    title: 'Hoxne Hoard, Suffolk: the Roman hoard in VR | Buried Worlds VR',
     description:
-      'Buried Worlds VR retells the 1992 Hoxne Hoard: follow four clue signs to a lost hammer, mend a fence, and brush nineteen Roman pieces out of one block of soil.',
+      'The Hoxne Hoard in Suffolk, retold in Buried Worlds VR: follow four clue signs to a lost hammer, then brush nineteen Roman pieces from one block of soil.',
     hero: {
       src: '/press/screenshots/09-hoxne-hoard.jpg',
       alt: 'The Hoxne hoard bursting out of its block of soil in a Suffolk field: gold solidi, silver siliquae and a Roman silver spoon, each named in the air.',
