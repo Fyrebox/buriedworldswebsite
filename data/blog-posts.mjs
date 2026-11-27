@@ -2,9 +2,9 @@
 // startup. Subsequent edits, unpublishing and deletion belong to the editor;
 // redeploying must never restore a post the developer has changed or removed.
 export const launchPosts = [{
-  title: 'Gold Prospecting Near Ballarat: A Beginner’s Guide',
+  title: 'Gold Panning Ballarat: A Beginner’s Guide to Where to Start',
   slug: 'gold-prospecting-near-ballarat',
-  description: 'Try gold prospecting near Ballarat: plan a first visit to Slaty Creek, consider a guided outing, check official access maps and discover the VR connection.',
+  description: 'Gold panning Ballarat, made simple: a beginner’s guide to Slaty Creek, guided outings, official access maps and what to check before your first pan.',
   heroKey: '/press/screenshots/02-ballarat-panning-2.jpg',
   heroAlt: 'Gold panning in Buried Worlds VR: a pan of gravel held at a river in the game’s Ballarat destination.',
   heroWidth: 1920,
