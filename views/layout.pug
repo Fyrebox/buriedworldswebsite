@@ -121,7 +121,10 @@ html(lang=pageLang || "en")
     //- A page whose largest paint is a known image names it, so the browser
     //- fetches it before it has parsed as far as the element.
     if preloadImage
-      link(rel="preload" as="image" href=preloadImage fetchpriority="high")
+      if preloadImageSrcset
+        link(rel="preload" as="image" href=preloadImage imagesrcset=preloadImageSrcset imagesizes=preloadImageSizes fetchpriority="high")
+      else
+        link(rel="preload" as="image" href=preloadImage fetchpriority="high")
     //- The version is a hash of the stylesheet's bytes, set at startup, so the
     //- year-long cache on /css/* is busted by a CSS change and by nothing else.
     //- Templates rendered without it (tests) fall back to the bare path.

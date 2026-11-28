@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 
 import { createDestinationsRouter, destinations } from './destinations.mjs';
-import { links, product, siteUrl, trailer, worlds } from './data/content.mjs';
+import { links, product, siteUrl, trailer, worlds, wordmark } from './data/content.mjs';
 import { notFoundHandler } from './errors.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -20,6 +20,7 @@ async function startServer() {
   app.locals.product = product;
   app.locals.links = links;
   app.locals.trailer = trailer;
+  app.locals.wordmark = wordmark;
   app.use(createDestinationsRouter({ siteUrl, product }));
   app.get('/', (req, res) => res.render('index', {
     heroVariant: 'poster', showLockedCard: true, loopSteps: [], worlds, signalRows: [], pagePath: '/'

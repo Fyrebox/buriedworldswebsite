@@ -1,7 +1,6 @@
 extends layout
 
 include partials/playtest-strip
-include partials/discord-strip
 include partials/hero
 include partials/trailer
 include partials/buybar
@@ -15,10 +14,12 @@ include partials/footer
 
 block content
   //- Lead with the available VR game, then the journal and free companion.
+  //- Nothing sits above the hero unless a playtest is running: the Discord
+  //- strip used to take that slot and it pulled people off the page before
+  //- they had seen the game. The Discord is still in the hero, in the
+  //- community section and in the footer.
   if playtestOpen
     +playtestStrip(study)
-  else
-    +discordStrip(links)
   +hero(heroVariant, links, product, trailer)
   //- One landmark for the whole run of sections, so a screen reader has a
   //- "main" to jump to and the skip link in the layout has somewhere to land.

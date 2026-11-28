@@ -14,7 +14,8 @@ import {
   showLockedCard,
   loopSteps,
   worlds,
-  signalRows
+  signalRows,
+  wordmark
 } from './data/content.mjs';
 import {
   pressContact,
@@ -67,6 +68,7 @@ app.locals.siteUrl = siteUrl;
 app.locals.product = product;
 app.locals.links = links;
 app.locals.trailer = trailer;
+app.locals.wordmark = wordmark;
 // Meta Pixel id, or nothing. See views/layout.pug for where it renders.
 app.locals.metaPixelId = (process.env.META_PIXEL_ID ?? '').replace(/\D/g, '');
 app.locals.metaDomainVerification = (process.env.META_DOMAIN_VERIFICATION ?? '').replace(/[^A-Za-z0-9]/g, '');
@@ -211,8 +213,12 @@ app.get('/', async (req, res) => {
     study,
     pagePath: '/',
     alternates: hreflangLinks('/', frenchAlternateOf['/'], siteUrl),
-    // The hero poster is the largest paint on the homepage.
-    preloadImage: trailer.poster,
+    // The wordmark is the first paint and the largest one now that the hero
+    // opens on the logo rather than typeset text. It is preloaded with its
+    // srcset so a retina screen does not fetch the small file as well.
+    preloadImage: wordmark.src,
+    preloadImageSrcset: wordmark.srcset,
+    preloadImageSizes: wordmark.sizes,
     jsonLd: gameJsonLd
   });
 });

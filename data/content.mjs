@@ -85,6 +85,19 @@ export const trailer = {
   uploadDate: '2026-08-26T00:00:00+10:00'
 };
 
+// The carved wordmark the hero opens on, built from the press kit art
+// (public/press/art/wordmark.png) by tools/make-wordmark.mjs. 560 CSS px is
+// the widest it is ever drawn, so the 1120 file covers retina. The art reads
+// "BURIED WORLDS" with no VR, which is why the name is spelled out in `alt`.
+export const wordmark = {
+  src: '/images/wordmark-560.webp',
+  srcset: '/images/wordmark-560.webp 560w, /images/wordmark-1120.webp 1120w',
+  sizes: '(max-width: 620px) 88vw, 560px',
+  width: 560,
+  height: 267,
+  alt: 'Buried Worlds VR'
+};
+
 // Hero variant: "poster" | "split" | "banner". Poster is the shipped default;
 // the others are alternate layouts kept for reference (README §1).
 export const heroVariant = 'poster';

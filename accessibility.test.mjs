@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 
 import express from 'express';
 
-import { links, product, siteUrl, trailer, worlds, loopSteps, signalRows } from './data/content.mjs';
+import { links, product, siteUrl, trailer, worlds, loopSteps, signalRows, wordmark } from './data/content.mjs';
 import { createDestinationsRouter } from './destinations.mjs';
 import { createGuidesRouter } from './guides.mjs';
 import { notFoundHandler } from './errors.mjs';
@@ -43,7 +43,7 @@ async function startServer(locals = {}) {
   const app = express();
   app.set('view engine', 'pug');
   app.set('views', path.join(root, 'views'));
-  Object.assign(app.locals, { siteUrl, product, links, trailer }, locals);
+  Object.assign(app.locals, { siteUrl, product, links, trailer, wordmark }, locals);
   app.get('/', (req, res) => res.render('index', {
     heroVariant: 'poster', showLockedCard: true, loopSteps, worlds, signalRows, pagePath: '/',
     playtestOpen: req.query.closed === undefined, study
@@ -136,7 +136,7 @@ test('every public page has a main landmark the skip link can reach', async () =
   }
 });
 
-test('the paid playtest is announced across the top of the homepage while it is open, and vanishes when closed', async () => {
+test('the paid playtest is announced across the top of the homepage while it is open, and nothing takes that slot when it closes', async () => {
   const server = await startServer();
   try {
     const open = await (await fetch(`${server.url}/`)).text();
@@ -149,11 +149,10 @@ test('the paid playtest is announced across the top of the homepage while it is 
 
     const closed = await (await fetch(`${server.url}/?closed=1`)).text();
     assert.ok(!closed.includes('playtest-strip'));
-    assert.ok(!open.includes('discord-strip'), 'one strip at a time');
-    const discord = /<div class="discord-strip"[\s\S]*?<\/div><\/div>/.exec(closed)?.[0];
-    assert.ok(discord, 'the Discord takes the slot when the playtest closes');
-    assert.ok(closed.indexOf('discord-strip') < closed.indexOf('<header class="hero"'), 'above the hero');
-    assert.ok(discord.includes('href="https://discord.gg/') && discord.includes('Join the Discord'));
+    // Nothing else takes the slot. A Discord strip used to, and it sent people
+    // off the page before they had seen the game; the hero opens the page now.
+    assert.ok(!closed.includes('discord-strip'), 'no bar above the hero when the playtest is closed');
+    assert.ok(closed.indexOf('<header class="hero"') < closed.indexOf('<main'), 'the hero is the first thing on the page');
     assert.ok(!closed.includes('href="/playtest"'), 'no route to a closed form');
     assert.ok(closed.includes('<a class="feature-card__link" href="https://discord.gg/'), 'the card falls back to the Discord');
   } finally {

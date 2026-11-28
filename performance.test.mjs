@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 
 import express from 'express';
 
-import { links, product, siteUrl, trailer, worlds, loopSteps, signalRows } from './data/content.mjs';
+import { links, product, siteUrl, trailer, worlds, loopSteps, signalRows, wordmark } from './data/content.mjs';
 import { createGuidesRouter } from './guides.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -23,7 +23,7 @@ async function startServer() {
   const app = express();
   app.set('view engine', 'pug');
   app.set('views', path.join(root, 'views'));
-  Object.assign(app.locals, { siteUrl, product, links, trailer });
+  Object.assign(app.locals, { siteUrl, product, links, trailer, wordmark });
   app.get('/', (req, res) => res.render('index', {
     heroVariant: 'poster', showLockedCard: true, loopSteps, worlds, signalRows, pagePath: '/',
     preloadImage: trailer.poster

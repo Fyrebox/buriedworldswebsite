@@ -201,8 +201,13 @@ metadata or requiring a deploy.
 
 While `PLAYTEST_OPEN` is not `false`, the homepage announces the study in a strip above the
 hero ("Paid playtest: US$10 for about 25 minutes… Become a playtester →") and the developer
-card's link points at `/playtest`; closed, the strip is not rendered and the card
-points at the Discord again. The page itself stays `noindex` and off the sitemap.
+card's link points at `/playtest`; closed, the strip is not rendered, nothing takes
+its place and the card points at the Discord again. The page itself stays `noindex`
+and off the sitemap.
+
+A Discord strip used to fill that slot while the playtest was closed. It is gone: it
+was the first thing on the page and it sent people to Discord before they had seen the
+game. The Discord is still in the hero, in the community section and in the footer.
 
 `/playtest` is the page a paid-playtest recruitment post links to: US$10 for 25
 minutes, five places, with the fee, the payment conditions and the privacy note
@@ -375,6 +380,14 @@ mechanism:
   then point `data/content.mjs` at it. Never overwrite `hero-poster-2.webp` in place.
 - The exceptions are the files that change in place by design and are fetched by robots
   rather than browsers: `sitemap.xml`, `robots.txt` and the press kit zip get an hour.
+
+The hero opens on the carved wordmark rather than typeset type, so the page wears the
+same logo as the store listing and the press kit. `tools/make-wordmark.mjs` builds
+`public/images/wordmark-560.webp` and `-1120.webp` from the press art
+(`public/press/art/wordmark.png`, 2.1 MB) by trimming the transparent border and
+resizing; `data/content.mjs` exports the paths, dimensions and alt text as `wordmark`,
+and both the hero `<img>` and the homepage's `<link rel="preload">` read them from
+there. A new size needs a new filename, like everything else under `public/`.
 
 Cloudflare respects the origin's `Cache-Control` as long as the zone's Browser Cache TTL
 is left at *Respect Existing Headers* (the default). If a static asset ever comes back
